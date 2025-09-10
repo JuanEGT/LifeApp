@@ -2,27 +2,13 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Mi Agenda</title>
+  <title>Agenda Personal</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Agenda</h1>
+  <h1>Mi Agenda</h1>
   <div id="agenda"></div>
 
-  <script>
-    const url = "https://script.google.com/macros/s/AKfycbxZlkiUlVRWpWJseCJSbUH_EwywzeHkDNZsTqFQ5M-1l5_My9VX4LiCZ344WPywXudKng/exec?sheet=Agenda";
-
-    fetch(url)
-      .then(res => res.json())
-      .then(data => {
-        const container = document.getElementById("agenda");
-        container.innerHTML = data.map(row => `
-          <p>
-            <strong>${row.Fecha}</strong> ${row.Hora} - 
-            ${row.Evento} (${row.Notas})
-          </p>
-        `).join("");
-      })
-      .catch(err => console.error("Error:", err));
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
