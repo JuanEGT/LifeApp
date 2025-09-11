@@ -5,8 +5,8 @@ const SHEET_NAME = "Agenda";
 const SCOPES = "https://www.googleapis.com/auth/spreadsheets";
 
 // Variables globales
-let token = null;        // Guardará el token de acceso de Google
-let tokenClient = null;  // Cliente GIS para solicitar token
+let token = null;
+let tokenClient = null;
 
 // ===== LOGIN CON GIS =====
 window.onload = () => {
@@ -47,6 +47,12 @@ function mostrarAgenda() {
   document.getElementById("fechaSelector").style.display = "none";
   document.getElementById("agenda").innerHTML = "";
   document.getElementById("msg").innerText = "";
+
+  // Actualizar barra y calendario
+  cargarEventos().then(values => {
+    mostrarRecordatorios(values);
+    mostrarCalendario(values);
+  });
 }
 
 function mostrarAgregarEvento() {
@@ -109,7 +115,6 @@ function mostrarEventos(values) {
     const p = document.createElement("p");
     p.innerHTML = `${obj.Fecha} ${obj.Hora} - ${obj.Evento} (${obj.Notas})`;
 
-    // Botón eliminar por ID
     const delBtn = document.createElement("button");
     delBtn.innerText = "Eliminar";
     delBtn.className = "btn backBtn";
@@ -121,14 +126,10 @@ function mostrarEventos(values) {
         const fila = filaIndex + 1;
         await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}!A${fila}:E?valueInputOption=USER_ENTERED`, {
           method: "PUT",
-          headers: {
-            Authorization: "Bearer " + token,
-            "Content-Type": "application/json"
-          },
+          headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
           body: JSON.stringify({ values: [["", "", "", "", ""]] })
         });
 
-        // Refrescar la lista completa
         const allValues = await cargarEventos();
         mostrarEventos(allValues);
       } catch (err) {
@@ -164,10 +165,7 @@ document.getElementById("eventoForm").addEventListener("submit", async e => {
   try {
     await fetch(url, {
       method: "POST",
-      headers: {
-        Authorization: "Bearer " + token,
-        "Content-Type": "application/json"
-      },
+      headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
       body: JSON.stringify({ values: [data] })
     });
 
@@ -201,7 +199,6 @@ async function buscarPorFecha() {
     const p = document.createElement("p");
     p.innerHTML = `${obj.Fecha} ${obj.Hora} - ${obj.Evento} (${obj.Notas})`;
 
-    // Botón eliminar por ID
     const delBtn = document.createElement("button");
     delBtn.innerText = "Eliminar";
     delBtn.className = "btn backBtn";
@@ -213,10 +210,7 @@ async function buscarPorFecha() {
         const fila = filaIndex + 1;
         await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}!A${fila}:E?valueInputOption=USER_ENTERED`, {
           method: "PUT",
-          headers: {
-            Authorization: "Bearer " + token,
-            "Content-Type": "application/json"
-          },
+          headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
           body: JSON.stringify({ values: [["", "", "", "", ""]] })
         });
 
@@ -239,4 +233,83 @@ async function buscarPorFecha() {
     backBtn.onclick = mostrarAgenda;
     div.appendChild(backBtn);
   }
+}
+
+// ===== NUEVAS FUNCIONES: RECORDATORIOS Y CALENDARIO =====
+
+// Barra de recordatorios próximos 7 días
+function mostrarRecordatorios(values) {
+  const cont = document.getElementById("recordatorios");
+  cont.innerHTML = "<h3>Próximos eventos</h3>";
+  if (!values || values.length < 2) return;
+
+  const headers = values[0];
+  const rows = values.slice(1);
+
+  const hoy = new Date();
+  const sieteDias = new Date();
+  sieteDias.setDate(hoy.getDate() + 7);
+
+  rows.forEach(r => {
+    const obj = {};
+    headers.forEach((h,i)=> obj[h] = r[i]||"");
+
+    const fechaEvento = new Date(obj.Fecha);
+    if (fechaEvento >= hoy && fechaEvento <= sieteDias) {
+      const divEvt = document.createElement("div");
+      divEvt.className = "recordatorio";
+      divEvt.innerText = `${obj.Fecha} - ${obj.Evento}`;
+
+      // Tooltip al pasar el cursor
+      divEvt.title = obj.Notas || "Sin notas";
+
+      cont.appendChild(divEvt);
+    }
+  });
+}
+
+// Calendario mensual visual (solo colores)
+function mostrarCalendario(values) {
+  const cont = document.getElementById("calendario");
+  cont.innerHTML = "<h3>Calendario mensual</h3>";
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+
+  // Crear matriz de días del mes
+  const diasMes = new Date(year, month + 1, 0).getDate();
+  const rows = [];
+  for (let i=1; i<=diasMes; i++) rows.push(i);
+
+  const eventosPorDia = {};
+  if (values && values.length >= 2) {
+    const headers = values[0];
+    const dataRows = values.slice(1);
+    dataRows.forEach(r => {
+      const obj = {};
+      headers.forEach((h,i)=> obj[h] = r[i]||"");
+      const d = new Date(obj.Fecha).getDate();
+      eventosPorDia[d] = true;
+    });
+  }
+
+  const grid = document.createElement("div");
+  grid.style.display = "grid";
+  grid.style.gridTemplateColumns = "repeat(7, 30px)";
+  grid.style.gap = "2px";
+
+  rows.forEach(d => {
+    const cell = document.createElement("div");
+    cell.style.width = "30px";
+    cell.style.height = "30px";
+    cell.style.display = "flex";
+    cell.style.alignItems = "center";
+    cell.style.justifyContent = "center";
+    cell.style.backgroundColor = eventosPorDia[d] ? "red" : "green";
+    cell.style.color = "#fff";
+    cell.innerText = d;
+    grid.appendChild(cell);
+  });
+
+  cont.appendChild(grid);
 }
