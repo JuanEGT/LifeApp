@@ -257,16 +257,20 @@ function mostrarRecordatorios(values) {
     const fechaEvento = new Date(obj.Fecha);
     if (fechaEvento >= hoy && fechaEvento <= sieteDias) {
       const divEvt = document.createElement("div");
-      divEvt.className = "recordatorio";
-      divEvt.innerText = `${obj.Fecha} - ${obj.Evento}`;
+      divEvt.className = "recordatorioItem"; // usar clase del CSS que ya definimos
+      divEvt.innerText = obj.Evento;
 
-      // Tooltip al pasar el cursor
-      divEvt.title = obj.Notas || "Sin notas";
+      // Tooltip personalizado
+      const tooltip = document.createElement("span");
+      tooltip.className = "tooltip";
+      tooltip.innerText = `Hora: ${obj.Hora}\nNotas: ${obj.Notas || "Sin notas"}`;
 
+      divEvt.appendChild(tooltip);
       cont.appendChild(divEvt);
     }
   });
 }
+
 
 // Calendario mensual visual (solo colores)
 function mostrarCalendario(values) {
