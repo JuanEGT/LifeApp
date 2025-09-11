@@ -9,11 +9,14 @@ let tokenClient = null;
 
 // ===== INICIALIZACIÓN =====
 window.onload = () => {
-  document.getElementById("loginContainer").style.display = "flex";
-  document.getElementById("mainMenu").style.display = "none";
-  document.getElementById("agendaContainer").style.display = "none";
-  document.getElementById("finanzasContainer").style.display = "none";
+  const loginContainer = document.getElementById("loginContainer");
+  const mainMenu = document.getElementById("mainMenu");
+  const agendaContainer = document.getElementById("agendaContainer");
 
+  if (loginContainer) loginContainer.style.display = "flex";
+  if (mainMenu) mainMenu.style.display = "none";
+  if (agendaContainer) agendaContainer.style.display = "none";
+  
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
     scope: SCOPES,
