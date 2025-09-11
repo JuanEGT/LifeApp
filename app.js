@@ -11,18 +11,14 @@ let tokenClient = null;
 // ===== LOGIN CON GIS =====
 window.onload = () => {
   const loginBtn = document.getElementById("loginBtn");
-  if (!loginBtn) {
-    console.error("No se encontró el botón loginBtn");
-    return;
-  }
+  if (!loginBtn) return console.error("No se encontró el botón loginBtn");
 
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
     scope: SCOPES,
     callback: (resp) => {
       token = resp.access_token;
-      document.getElementById("mainMenu").style.display = "flex";
-      document.getElementById("loginContainer").style.display = "none";
+      mostrarMenuPrincipal();
     }
   });
 
@@ -32,30 +28,46 @@ window.onload = () => {
 };
 
 // ===== FUNCIONES DE NAVEGACIÓN =====
-function mostrarAgenda() {
-  document.getElementById("agendaContainer").style.display = "flex";
-  document.getElementById("menuButtons").style.display = "flex";
-  document.getElementById("eventoForm").style.display = "none";
-  document.getElementById("fechaSelector").style.display = "none";
-  cargarEventos();
-}
-
-function mostrarAgregarEvento() {
-  document.getElementById("eventoForm").style.display = "flex";
-  document.getElementById("fechaSelector").style.display = "none";
-}
-
-function mostrarBuscarFecha() {
-  document.getElementById("fechaSelector").style.display = "flex";
-  document.getElementById("eventoForm").style.display = "none";
-}
-
-function volverAMenu() {
+function mostrarMenuPrincipal() {
+  document.getElementById("loginContainer").style.display = "none";
   document.getElementById("agendaContainer").style.display = "none";
   document.getElementById("mainMenu").style.display = "flex";
 }
 
-// ===== FUNCIONES DE AGENDA =====
+function mostrarAgenda() {
+  document.getElementById("mainMenu").style.display = "none";
+  document.getElementById("agendaContainer").style.display = "flex";
+  // Mostrar sub-menú, ocultar formularios y agenda
+  document.getElementById("menuButtons").style.display = "flex";
+  document.getElementById("eventoForm").style.display = "none";
+  document.getElementById("fechaSelector").style.display = "none";
+  document.getElementById("agenda").innerHTML = "";
+  document.getElementById("msg").innerText = "";
+}
+
+function mostrarAgregarEvento() {
+  document.getElementById("menuButtons").style.display = "none";
+  document.getElementById("eventoForm").style.display = "flex";
+  document.getElementById("fechaSelector").style.display = "none";
+  document.getElementById("agenda").innerHTML = "";
+  document.getElementById("msg").innerText = "";
+}
+
+function mostrarBuscarFecha() {
+  document.getElementById("menuButtons").style.display = "none";
+  document.getElementById("eventoForm").style.display = "none";
+  document.getElementById("fechaSelector").style.display = "flex";
+  document.getElementById("agenda").innerHTML = "";
+  document.getElementById("msg").innerText = "";
+}
+
+function volverAMenu() {
+  mostrarMenuPrincipal();
+}
+
+// ===== FUNCIONES DE DATOS =====
+
+// Cargar todos los eventos
 async function cargarEventos() {
   if (!token) return;
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?majorDimension=ROWS`;
@@ -64,22 +76,25 @@ async function cargarEventos() {
       headers: { Authorization: "Bearer " + token }
     });
     const data = await resp.json();
-    mostrarEventos(data.values);
+    return data.values;
   } catch (err) {
     console.error(err);
     document.getElementById("msg").innerText = "Error al cargar eventos";
+    return [];
   }
 }
 
+// Mostrar eventos en pantalla
 function mostrarEventos(values) {
-  if (!values || values.length < 2) return;
-  const headers = values[0];
-  const rows = values.slice(1);
   const div = document.getElementById("agenda");
   div.innerHTML = "";
+  if (!values || values.length < 2) return;
+
+  const headers = values[0];
+  const rows = values.slice(1);
   rows.forEach(r => {
     const obj = {};
-    headers.forEach((h, i) => obj[h] = r[i] || "");
+    headers.forEach((h,i)=> obj[h]=r[i]||"");
     div.innerHTML += `<p>${obj.Fecha} ${obj.Hora} - ${obj.Evento} (${obj.Notas})</p>`;
   });
 }
@@ -108,7 +123,7 @@ document.getElementById("eventoForm").addEventListener("submit", async e => {
       body: JSON.stringify({ values: [data] })
     });
     form.reset();
-    cargarEventos();
+    mostrarAgenda(); // Regresa al sub-menú
   } catch (err) {
     console.error(err);
     document.getElementById("msg").innerText = "Error al agregar evento";
@@ -116,23 +131,26 @@ document.getElementById("eventoForm").addEventListener("submit", async e => {
 });
 
 // ===== BUSCAR POR FECHA =====
-function buscarPorFecha() {
+async function buscarPorFecha() {
   const fecha = document.getElementById("fechaInput").value;
   if (!fecha) return;
-  if (!token) return;
 
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?majorDimension=ROWS`;
+  const values = await cargarEventos();
+  if (!values || values.length < 2) return;
 
-  fetch(url, { headers: { Authorization: "Bearer " + token } })
-    .then(resp => resp.json())
-    .then(data => {
-      if (!data.values || data.values.length < 2) return;
-      const headers = data.values[0];
-      const rows = data.values.slice(1).filter(r => r[0] === fecha); // Filtra por Fecha
-      mostrarEventos([headers, ...rows]);
-    })
-    .catch(err => {
-      console.error(err);
-      document.getElementById("msg").innerText = "Error al buscar por fecha";
-    });
+  const headers = values[0];
+  const rows = values.slice(1);
+  const filtrados = rows.filter(r => r[0] === fecha);
+
+  // Mostrar resultados
+  const div = document.getElementById("agenda");
+  div.innerHTML = "";
+  filtrados.forEach(r => {
+    const obj = {};
+    headers.forEach((h,i)=> obj[h]=r[i]||"");
+    div.innerHTML += `<p>${obj.Fecha} ${obj.Hora} - ${obj.Evento} (${obj.Notas})</p>`;
+  });
+
+  // Mostrar botón para volver al sub-menú
+  div.innerHTML += `<button onclick="mostrarAgenda()">Volver a Agenda</button>`;
 }
