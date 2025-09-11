@@ -10,6 +10,11 @@ let tokenClient = null;
 
 // ===== LOGIN CON GIS =====
 window.onload = () => {
+  // Mostrar login y ocultar todo lo demás
+  document.getElementById("loginContainer").style.display = "flex";
+  document.getElementById("mainMenu").style.display = "none";
+  document.getElementById("agendaContainer").style.display = "none";
+
   const loginBtn = document.getElementById("loginBtn");
   if (!loginBtn) return console.error("No se encontró el botón loginBtn");
 
@@ -18,7 +23,7 @@ window.onload = () => {
     scope: SCOPES,
     callback: (resp) => {
       token = resp.access_token;
-      mostrarMenuPrincipal();
+      mostrarMenuPrincipal(); // aquí ocultas login y muestras menú principal
     }
   });
 
