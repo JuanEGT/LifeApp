@@ -1,5 +1,5 @@
 // 👇 pon aquí tu WebApp URL de Google Apps Script
-const API_URL = "https://script.google.com/macros/s/AKfycbzKwLrAc3oRBVO54y1o3KWXKM_xD-ZCdoOrTyz6S8vJpHBEJy0rDSQVVioFHY-ZnzIS5Q/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwTF_4IhuQzO3C1pvvNHTusdSWvBjNyRycdLF3AppAxZ9cqHLoZWeldBbaeFS88aHGbXA/exec";
 const SHEET = "Agenda";
 
 // ===============================
