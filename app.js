@@ -1,161 +1,153 @@
-// ===== CONFIGURACIÓN =====
-const CLIENT_ID = "721915958995-9gri9jissf6vp3i1sfj93ft3tjqp7rnk.apps.googleusercontent.com";
-const SPREADSHEET_ID = "1CMnA-3Ch5Ac1LLP8Hgph15IeeH7Dlvcj0IvX51mLzKU";
-const SHEET_NAME = "Agenda";
-const SCOPES = "https://www.googleapis.com/auth/spreadsheets";
+// ===============================
+// VARIABLES GLOBALES
+// ===============================
 
-// Variables globales
-let token = null;
-let tokenClient = null;
+// Array donde se guardan los eventos
+let agenda = [];
 
-// ===== LOGIN CON GIS =====
-window.onload = () => {
-  // Mostrar login y ocultar todo lo demás
-  document.getElementById("loginContainer").style.display = "flex";
-  document.getElementById("mainMenu").style.display = "none";
-  document.getElementById("agendaContainer").style.display = "none";
+// Obtenemos referencias a los elementos del DOM
+const mainMenu = document.getElementById("mainMenu");       // Contenedor del menú principal
+const agendaContainer = document.getElementById("agenda");  // Contenedor de la agenda
+const subMenu = document.getElementById("subMenu");         // Submenú (Agregar / Buscar)
+const addForm = document.getElementById("addForm");         // Formulario de agregar evento
+const searchDate = document.getElementById("searchDate");   // Selector de fecha
+const results = document.getElementById("results");         // Resultados de búsqueda
+const msg = document.getElementById("msg");                 // Mensaje de error/info
 
-  const loginBtn = document.getElementById("loginBtn");
-  if (!loginBtn) return console.error("No se encontró el botón loginBtn");
+// Botones
+const backToMenuBtn = document.getElementById("backToMenu");   // Volver al menú principal
+const backToAgendaBtn = document.getElementById("backToAgenda"); // Volver a la agenda
 
-  tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: CLIENT_ID,
-    scope: SCOPES,
-    callback: (resp) => {
-      token = resp.access_token;
-      mostrarMenuPrincipal(); // aquí ocultas login y muestras menú principal
-    }
-  });
 
-  loginBtn.addEventListener("click", () => {
-    tokenClient.requestAccessToken({ prompt: "consent" });
-  });
-};
+// ===============================
+// FUNCIONES DE NAVEGACIÓN
+// ===============================
 
-// ===== FUNCIONES DE NAVEGACIÓN =====
-function mostrarMenuPrincipal() {
-  document.getElementById("loginContainer").style.display = "none";
-  document.getElementById("agendaContainer").style.display = "none";
-  document.getElementById("mainMenu").style.display = "flex";
+// Mostrar el menú principal
+function mostrarMenu() {
+  mainMenu.style.display = "flex";   // Mostramos menú principal
+  agendaContainer.style.display = "none"; // Ocultamos agenda
+  addForm.classList.add("hidden");   // Ocultamos formulario
+  searchDate.classList.add("hidden");// Ocultamos buscador
+  results.innerHTML = "";            // Limpiamos resultados
+  msg.textContent = "";              // Limpiamos mensajes
 }
 
+// Mostrar la agenda principal con submenú
 function mostrarAgenda() {
-  document.getElementById("mainMenu").style.display = "none";
-  document.getElementById("agendaContainer").style.display = "flex";
-  // Mostrar sub-menú, ocultar formularios y agenda
-  document.getElementById("menuButtons").style.display = "flex";
-  document.getElementById("eventoForm").style.display = "none";
-  document.getElementById("fechaSelector").style.display = "none";
-  document.getElementById("agenda").innerHTML = "";
-  document.getElementById("msg").innerText = "";
+  mainMenu.style.display = "none";        // Ocultamos menú principal
+  agendaContainer.style.display = "flex"; // Mostramos agenda
+  subMenu.style.display = "flex";         // Mostramos submenú
+  addForm.classList.add("hidden");        // Ocultamos formulario
+  searchDate.classList.add("hidden");     // Ocultamos buscador
+  results.innerHTML = "";                 // Limpiamos resultados
+
+  backToMenuBtn.style.display = "block";  // Botón "volver al menú principal"
+  backToAgendaBtn.style.display = "none"; // Ocultamos "volver a agenda"
+
+  mostrarEventos(); // Renderizamos los eventos
 }
 
+// Mostrar formulario de agregar evento
 function mostrarAgregarEvento() {
-  document.getElementById("menuButtons").style.display = "none";
-  document.getElementById("eventoForm").style.display = "flex";
-  document.getElementById("fechaSelector").style.display = "none";
-  document.getElementById("agenda").innerHTML = "";
-  document.getElementById("msg").innerText = "";
+  subMenu.style.display = "none";         // Ocultamos submenú
+  addForm.classList.remove("hidden");     // Mostramos formulario
+  searchDate.classList.add("hidden");     // Ocultamos buscador
+  results.innerHTML = "";                 // Limpiamos resultados
+  msg.textContent = "";                   // Limpiamos mensajes
+
+  backToMenuBtn.style.display = "none";   // Ocultamos botón menú principal
+  backToAgendaBtn.style.display = "block";// Mostramos botón volver a agenda
 }
 
+// Mostrar buscador por fecha
 function mostrarBuscarFecha() {
-  document.getElementById("menuButtons").style.display = "none";
-  document.getElementById("eventoForm").style.display = "none";
-  document.getElementById("fechaSelector").style.display = "flex";
-  document.getElementById("agenda").innerHTML = "";
-  document.getElementById("msg").innerText = "";
+  subMenu.style.display = "none";         // Ocultamos submenú
+  addForm.classList.add("hidden");        // Ocultamos formulario
+  searchDate.classList.remove("hidden");  // Mostramos buscador
+  results.innerHTML = "";                 // Limpiamos resultados
+  msg.textContent = "";                   // Limpiamos mensajes
+
+  backToMenuBtn.style.display = "none";   // Ocultamos botón menú principal
+  backToAgendaBtn.style.display = "block";// Mostramos botón volver a agenda
 }
 
-function volverAMenu() {
-  mostrarMenuPrincipal();
-}
 
-// ===== FUNCIONES DE DATOS =====
+// ===============================
+// FUNCIONES DE LÓGICA DE AGENDA
+// ===============================
 
-// Cargar todos los eventos
-async function cargarEventos() {
-  if (!token) return;
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?majorDimension=ROWS`;
-  try {
-    const resp = await fetch(url, {
-      headers: { Authorization: "Bearer " + token }
-    });
-    const data = await resp.json();
-    return data.values;
-  } catch (err) {
-    console.error(err);
-    document.getElementById("msg").innerText = "Error al cargar eventos";
-    return [];
+// Renderizar eventos en la agenda
+function mostrarEventos() {
+  const agendaList = document.getElementById("agendaList");
+  agendaList.innerHTML = ""; // Limpiamos
+
+  if (agenda.length === 0) {
+    agendaList.innerHTML = "<p>No hay eventos aún.</p>";
+    return;
   }
-}
 
-// Mostrar eventos en pantalla
-function mostrarEventos(values) {
-  const div = document.getElementById("agenda");
-  div.innerHTML = "";
-  if (!values || values.length < 2) return;
-
-  const headers = values[0];
-  const rows = values.slice(1);
-  rows.forEach(r => {
-    const obj = {};
-    headers.forEach((h,i)=> obj[h]=r[i]||"");
-    div.innerHTML += `<p>${obj.Fecha} ${obj.Hora} - ${obj.Evento} (${obj.Notas})</p>`;
+  // Recorremos los eventos y los pintamos
+  agenda.forEach((evento, index) => {
+    const p = document.createElement("p");
+    p.textContent = `${evento.fecha} - ${evento.nombre}`;
+    agendaList.appendChild(p);
   });
 }
 
-// ===== AGREGAR EVENTO =====
-document.getElementById("eventoForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  if (!token) return;
+// Guardar evento desde el formulario
+document.getElementById("eventForm").addEventListener("submit", function (e) {
+  e.preventDefault(); // Prevenimos recarga
 
-  const form = e.target;
-  const data = [
-    form.Fecha.value,
-    form.Hora.value,
-    form.Evento.value,
-    form.Notas.value
-  ];
+  const nombre = document.getElementById("nombre").value.trim();
+  const fecha = document.getElementById("fecha").value;
 
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}:append?valueInputOption=USER_ENTERED`;
-  try {
-    await fetch(url, {
-      method: "POST",
-      headers: {
-        Authorization: "Bearer " + token,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ values: [data] })
+  if (!nombre || !fecha) {
+    msg.textContent = "Por favor llena todos los campos.";
+    return;
+  }
+
+  agenda.push({ nombre, fecha }); // Guardamos el evento
+  msg.textContent = "Evento agregado con éxito.";
+
+  // Reseteamos formulario
+  document.getElementById("eventForm").reset();
+
+  // Volvemos a agenda
+  mostrarAgenda();
+});
+
+// Buscar eventos por fecha
+document.getElementById("dateInput").addEventListener("change", function () {
+  const date = this.value;
+  results.innerHTML = "";
+
+  const encontrados = agenda.filter((e) => e.fecha === date);
+
+  if (encontrados.length === 0) {
+    results.innerHTML = "<p>No hay eventos en esta fecha.</p>";
+  } else {
+    encontrados.forEach((e) => {
+      const p = document.createElement("p");
+      p.textContent = `${e.fecha} - ${e.nombre}`;
+      results.appendChild(p);
     });
-    form.reset();
-    mostrarAgenda(); // Regresa al sub-menú
-  } catch (err) {
-    console.error(err);
-    document.getElementById("msg").innerText = "Error al agregar evento";
   }
 });
 
-// ===== BUSCAR POR FECHA =====
-async function buscarPorFecha() {
-  const fecha = document.getElementById("fechaInput").value;
-  if (!fecha) return;
 
-  const values = await cargarEventos();
-  if (!values || values.length < 2) return;
+// ===============================
+// BOTONES DE NAVEGACIÓN
+// ===============================
 
-  const headers = values[0];
-  const rows = values.slice(1);
-  const filtrados = rows.filter(r => r[0] === fecha);
+document.getElementById("goToAgenda").addEventListener("click", mostrarAgenda);
+document.getElementById("goToAdd").addEventListener("click", mostrarAgregarEvento);
+document.getElementById("goToSearch").addEventListener("click", mostrarBuscarFecha);
 
-  // Mostrar resultados
-  const div = document.getElementById("agenda");
-  div.innerHTML = "";
-  filtrados.forEach(r => {
-    const obj = {};
-    headers.forEach((h,i)=> obj[h]=r[i]||"");
-    div.innerHTML += `<p>${obj.Fecha} ${obj.Hora} - ${obj.Evento} (${obj.Notas})</p>`;
-  });
+backToMenuBtn.addEventListener("click", mostrarMenu);
+backToAgendaBtn.addEventListener("click", mostrarAgenda);
 
-  // Mostrar botón para volver al sub-menú
-  div.innerHTML += `<button onclick="mostrarAgenda()">Volver a Agenda</button>`;
-}
+// ===============================
+// INICIO
+// ===============================
+mostrarMenu(); // Mostramos el menú al cargar
