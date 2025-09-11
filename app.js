@@ -1,6 +1,6 @@
 // ===== CONFIGURACIÓN =====
-const CLIENT_ID = "TU_CLIENT_ID"; // reemplaza
-const SPREADSHEET_ID = "TU_SPREADSHEET_ID"; // reemplaza
+const CLIENT_ID = "721915958995-9gri9jissf6vp3i1sfj93ft3tjqp7rnk.apps.googleusercontent.com"; // reemplaza
+const SPREADSHEET_ID = "1CMnA-3Ch5Ac1LLP8Hgph15IeeH7Dlvcj0IvX51mLzKU"; // reemplaza
 const SHEET_NAME = "Agenda";
 const SCOPES = "https://www.googleapis.com/auth/spreadsheets";
 
