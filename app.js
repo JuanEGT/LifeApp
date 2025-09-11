@@ -237,7 +237,6 @@ async function buscarPorFecha() {
 
 // ===== NUEVAS FUNCIONES: RECORDATORIOS Y CALENDARIO =====
 
-// Barra de recordatorios próximos 7 días
 function mostrarRecordatorios(values) {
   const cont = document.getElementById("recordatorios");
   cont.innerHTML = "<h3>Próximos eventos</h3>";
@@ -258,12 +257,19 @@ function mostrarRecordatorios(values) {
     if (fechaEvento >= hoy && fechaEvento <= sieteDias) {
       const divEvt = document.createElement("div");
       divEvt.className = "recordatorioItem";
-      // Texto visible (truncado si es largo)
+
+      // Texto visible truncado
+      const maxLength = 30; // cantidad máxima de caracteres visibles
+      let eventoTexto = `${obj.Fecha} - ${obj.Evento}`;
+      if (eventoTexto.length > maxLength) {
+        eventoTexto = eventoTexto.slice(0, maxLength) + "...";
+      }
+
       const texto = document.createElement("span");
-      texto.innerText = `${obj.Fecha} - ${obj.Evento}`;
+      texto.innerText = eventoTexto;
       divEvt.appendChild(texto);
 
-      // Tooltip con hora y notas
+      // Tooltip con hora y notas completas
       const tooltip = document.createElement("span");
       tooltip.className = "tooltip";
       tooltip.innerText = `Hora: ${obj.Hora || "No definida"}\nNotas: ${obj.Notas || "Sin notas"}`;
