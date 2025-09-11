@@ -8,29 +8,73 @@ const SCOPES = "https://www.googleapis.com/auth/spreadsheets";
 let token = null;
 let tokenClient = null;
 
-// ===== LOGIN CON GIS =====
+// ===== LOGIN Y DOM READY =====
 window.onload = () => {
+  const loginBtn = document.getElementById("loginBtn");
+  const eventoForm = document.getElementById("eventoForm");
+  const msg = document.getElementById("msg");
+
+  if (!loginBtn || !eventoForm) {
+    console.error("No se encontraron elementos del DOM");
+    return;
+  }
+
+  // Inicializar Token Client de GIS
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
     scope: SCOPES,
     callback: (resp) => {
       token = resp.access_token;
-      document.getElementById("eventoForm").style.display = "block";
+      eventoForm.style.display = "block";
       cargarEventos();
     }
   });
 
-  document.getElementById("loginBtn").addEventListener("click", () => {
+  // Botón de login
+  loginBtn.addEventListener("click", () => {
     tokenClient.requestAccessToken({ prompt: "consent" });
+  });
+
+  // Formulario para agregar evento
+  eventoForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    if (!token) return;
+
+    const data = [
+      eventoForm.Fecha.value,
+      eventoForm.Hora.value,
+      eventoForm.Evento.value,
+      eventoForm.Notas.value
+    ];
+
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}:append?valueInputOption=USER_ENTERED`;
+
+    try {
+      await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer " + token,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ values: [data] })
+      });
+      eventoForm.reset();
+      cargarEventos();
+    } catch (err) {
+      console.error(err);
+      msg.innerText = "Error al agregar evento";
+    }
   });
 };
 
 // ===== FUNCIONES =====
 
-// Leer eventos
+// Leer eventos de la hoja
 async function cargarEventos() {
   if (!token) return;
+
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?majorDimension=ROWS`;
+
   try {
     const resp = await fetch(url, {
       headers: { Authorization: "Bearer " + token }
@@ -43,7 +87,7 @@ async function cargarEventos() {
   }
 }
 
-// Mostrar eventos en pantalla
+// Mostrar eventos en la pantalla
 function mostrarEventos(values) {
   if (!values || values.length < 2) return;
   const headers = values[0];
@@ -52,38 +96,8 @@ function mostrarEventos(values) {
   div.innerHTML = "";
   rows.forEach(r => {
     const obj = {};
-    headers.forEach((h,i)=> obj[h]=r[i]||"");
+    headers.forEach((h,i) => obj[h] = r[i] || "");
     div.innerHTML += `<p>${obj.Fecha} ${obj.Hora} - ${obj.Evento} (${obj.Notas})</p>`;
   });
 }
-
-// Agregar evento
-document.getElementById("eventoForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  if (!token) return;
-
-  const form = e.target;
-  const data = [
-    form.Fecha.value,
-    form.Hora.value,
-    form.Evento.value,
-    form.Notas.value
-  ];
-
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}:append?valueInputOption=USER_ENTERED`;
-  try {
-    await fetch(url, {
-      method: "POST",
-      headers: {
-        Authorization: "Bearer " + token,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ values: [data] })
-    });
-    form.reset();
-    cargarEventos();
-  } catch (err) {
-    console.error(err);
-    document.getElementById("msg").innerText = "Error al agregar evento";
-  }
-});
+  
