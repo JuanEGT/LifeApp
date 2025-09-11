@@ -258,13 +258,16 @@ function mostrarRecordatorios(values) {
     if (fechaEvento >= hoy && fechaEvento <= sieteDias) {
       const divEvt = document.createElement("div");
       divEvt.className = "recordatorioItem";
-      divEvt.innerText = `${obj.Fecha} - ${obj.Evento}`;
+      // Texto visible (truncado si es largo)
+      const texto = document.createElement("span");
+      texto.innerText = `${obj.Fecha} - ${obj.Evento}`;
+      divEvt.appendChild(texto);
 
-      // Tooltip personalizado
+      // Tooltip con hora y notas
       const tooltip = document.createElement("span");
       tooltip.className = "tooltip";
       tooltip.innerText = `Hora: ${obj.Hora || "No definida"}\nNotas: ${obj.Notas || "Sin notas"}`;
-
+      
       divEvt.appendChild(tooltip);
       cont.appendChild(divEvt);
     }
