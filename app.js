@@ -63,7 +63,18 @@ function mostrarAgregarEvento() {
   document.getElementById("fechaSelector").style.display = "none";
   document.getElementById("agenda").innerHTML = "";
   document.getElementById("msg").innerText = "";
+
+  // Crear botón Volver a Agenda si no existe
+  if (!document.getElementById("backToAgendaFromAdd")) {
+    const backBtn = document.createElement("button");
+    backBtn.id = "backToAgendaFromAdd";
+    backBtn.innerText = "Volver a Agenda";
+    backBtn.className = "btn backBtn";
+    backBtn.onclick = mostrarAgenda;
+    document.getElementById("eventoForm").appendChild(backBtn);
+  }
 }
+
 
 // Mostrar selector de fecha para buscar
 function mostrarBuscarFecha() {
@@ -159,19 +170,55 @@ async function buscarPorFecha() {
 
   const headers = values[0];
   const rows = values.slice(1);
-
-  // Filtrar eventos que coincidan con la fecha
   const filtrados = rows.filter(r => r[0] === fecha);
 
   const div = document.getElementById("agenda");
   div.innerHTML = "";
 
-  filtrados.forEach(r => {
+  filtrados.forEach((r, idx) => {
     const obj = {};
-    headers.forEach((h, i) => obj[h] = r[i] || "");
-    div.innerHTML += `<p>${obj.Fecha} ${obj.Hora} - ${obj.Evento} (${obj.Notas})</p>`;
+    headers.forEach((h,i)=> obj[h]=r[i]||"");
+
+    const p = document.createElement("p");
+    p.innerHTML = `${obj.Fecha} ${obj.Hora} - ${obj.Evento} (${obj.Notas})`;
+
+    // Botón eliminar
+    const delBtn = document.createElement("button");
+    delBtn.innerText = "Eliminar";
+    delBtn.className = "btn backBtn";
+    delBtn.onclick = async () => {
+      // Calculamos la fila real en la hoja
+      const fila = values.indexOf(r) + 1; // +1 por los headers
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}!A${fila}:D?majorDimension=ROWS`;
+      
+      try {
+        // Sobrescribir fila vacía para simular borrado
+        await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}!A${fila}:D?valueInputOption=USER_ENTERED`, {
+          method: "PUT",
+          headers: {
+            Authorization: "Bearer " + token,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ values: [["", "", "", ""]] })
+        });
+        buscarPorFecha(); // refrescar resultados
+      } catch (err) {
+        console.error(err);
+        document.getElementById("msg").innerText = "Error al eliminar evento";
+      }
+    };
+
+    p.appendChild(delBtn);
+    div.appendChild(p);
   });
 
-  // Botón de volver al sub-menú
-  div.innerHTML += `<button class="btn backBtn" onclick="mostrarAgenda()">Volver a Agenda</button>`;
+  // Botón para volver a sub-menú Agenda
+  if (!document.getElementById("backToAgendaFromSearch")) {
+    const backBtn = document.createElement("button");
+    backBtn.id = "backToAgendaFromSearch";
+    backBtn.innerText = "Volver a Agenda";
+    backBtn.className = "btn backBtn";
+    backBtn.onclick = mostrarAgenda;
+    div.appendChild(backBtn);
+  }
 }
