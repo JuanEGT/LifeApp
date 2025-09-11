@@ -21,21 +21,20 @@
   <div id="mainMenu" class="container">
     <h1>Menú Principal</h1>
     <button class="btn" id="btnAgenda">Agenda</button>
-    <!-- Aquí más funciones futuras como Finanzas, Hábitos, etc. -->
+    <button class="btn" id="btnFinanzas">Finanzas</button>
+    <!-- Aquí más funciones futuras como Hábitos, etc. -->
   </div>
 
   <!-- ================= AGENDA ================= -->
   <div id="agendaContainer" class="container">
     <h1>Agenda</h1>
 
-    <!-- Sub-menú dentro de agenda -->
     <div id="menuButtons" class="subMenu">
       <button class="btn" id="btnAgregarEvento">Agregar Evento</button>
       <button class="btn" id="btnBuscarFecha">Buscar por Fecha</button>
       <button class="btn backBtn" id="btnVolverMenu">Volver al Menú Principal</button>
     </div>
 
-    <!-- Formulario para agregar evento -->
     <form id="eventoForm" class="form">
       <label>
         Fecha:
@@ -56,7 +55,6 @@
       <button type="submit" class="btn">Guardar Evento</button>
     </form>
 
-    <!-- Selector de fecha para buscar eventos -->
     <div id="fechaSelector" class="form">
       <label>
         Selecciona fecha:
@@ -66,20 +64,92 @@
       <button class="btn backBtn" id="btnVolverAgenda">Volver a Agenda</button>
     </div>
 
-    <!-- Contenedor donde se muestran los eventos -->
     <div id="agenda" class="agenda"></div>
 
-    <!-- ================= NUEVAS SECCIONES ================= -->
     <div id="barraYCalendario" class="sidebarContainer">
-      <!-- Barra de recordatorios -->
       <div id="recordatorios" class="recordatorios"></div>
-      <!-- Calendario mensual visual -->
       <div id="calendario" class="calendario"></div>
     </div>
   </div>
 
+  <!-- ================= FINANZAS ================= -->
+  <div id="finanzasContainerMain" class="container" style="display:none;">
+    <h1>Finanzas</h1>
+
+    <!-- Formulario para agregar registro -->
+    <form id="finanzasForm" class="form">
+      <label>
+        Grupo:
+        <select name="Grupo" required>
+          <option value="Movimientos">Movimientos</option>
+          <option value="Finanzas Personales">Finanzas Personales</option>
+        </select>
+      </label>
+      <label>
+        Tipo:
+        <input type="text" name="Tipo" placeholder="Ingreso/Gasto/Ahorro/Deuda/Inversión" required>
+      </label>
+      <label>
+        Fecha:
+        <input type="date" name="Fecha" required>
+      </label>
+      <label>
+        Cantidad:
+        <input type="number" name="Cantidad" required>
+      </label>
+      <label>
+        Nombre:
+        <input type="text" name="Nombre" required>
+      </label>
+      <label>
+        Método de Pago:
+        <input type="text" name="MetodoPago">
+      </label>
+      <label>
+        Salario por hora:
+        <input type="number" name="SalarioHora" step="0.01">
+      </label>
+      <label>
+        Horas trabajadas:
+        <input type="number" name="HorasTrabajadas">
+      </label>
+      <label>
+        Propinas:
+        <input type="number" name="Propinas">
+      </label>
+      <label>
+        Bonos/Aguinaldo:
+        <input type="number" name="Bonos">
+      </label>
+      <label>
+        Impuestos:
+        <input type="number" name="Impuestos">
+      </label>
+      <label>
+        Ingreso neto:
+        <input type="number" name="IngresoNeto">
+      </label>
+      <label>
+        Tasa de interés:
+        <input type="number" name="TasaInteres" step="0.01">
+      </label>
+      <label>
+        Tasa de crecimiento:
+        <input type="number" name="TasaCrecimiento" step="0.01">
+      </label>
+      <label>
+        Periodicidad:
+        <input type="text" name="Periodicidad" placeholder="Mensual/Anual">
+      </label>
+      <button type="submit" class="btn">Agregar registro</button>
+    </form>
+
+    <div id="finanzasResumen"></div>
+  </div>
+
   <!-- ================= SCRIPTS ================= -->
   <script src="agenda.js" defer></script>
+  <script src="finanzas.js" defer></script>
   <script src="app.js" defer></script>
 
 </body>
