@@ -7,6 +7,29 @@
 </head>
 <body>
   <h1>Mi Agenda</h1>
+
+  <!-- 📝 Formulario -->
+  <form id="agendaForm">
+    <label>
+      Fecha:
+      <input type="date" name="Fecha" required>
+    </label>
+    <label>
+      Hora:
+      <input type="time" name="Hora" required>
+    </label>
+    <label>
+      Evento:
+      <input type="text" name="Evento" required>
+    </label>
+    <label>
+      Notas:
+      <input type="text" name="Notas">
+    </label>
+    <button type="submit">Agregar</button>
+  </form>
+
+  <!-- 📅 Lista de agenda -->
   <div id="agenda"></div>
 
   <script src="app.js"></script>
