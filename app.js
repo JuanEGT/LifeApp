@@ -1,71 +1,96 @@
-// 👇 pon aquí tu WebApp URL de Google Apps Script
-const API_URL = "https://script.google.com/macros/s/AKfycbwTF_4IhuQzO3C1pvvNHTusdSWvBjNyRycdLF3AppAxZ9cqHLoZWeldBbaeFS88aHGbXA/exec";
-const SHEET = "Agenda";
+// ===== CONFIGURACIÓN =====
+const CLIENT_ID = "TU_CLIENT_ID"; // reemplaza
+const SPREADSHEET_ID = "TU_SPREADSHEET_ID"; // reemplaza
+const SHEET_NAME = "Agenda";
+const SCOPES = "https://www.googleapis.com/auth/spreadsheets";
 
-// ===============================
-// Cargar eventos (GET)
-// ===============================
-async function cargarEventos() {
-  try {
-    const res = await fetch(`${API_URL}?sheet=${SHEET}`);
-    const data = await res.json();
+// Variables globales
+let token = null;
 
-    const lista = document.getElementById("agenda");
-    lista.innerHTML = "";
-
-    if (data.length === 0) {
-      lista.innerHTML = "<p>No hay eventos</p>";
-      return;
+// ===== LOGIN CON GIS =====
+window.onload = () => {
+  google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    callback: (resp) => {
+      token = resp.access_token;
+      document.getElementById("eventoForm").style.display = "block";
+      cargarEventos();
     }
+  });
 
-    data.forEach(ev => {
-      const div = document.createElement("div");
-      div.className = "evento";
-      div.textContent = `${ev.Fecha} ${ev.Hora} - ${ev.Evento} (${ev.Notas || ""})`;
-      lista.appendChild(div);
+  document.querySelector(".g_id_signin").addEventListener("click", () => {
+    google.accounts.oauth2.requestAccessToken({
+      prompt: "consent",
+      scope: SCOPES,
+      callback: (resp) => {
+        token = resp.access_token;
+        document.getElementById("eventoForm").style.display = "block";
+        cargarEventos();
+      }
     });
+  });
+};
+
+// ===== FUNCIONES =====
+
+// Leer eventos
+async function cargarEventos() {
+  if (!token) return;
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?majorDimension=ROWS`;
+  try {
+    const resp = await fetch(url, {
+      headers: { Authorization: "Bearer " + token }
+    });
+    const data = await resp.json();
+    mostrarEventos(data.values);
   } catch (err) {
-    console.error("Error al cargar:", err);
-    document.getElementById("agenda").innerHTML = "<p>Error al cargar eventos</p>";
+    console.error(err);
+    document.getElementById("msg").innerText = "Error al cargar eventos";
   }
 }
 
-// ===============================
-// Enviar evento (POST)
-// ===============================
-document.getElementById("eventoForm").addEventListener("submit", async (e) => {
+// Mostrar eventos en pantalla
+function mostrarEventos(values) {
+  if (!values || values.length < 2) return;
+  const headers = values[0];
+  const rows = values.slice(1);
+  const div = document.getElementById("agenda");
+  div.innerHTML = "";
+  rows.forEach(r => {
+    const obj = {};
+    headers.forEach((h,i)=> obj[h]=r[i]||"");
+    div.innerHTML += `<p>${obj.Fecha} ${obj.Hora} - ${obj.Evento} (${obj.Notas})</p>`;
+  });
+}
+
+// Agregar evento
+document.getElementById("eventoForm").addEventListener("submit", async e => {
   e.preventDefault();
+  if (!token) return;
 
   const form = e.target;
-  const datos = {
+  const data = {
     Fecha: form.Fecha.value,
     Hora: form.Hora.value,
     Evento: form.Evento.value,
     Notas: form.Notas.value
   };
 
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}:append?valueInputOption=USER_ENTERED`;
   try {
-    const res = await fetch(`${API_URL}?sheet=${SHEET}`, {
+    await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(datos)
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ values: [[data.Fecha, data.Hora, data.Evento, data.Notas]] })
     });
-
-    const result = await res.json();
-    if (result.success) {
-      document.getElementById("msg").textContent = "✅ Evento guardado!";
-      form.reset();
-      cargarEventos();
-    } else {
-      document.getElementById("msg").textContent = "❌ Error al guardar: " + result.error;
-    }
+    form.reset();
+    cargarEventos();
   } catch (err) {
-    console.error("Error al enviar:", err);
-    document.getElementById("msg").textContent = "❌ No se pudo enviar el evento.";
+    console.error(err);
+    document.getElementById("msg").innerText = "Error al agregar evento";
   }
 });
-
-// ===============================
-// Inicializar
-// ===============================
-cargarEventos();
