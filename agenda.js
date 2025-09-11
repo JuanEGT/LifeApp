@@ -165,49 +165,58 @@ const Agenda = (() => {
     });
   }
 
-  function mostrarCalendario(values) {
-    const cont = document.getElementById("calendario");
-    cont.innerHTML = "<h3>Calendario mensual</h3>";
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth();
+function mostrarCalendario(values) {
+  const cont = document.getElementById("calendario");
+  cont.innerHTML = "<h3>Calendario mensual</h3>";
 
-    const diasMes = new Date(year, month + 1, 0).getDate();
-    const rows = [];
-    for (let i=1; i<=diasMes; i++) rows.push(i);
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
 
-    const eventosPorDia = {};
-    if (values && values.length >= 2) {
-      const headers = values[0];
-      const dataRows = values.slice(1);
-      dataRows.forEach(r => {
-        const obj = {};
-        headers.forEach((h,i)=> obj[h] = r[i]||"");
-        const d = new Date(obj.Fecha).getDate();
-        eventosPorDia[d] = true;
-      });
-    }
+  const diasMes = new Date(year, month + 1, 0).getDate();
+  const rows = [];
+  for (let i = 1; i <= diasMes; i++) rows.push(i);
 
-    const grid = document.createElement("div");
-    grid.style.display = "grid";
-    grid.style.gridTemplateColumns = "repeat(7, 30px)";
-    grid.style.gap = "2px";
+  const eventosPorDia = {};
+  if (values && values.length >= 2) {
+    const headers = values[0];
+    const dataRows = values.slice(1);
 
-    rows.forEach(d => {
-      const cell = document.createElement("div");
-      cell.style.width = "30px";
-      cell.style.height = "30px";
-      cell.style.display = "flex";
-      cell.style.alignItems = "center";
-      cell.style.justifyContent = "center";
-      cell.style.backgroundColor = eventosPorDia[d] ? "red" : "green";
-      cell.style.color = "#fff";
-      cell.innerText = d;
-      grid.appendChild(cell);
+    dataRows.forEach(r => {
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = r[i] || "");
+
+      const fechaEvento = new Date(obj.Fecha);
+
+      // Solo marcar si es el mes y año actuales
+      if (fechaEvento.getFullYear() === year && fechaEvento.getMonth() === month) {
+        const diaEvento = fechaEvento.getDate();
+        eventosPorDia[diaEvento] = true;
+      }
     });
-
-    cont.appendChild(grid);
   }
+
+  const grid = document.createElement("div");
+  grid.style.display = "grid";
+  grid.style.gridTemplateColumns = "repeat(7, 30px)";
+  grid.style.gap = "2px";
+
+  rows.forEach(d => {
+    const cell = document.createElement("div");
+    cell.style.width = "30px";
+    cell.style.height = "30px";
+    cell.style.display = "flex";
+    cell.style.alignItems = "center";
+    cell.style.justifyContent = "center";
+    cell.style.backgroundColor = eventosPorDia[d] ? "red" : "green";
+    cell.style.color = "#fff";
+    cell.innerText = d;
+    grid.appendChild(cell);
+  });
+
+  cont.appendChild(grid);
+}
+
 
   // ===================== UI de navegación =====================
   function mostrarAgenda() {
