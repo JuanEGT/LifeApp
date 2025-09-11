@@ -20,7 +20,7 @@
   <!-- ================= MENÚ PRINCIPAL ================= -->
   <div id="mainMenu" class="container">
     <h1>Menú Principal</h1>
-    <button class="btn" onclick="mostrarAgenda()">Agenda</button>
+    <button class="btn" id="btnAgenda">Agenda</button>
     <!-- Aquí más funciones futuras como Finanzas, Hábitos, etc. -->
   </div>
 
@@ -30,9 +30,9 @@
 
     <!-- Sub-menú dentro de agenda -->
     <div id="menuButtons" class="subMenu">
-      <button class="btn" onclick="mostrarAgregarEvento()">Agregar Evento</button>
-      <button class="btn" onclick="mostrarBuscarFecha()">Buscar por Fecha</button>
-      <button class="btn backBtn" onclick="volverAMenu()">Volver al Menú Principal</button>
+      <button class="btn" id="btnAgregarEvento">Agregar Evento</button>
+      <button class="btn" id="btnBuscarFecha">Buscar por Fecha</button>
+      <button class="btn backBtn" id="btnVolverMenu">Volver al Menú Principal</button>
     </div>
 
     <!-- Formulario para agregar evento -->
@@ -62,8 +62,8 @@
         Selecciona fecha:
         <input type="date" id="fechaInput">
       </label>
-      <button class="btn" onclick="buscarPorFecha()">Buscar</button>
-      <button class="btn backBtn" onclick="mostrarAgenda()">Volver a Agenda</button>
+      <button class="btn" id="btnBuscarPorFecha">Buscar</button>
+      <button class="btn backBtn" id="btnVolverAgenda">Volver a Agenda</button>
     </div>
 
     <!-- Contenedor donde se muestran los eventos -->
@@ -78,6 +78,9 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <!-- ================= SCRIPTS ================= -->
+  <script src="agenda.js" defer></script>
+  <script src="app.js" defer></script>
+
 </body>
 </html>
