@@ -6,16 +6,24 @@
   <title>Agenda App</title>
   <!-- Vinculamos el CSS -->
   <link rel="stylesheet" href="style.css">
+  <!-- SDK de Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
+  <!-- ===== LOGIN ===== -->
+  <div id="loginContainer" class="container">
+    <h1>Iniciar Sesión</h1>
+    <button id="loginBtn" class="btn">🔑 Iniciar con Google</button>
+  </div>
+
   <!-- ===== MENÚ PRINCIPAL ===== -->
-  <div id="mainMenu" class="container">
+  <div id="mainMenu" class="container hidden">
     <h1>Menú Principal</h1>
     <button id="goToAgenda" class="btn">📅 Ir a la Agenda</button>
   </div>
 
   <!-- ===== AGENDA ===== -->
-  <div id="agenda" class="container">
+  <div id="agenda" class="container hidden">
     <h1>Agenda</h1>
     <!-- Lista de eventos -->
     <div id="agendaList" class="agenda"></div>
