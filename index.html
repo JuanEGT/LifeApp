@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LifeApp - Agenda</title>
 <link rel="stylesheet" href="style.css">
+
 <!-- Google Identity Services -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="app.js" defer></script>
@@ -14,14 +15,7 @@
   <h1>LifeApp - Agenda</h1>
 
   <!-- Botón de login -->
-  <div id="g_id_onload"
-       data-client_id="721915958995-9gri9jissf6vp3i1sfj93ft3tjqp7rnk.apps.googleusercontent.com"
-       data-context="signin"
-       data-ux_mode="popup"
-       data-login_uri=""
-       data-auto_prompt="false">
-  </div>
-  <div class="g_id_signin" data-type="standard"></div>
+  <button id="loginBtn">Login con Google</button>
 
   <!-- Mensajes -->
   <p id="msg"></p>

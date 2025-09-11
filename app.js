@@ -1,15 +1,16 @@
 // ===== CONFIGURACIÓN =====
-const CLIENT_ID = "721915958995-9gri9jissf6vp3i1sfj93ft3tjqp7rnk.apps.googleusercontent.com"; // reemplaza
-const SPREADSHEET_ID = "1CMnA-3Ch5Ac1LLP8Hgph15IeeH7Dlvcj0IvX51mLzKU"; // reemplaza
+const CLIENT_ID = "721915958995-9gri9jissf6vp3i1sfj93ft3tjqp7rnk.apps.googleusercontent.com";
+const SPREADSHEET_ID = "1CMnA-3Ch5Ac1LLP8Hgph15IeeH7Dlvcj0IvX51mLzKU";
 const SHEET_NAME = "Agenda";
 const SCOPES = "https://www.googleapis.com/auth/spreadsheets";
 
 // Variables globales
 let token = null;
+let tokenClient = null;
 
 // ===== LOGIN CON GIS =====
 window.onload = () => {
-  google.accounts.oauth2.initTokenClient({
+  tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
     scope: SCOPES,
     callback: (resp) => {
@@ -19,16 +20,8 @@ window.onload = () => {
     }
   });
 
-  document.querySelector(".g_id_signin").addEventListener("click", () => {
-    google.accounts.oauth2.requestAccessToken({
-      prompt: "consent",
-      scope: SCOPES,
-      callback: (resp) => {
-        token = resp.access_token;
-        document.getElementById("eventoForm").style.display = "block";
-        cargarEventos();
-      }
-    });
+  document.getElementById("loginBtn").addEventListener("click", () => {
+    tokenClient.requestAccessToken({ prompt: "consent" });
   });
 };
 
@@ -70,12 +63,12 @@ document.getElementById("eventoForm").addEventListener("submit", async e => {
   if (!token) return;
 
   const form = e.target;
-  const data = {
-    Fecha: form.Fecha.value,
-    Hora: form.Hora.value,
-    Evento: form.Evento.value,
-    Notas: form.Notas.value
-  };
+  const data = [
+    form.Fecha.value,
+    form.Hora.value,
+    form.Evento.value,
+    form.Notas.value
+  ];
 
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}:append?valueInputOption=USER_ENTERED`;
   try {
@@ -85,7 +78,7 @@ document.getElementById("eventoForm").addEventListener("submit", async e => {
         Authorization: "Bearer " + token,
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ values: [[data.Fecha, data.Hora, data.Evento, data.Notas]] })
+      body: JSON.stringify({ values: [data] })
     });
     form.reset();
     cargarEventos();
