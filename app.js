@@ -29,7 +29,6 @@ window.onload = () => {
     tokenClient.requestAccessToken({ prompt: "consent" });
   });
 
-  // Asociar formulario de agregar evento
   const form = document.getElementById("eventoForm");
   if (form) form.addEventListener("submit", agregarEvento);
 };
@@ -42,6 +41,7 @@ function ocultarTodos() {
   document.getElementById("eventoForm").style.display = "none";
   document.getElementById("fechaSelector").style.display = "none";
   document.getElementById("agendaContainer").style.display = "none";
+  document.getElementById("agenda").innerHTML = "";
   document.getElementById("msg").innerText = "";
 }
 
@@ -54,7 +54,7 @@ function mostrarAgenda() {
   ocultarTodos();
   document.getElementById("agendaContainer").style.display = "block";
   document.getElementById("menuButtons").style.display = "block";
-  cargarEventos();
+  document.getElementById("agenda").innerHTML = "<p>Selecciona una opción para mostrar eventos.</p>";
 }
 
 function mostrarAgregarEvento() {
@@ -90,24 +90,38 @@ async function cargarEventos(fechaSeleccionada = null) {
 }
 
 function mostrarEventos(values, fechaSeleccionada = null) {
-  if (!values || values.length < 2) return;
-  const headers = values[0];
-  const rows = values.slice(1);
   const div = document.getElementById("agenda");
   div.innerHTML = "";
+
+  if (!values || values.length < 2) {
+    div.innerHTML = "<p>No hay eventos.</p>";
+    return;
+  }
+
+  const headers = values[0];
+  const rows = values.slice(1);
+  let eventosMostrados = 0;
 
   rows.forEach(r => {
     const obj = {};
     headers.forEach((h,i)=> obj[h]=r[i]||"");
+
+    // Filtrar por fecha
     if (!fechaSeleccionada || obj.Fecha === fechaSeleccionada) {
+      eventosMostrados++;
       div.innerHTML += `<p>
         ${obj.Fecha} ${obj.Hora} - ${obj.Evento} (${obj.Notas})
         <button onclick="eliminarEvento(${obj.ID})">Eliminar</button>
       </p>`;
     }
   });
+
+  if (eventosMostrados === 0) {
+    div.innerHTML = "<p>No hay eventos para esta fecha.</p>";
+  }
 }
 
+// ===== AGREGAR EVENTO =====
 async function agregarEvento(event) {
   event.preventDefault();
   if (!token) return;
@@ -140,6 +154,7 @@ async function agregarEvento(event) {
   }
 }
 
+// ===== ELIMINAR EVENTO =====
 async function eliminarEvento(id) {
   if (!token) return;
 
@@ -176,12 +191,18 @@ async function eliminarEvento(id) {
     })
   });
 
-  cargarEventos();
+  // Refrescar solo la fecha seleccionada si existe
+  const fechaInput = document.getElementById("fechaInput");
+  if (fechaInput && fechaInput.value) {
+    cargarEventos(fechaInput.value);
+  } else {
+    mostrarAgenda();
+  }
 }
 
 // ===== BUSCAR POR FECHA =====
 function buscarPorFecha() {
   const fecha = document.getElementById("fechaInput").value;
+  if (!fecha) return;
   cargarEventos(fecha);
-  mostrarAgenda();
 }
