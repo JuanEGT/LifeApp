@@ -21,8 +21,7 @@ window.onload = () => {
     scope: SCOPES,
     callback: (resp) => {
       token = resp.access_token;
-      document.getElementById("eventoForm").style.display = "block";
-      cargarEventos();
+      document.getElementById("mainMenu").style.display = "block"; // Mostrar menú principal
     }
   });
 
@@ -33,8 +32,8 @@ window.onload = () => {
 
 // ===== FUNCIONES =====
 
-// Leer eventos
-async function cargarEventos() {
+// Mostrar agenda por fecha
+async function cargarEventos(fechaSeleccionada = null) {
   if (!token) return;
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?majorDimension=ROWS`;
   try {
@@ -42,53 +41,49 @@ async function cargarEventos() {
       headers: { Authorization: "Bearer " + token }
     });
     const data = await resp.json();
-    mostrarEventos(data.values);
+    mostrarEventos(data.values, fechaSeleccionada);
   } catch (err) {
     console.error(err);
     document.getElementById("msg").innerText = "Error al cargar eventos";
   }
 }
 
-// Mostrar eventos en pantalla por hora
-function mostrarEventos(values) {
+// Mostrar eventos en pantalla
+function mostrarEventos(values, fechaSeleccionada = null) {
   if (!values || values.length < 2) return;
   const headers = values[0];
   const rows = values.slice(1);
   const div = document.getElementById("agenda");
   div.innerHTML = "";
 
-  const horas = Array.from({ length: 24 }, (_, i) => i);
-
-  horas.forEach(h => {
-    div.innerHTML += `<h3>${String(h).padStart(2,'0')}:00 - ${String(h+1).padStart(2,'0')}:00</h3>`;
-    rows.forEach((r, idx) => {
-      const obj = {};
-      headers.forEach((head, i) => obj[head] = r[i] || "");
-      const hr = parseInt(obj.Hora.split(":")[0]);
-      if (hr === h) {
-        div.innerHTML += `<p>${obj.Hora} - ${obj.Evento} (${obj.Notas}) 
-        <button onclick="eliminarEvento('${obj.ID}')">Eliminar</button></p>`;
-      }
-    });
+  rows.forEach(r => {
+    const obj = {};
+    headers.forEach((h,i)=> obj[h]=r[i]||"");
+    if (!fechaSeleccionada || obj.Fecha === fechaSeleccionada) {
+      div.innerHTML += `<p>
+        ${obj.Fecha} ${obj.Hora} - ${obj.Evento} (${obj.Notas})
+        <button onclick="eliminarEvento(${obj.ID})">Eliminar</button>
+      </p>`;
+    }
   });
 }
 
 // Agregar evento
-document.getElementById("eventoForm").addEventListener("submit", async e => {
-  e.preventDefault();
+async function agregarEvento(event) {
+  event.preventDefault();
   if (!token) return;
 
-  const form = e.target;
-  const newID = Date.now().toString(); // ID único
-  const data = {
-    ID: newID,
-    Fecha: form.Fecha.value,
-    Hora: form.Hora.value,
-    Evento: form.Evento.value,
-    Notas: form.Notas.value
-  };
+  const form = event.target;
+  const data = [
+    Date.now(), // ID único
+    form.Fecha.value,
+    form.Hora.value,
+    form.Evento.value,
+    form.Notas.value
+  ];
 
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}:append?valueInputOption=USER_ENTERED`;
+
   try {
     await fetch(url, {
       method: "POST",
@@ -96,7 +91,7 @@ document.getElementById("eventoForm").addEventListener("submit", async e => {
         Authorization: "Bearer " + token,
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ values: [[data.ID, data.Fecha, data.Hora, data.Evento, data.Notas]] })
+      body: JSON.stringify({ values: [data] })
     });
     form.reset();
     cargarEventos();
@@ -104,46 +99,75 @@ document.getElementById("eventoForm").addEventListener("submit", async e => {
     console.error(err);
     document.getElementById("msg").innerText = "Error al agregar evento";
   }
-});
+}
 
 // Eliminar evento por ID
 async function eliminarEvento(id) {
   if (!token) return;
 
-  // Leer toda la hoja
+  // Leer todos los datos
   const urlGet = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?majorDimension=ROWS`;
-  try {
-    const resp = await fetch(urlGet, {
-      headers: { Authorization: "Bearer " + token }
-    });
-    const data = await resp.json();
-    const headers = data.values[0];
-    const rows = data.values.slice(1);
-    let rowIndex = -1;
-    rows.forEach((r, i) => {
-      if (r[0] === id) rowIndex = i + 2; // +2 porque fila 1 = headers, índice 0
-    });
+  const resp = await fetch(urlGet, { headers: { Authorization: "Bearer " + token } });
+  const data = await resp.json();
 
-    if (rowIndex > 0) {
-      const batchUpdateUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}:batchUpdate`;
-      const body = {
-        requests: [
-          { deleteDimension: { range: { sheetId: 0, dimension: "ROWS", startIndex: rowIndex-1, endIndex: rowIndex } } }
-        ]
-      };
-      await fetch(batchUpdateUrl, {
-        method: "POST",
-        headers: {
-          Authorization: "Bearer " + token,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(body)
-      });
-      cargarEventos();
+  if (!data.values || data.values.length < 2) return;
+
+  const headers = data.values[0];
+  const rows = data.values.slice(1);
+  let rowIndex = -1;
+
+  for (let i = 0; i < rows.length; i++) {
+    if (rows[i][0] == id) {
+      rowIndex = i + 2; // +2 porque Sheets indexa desde 1 y la primera fila son headers
+      break;
     }
-
-  } catch (err) {
-    console.error(err);
-    document.getElementById("msg").innerText = "Error al eliminar evento";
   }
+
+  if (rowIndex === -1) return;
+
+  // Eliminar fila
+  const urlDelete = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}:batchUpdate`;
+  await fetch(urlDelete, {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + token,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      requests: [
+        { deleteDimension: { range: { sheetId: 0, dimension: "ROWS", startIndex: rowIndex-1, endIndex: rowIndex } } }
+      ]
+    })
+  });
+
+  cargarEventos();
 }
+
+// ===== EVENTOS DEL DOM =====
+window.showAgenda = () => {
+  document.getElementById("menuButtons").style.display = "block";
+  document.getElementById("eventoForm").style.display = "none";
+  document.getElementById("agendaContainer").style.display = "block";
+};
+
+window.showAgregarEvento = () => {
+  document.getElementById("eventoForm").style.display = "block";
+  document.getElementById("menuButtons").style.display = "none";
+  document.getElementById("agendaContainer").style.display = "none";
+};
+
+window.showBuscarFecha = () => {
+  document.getElementById("fechaSelector").style.display = "block";
+  document.getElementById("menuButtons").style.display = "none";
+  document.getElementById("agendaContainer").style.display = "none";
+};
+
+window.buscarPorFecha = () => {
+  const fecha = document.getElementById("fechaInput").value;
+  cargarEventos(fecha);
+  document.getElementById("fechaSelector").style.display = "none";
+  document.getElementById("agendaContainer").style.display = "block";
+};
+
+// Formulario agregar evento
+document.getElementById("eventoForm").addEventListener("submit", agregarEvento);

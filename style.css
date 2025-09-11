@@ -1,118 +1,102 @@
-/* ===== GENERAL ===== */
+/* ===== ESTILO GENERAL ===== */
 body {
-  margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #121212;
-  color: #e0e0e0;
+  color: #ffffff;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
 .container {
-  max-width: 800px;
-  margin: 40px auto;
-  padding: 20px;
-  background-color: #1e1e1e;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 1rem;
 }
 
-/* ===== TITULOS ===== */
-h1, h2, h3 {
+h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* ===== BOTONES ===== */
+button {
+  background-color: #1f1f1f;
   color: #ffffff;
-  margin-bottom: 10px;
+  border: 1px solid #333;
+  padding: 0.5rem 1rem;
+  margin: 0.3rem;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: 0.2s;
 }
 
-/* ===== FORMULARIO ===== */
+button:hover {
+  background-color: #333;
+}
+
+/* ===== FORMULARIOS ===== */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
 form label {
-  display: block;
-  margin-bottom: 10px;
-  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
 }
 
-form input[type="text"],
-form input[type="date"],
-form input[type="time"] {
-  width: 100%;
-  padding: 8px;
-  margin-top: 4px;
-  border: none;
-  border-radius: 5px;
-  background-color: #2c2c2c;
+input[type="text"],
+input[type="date"],
+input[type="time"] {
+  padding: 0.3rem;
+  border-radius: 4px;
+  border: 1px solid #333;
+  background-color: #1f1f1f;
   color: #ffffff;
 }
 
-form button {
-  margin-top: 10px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  background-color: #6200ea;
-  color: #fff;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-form button:hover {
-  background-color: #3700b3;
-}
-
-/* ===== BOTON LOGIN ===== */
-#loginBtn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  background-color: #03dac6;
-  color: #000;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.2s;
-  margin-bottom: 20px;
-}
-
-#loginBtn:hover {
-  background-color: #018786;
+input[type="text"]::placeholder {
+  color: #aaa;
 }
 
 /* ===== AGENDA ===== */
 #agenda {
-  margin-top: 20px;
-}
-
-#agenda h3 {
-  border-bottom: 1px solid #444;
-  padding-bottom: 5px;
-  margin-top: 20px;
+  margin-top: 1rem;
+  border-top: 1px solid #333;
+  padding-top: 1rem;
 }
 
 #agenda p {
+  margin: 0.3rem 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #2c2c2c;
-  padding: 5px 10px;
-  border-radius: 5px;
-  margin: 5px 0;
 }
 
-/* ===== BOTONES ELIMINAR ===== */
 #agenda button {
-  padding: 4px 10px;
+  background-color: #ff4c4c;
   border: none;
-  border-radius: 4px;
-  background-color: #cf6679;
-  color: #fff;
-  cursor: pointer;
-  font-size: 12px;
-  transition: background 0.2s;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.8rem;
 }
 
 #agenda button:hover {
-  background-color: #b00020;
+  background-color: #ff1c1c;
+}
+
+/* ===== MENÚS Y CONTENEDORES ===== */
+#mainMenu,
+#menuButtons,
+#fechaSelector,
+#eventoForm {
+  margin-bottom: 1rem;
 }
 
 /* ===== MENSAJES ===== */
 #msg {
-  margin-top: 10px;
-  font-size: 14px;
   color: #ff5555;
+  margin-top: 1rem;
 }
