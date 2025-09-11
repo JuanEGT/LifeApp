@@ -258,7 +258,7 @@ function mostrarRecordatorios(values) {
     if (fechaEvento >= hoy && fechaEvento <= sieteDias) {
       const divEvt = document.createElement("div");
       divEvt.className = "recordatorioItem"; // usar clase del CSS que ya definimos
-      divEvt.innerText = obj.Evento;
+      divEvt.innerText = `${obj.Fecha} - ${obj.Evento}`; // ahora incluye fecha
 
       // Tooltip personalizado
       const tooltip = document.createElement("span");
