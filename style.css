@@ -68,7 +68,7 @@ body {
   font-size: 0.95rem;
 }
 
-.form input, .form select {
+.form input {
   background-color: #1f1f1f;
   border: 1px solid #333;
   color: #e0e0e0;
@@ -167,35 +167,6 @@ body {
 
 .dia.rojo {
   background-color: #dc3545; /* Día con eventos */
-}
-
-/* ===== FINANZAS ===== */
-#finanzasContainerMain {
-  display: none; /* Igual que los demás contenedores */
-  flex-direction: column;
-  gap: 20px;
-}
-
-#finanzasForm {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-#finanzasResumen {
-  margin-top: 20px;
-  max-height: 300px;
-  overflow-y: auto;
-  border-top: 1px solid #333;
-  padding-top: 10px;
-}
-
-#finanzasResumen p {
-  border-bottom: 1px solid #333;
-  padding: 5px 0;
-  font-size: 0.95rem;
 }
 
 /* ===== RESPONSIVE ===== */

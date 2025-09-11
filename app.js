@@ -9,42 +9,38 @@ let tokenClient = null;
 
 // ===== INICIALIZACIÓN =====
 window.onload = () => {
-  const loginContainer = document.getElementById("loginContainer");
-  const mainMenu = document.getElementById("mainMenu");
-  const agendaContainer = document.getElementById("agendaContainer");
+  document.getElementById("loginContainer").style.display = "flex";
+  document.getElementById("mainMenu").style.display = "none";
+  document.getElementById("agendaContainer").style.display = "none";
 
-  if (loginContainer) loginContainer.style.display = "flex";
-  if (mainMenu) mainMenu.style.display = "none";
-  if (agendaContainer) agendaContainer.style.display = "none";
-  
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
     scope: SCOPES,
     callback: (resp) => {
       token = resp.access_token;
       Agenda.setToken(token);
-      Finanzas.setToken(token);
       mostrarMenuPrincipal();
     }
   });
 
-  // ===== LOGIN =====
   const loginBtn = document.getElementById("loginBtn");
-  if (loginBtn) loginBtn.addEventListener("click", () => {
-    tokenClient.requestAccessToken({ prompt: "consent" });
-  });
+  if (loginBtn) {
+    loginBtn.addEventListener("click", () => {
+      tokenClient.requestAccessToken({ prompt: "consent" });
+    });
+  }
 
-  // ===== MENÚ PRINCIPAL =====
+  // Conectar botones del menú principal
   const btnAgenda = document.getElementById("btnAgenda");
   if (btnAgenda) btnAgenda.addEventListener("click", () => Agenda.mostrarAgenda());
 
-  const btnFinanzas = document.getElementById("btnFinanzas");
-  if (btnFinanzas) btnFinanzas.addEventListener("click", () => Finanzas.mostrarFinanzas());
-
-  // ===== BOTONES AGENDA =====
+  // Conectar botones dentro de Agenda
   const btnAgregar = document.getElementById("btnAgregarEvento");
   if (btnAgregar) btnAgregar.addEventListener("click", () => Agenda.mostrarAgregarEvento());
-
+  
+  const btnFinanzas = document.getElementById("btnFinanzas");
+  if (btnFinanzas) btnFinanzas.addEventListener("click", () => Finanzas.mostrarFinanzas());
+  
   const btnBuscar = document.getElementById("btnBuscarFecha");
   if (btnBuscar) btnBuscar.addEventListener("click", () => Agenda.mostrarBuscarFecha());
 
@@ -54,17 +50,20 @@ window.onload = () => {
   const btnVolverAgenda = document.getElementById("btnVolverAgenda");
   if (btnVolverAgenda) btnVolverAgenda.addEventListener("click", () => Agenda.mostrarAgenda());
 
+  // Botón de buscar por fecha dentro de selector
   const btnBuscarPorFecha = document.getElementById("btnBuscarPorFecha");
   if (btnBuscarPorFecha) btnBuscarPorFecha.addEventListener("click", (e) => {
-    e.preventDefault();
+    e.preventDefault(); // evitar submit del formulario
     Agenda.buscarPorFecha();
   });
 
+  // Formulario de agregar evento
   const eventoForm = document.getElementById("eventoForm");
   if (eventoForm) {
     eventoForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       if (!token) return;
+
       const form = e.target;
       const id = Date.now();
       const data = [
@@ -74,21 +73,17 @@ window.onload = () => {
         form.Evento.value,
         form.Notas.value
       ];
+
       await Agenda.agregarEvento(data);
       form.reset();
       Agenda.mostrarAgenda();
     });
   }
-
-  // ===== BOTONES FINANZAS =====
-  const btnVolverMenuFinanzas = document.getElementById("btnVolverMenuFinanzas");
-  if (btnVolverMenuFinanzas) btnVolverMenuFinanzas.addEventListener("click", () => mostrarMenuPrincipal());
 };
 
-// ===== FUNCIONES GENERALES =====
+// ===== FUNCIONES =====
 function mostrarMenuPrincipal() {
   document.getElementById("loginContainer").style.display = "none";
   document.getElementById("agendaContainer").style.display = "none";
-  document.getElementById("finanzasContainer").style.display = "none";
   document.getElementById("mainMenu").style.display = "flex";
 }
