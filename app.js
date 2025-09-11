@@ -1,49 +1,71 @@
-const url = "https://script.google.com/macros/s/AKfycbxZlkiUlVRWpWJseCJSbUH_EwywzeHkDNZsTqFQ5M-1l5_My9VX4LiCZ344WPywXudKng/exec?sheet=Agenda";
+// 👇 pon aquí tu WebApp URL de Google Apps Script
+const API_URL = "https://script.google.com/macros/s/AKfycbxZlkiUlVRWpWJseCJSbUH_EwywzeHkDNZsTqFQ5M-1l5_My9VX4LiCZ344WPywXudKng/exec";
+const SHEET = "Agenda";
 
-const container = document.getElementById("agenda");
-const form = document.getElementById("agendaForm");
+// ===============================
+// Cargar eventos (GET)
+// ===============================
+async function cargarEventos() {
+  try {
+    const res = await fetch(`${API_URL}?sheet=${SHEET}`);
+    const data = await res.json();
 
-// 👉 Mostrar los eventos
-function cargarAgenda() {
-  fetch(url)
-    .then(res => res.json())
-    .then(data => {
-      container.innerHTML = data.map(row => `
-        <div class="agenda-item">
-          <div class="datetime">${row.Fecha} ${row.Hora}</div>
-          <div class="evento">${row.Evento}</div>
-          <div class="notas">${row.Notas}</div>
-        </div>
-      `).join("");
-    })
-    .catch(err => console.error("Error:", err));
+    const lista = document.getElementById("agenda");
+    lista.innerHTML = "";
+
+    if (data.length === 0) {
+      lista.innerHTML = "<p>No hay eventos</p>";
+      return;
+    }
+
+    data.forEach(ev => {
+      const div = document.createElement("div");
+      div.className = "evento";
+      div.textContent = `${ev.Fecha} ${ev.Hora} - ${ev.Evento} (${ev.Notas || ""})`;
+      lista.appendChild(div);
+    });
+  } catch (err) {
+    console.error("Error al cargar:", err);
+    document.getElementById("agenda").innerHTML = "<p>Error al cargar eventos</p>";
+  }
 }
 
-// 👉 Enviar formulario al Sheet
-form.addEventListener("submit", async (e) => {
+// ===============================
+// Enviar evento (POST)
+// ===============================
+document.getElementById("eventoForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const formData = new FormData(form);
-  const payload = {};
-  formData.forEach((value, key) => {
-    payload[key] = value;
-  });
+  const form = e.target;
+  const datos = {
+    Fecha: form.Fecha.value,
+    Hora: form.Hora.value,
+    Evento: form.Evento.value,
+    Notas: form.Notas.value
+  };
 
   try {
-    await fetch(url, {
+    const res = await fetch(`${API_URL}?sheet=${SHEET}`, {
       method: "POST",
-      body: JSON.stringify(payload),
-      headers: {
-        "Content-Type": "application/json"
-      }
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(datos)
     });
 
-    form.reset();
-    cargarAgenda(); // recargar lista
+    const result = await res.json();
+    if (result.success) {
+      document.getElementById("msg").textContent = "✅ Evento guardado!";
+      form.reset();
+      cargarEventos();
+    } else {
+      document.getElementById("msg").textContent = "❌ Error al guardar: " + result.error;
+    }
   } catch (err) {
     console.error("Error al enviar:", err);
+    document.getElementById("msg").textContent = "❌ No se pudo enviar el evento.";
   }
 });
 
-// 👉 Cargar datos al inicio
-cargarAgenda();
+// ===============================
+// Inicializar
+// ===============================
+cargarEventos();

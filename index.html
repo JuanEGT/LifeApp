@@ -2,35 +2,43 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Agenda Personal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agenda</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Mi Agenda</h1>
+  <div class="container">
+    <h1>Agenda</h1>
 
-  <!-- 📝 Formulario -->
-  <form id="agendaForm">
-    <label>
-      Fecha:
-      <input type="date" name="Fecha" required>
-    </label>
-    <label>
-      Hora:
-      <input type="time" name="Hora" required>
-    </label>
-    <label>
-      Evento:
-      <input type="text" name="Evento" required>
-    </label>
-    <label>
-      Notas:
-      <input type="text" name="Notas">
-    </label>
-    <button type="submit">Agregar</button>
-  </form>
+    <!-- Lista de eventos -->
+    <div id="agenda"></div>
 
-  <!-- 📅 Lista de agenda -->
-  <div id="agenda"></div>
+    <hr>
+
+    <!-- Formulario -->
+    <h2>Agregar evento</h2>
+    <form id="eventoForm">
+      <label>
+        Fecha:
+        <input type="date" name="Fecha" required>
+      </label>
+      <label>
+        Hora:
+        <input type="time" name="Hora" required>
+      </label>
+      <label>
+        Evento:
+        <input type="text" name="Evento" required>
+      </label>
+      <label>
+        Notas:
+        <input type="text" name="Notas">
+      </label>
+      <button type="submit">Guardar</button>
+    </form>
+
+    <p id="msg"></p>
+  </div>
 
   <script src="app.js"></script>
 </body>
