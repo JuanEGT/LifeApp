@@ -129,6 +129,7 @@ body {
 }
 
 .recordatorioItem {
+  position: relative; /* necesario para posicionar tooltip */
   padding: 5px;
   border-bottom: 1px solid #333;
   cursor: pointer;
@@ -137,6 +138,28 @@ body {
 
 .recordatorioItem:hover {
   background-color: #333;
+}
+
+/* Tooltip que aparece solo al hover */
+.recordatorioItem .tooltip {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  left: 105%; /* a la derecha del item */
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #333;
+  color: #fff;
+  padding: 5px 8px;
+  border-radius: 5px;
+  white-space: pre; /* respeta saltos de línea */
+  transition: opacity 0.2s;
+  z-index: 10;
+}
+
+.recordatorioItem:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
 }
 
 .calendario {
