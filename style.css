@@ -1,4 +1,4 @@
-/* ===== RESET ===== */
+/* ===== RESET GENERAL ===== */
 * {
   margin: 0;
   padding: 0;
@@ -6,7 +6,7 @@
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* ===== CONTENEDORES ===== */
+/* ===== BODY ===== */
 body {
   background-color: #121212;
   color: #e0e0e0;
@@ -17,11 +17,12 @@ body {
   padding: 20px;
 }
 
+/* ===== CONTENEDORES ===== */
 .container {
   width: 100%;
   max-width: 500px;
   margin: 20px auto;
-  display: none;
+  display: none;              /* Todos ocultos al inicio */
   flex-direction: column;
   gap: 20px;
 }

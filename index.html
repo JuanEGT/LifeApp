@@ -3,58 +3,66 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LifeApp</title>
+  <title>Agenda App</title>
+  <!-- Vinculamos el CSS -->
   <link rel="stylesheet" href="style.css">
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-  <!-- LOGIN -->
-  <div id="loginContainer" class="container">
-    <h1>LifeApp</h1>
-    <button id="loginBtn" class="btn">Login con Google</button>
-  </div>
-
-  <!-- MENÚ PRINCIPAL -->
+  <!-- ===== MENÚ PRINCIPAL ===== -->
   <div id="mainMenu" class="container">
     <h1>Menú Principal</h1>
-    <button class="btn" onclick="mostrarAgenda()">Agenda</button>
+    <button id="goToAgenda" class="btn">📅 Ir a la Agenda</button>
   </div>
 
-  <!-- AGENDA -->
-  <div id="agendaContainer" class="container">
-    <!-- Volver al menú principal -->
-    <button class="btn backBtn" onclick="volverAMenu()">Volver al Menú Principal</button>
+  <!-- ===== AGENDA ===== -->
+  <div id="agenda" class="container">
+    <h1>Agenda</h1>
+    <!-- Lista de eventos -->
+    <div id="agendaList" class="agenda"></div>
 
-    <!-- Sub-menú de Agenda -->
-    <div id="menuButtons" class="subMenu">
-      <button class="btn" onclick="mostrarAgregarEvento()">Agregar Evento</button>
-      <button class="btn" onclick="mostrarBuscarFecha()">Buscar por Fecha</button>
+    <!-- Submenú dentro de Agenda -->
+    <div id="subMenu" class="subMenu">
+      <button id="goToAdd" class="btn">➕ Agregar Evento</button>
+      <button id="goToSearch" class="btn">🔍 Buscar por Fecha</button>
     </div>
 
-    <!-- Formulario de agregar evento -->
-    <form id="eventoForm" class="form hidden">
-      <label>Fecha: <input type="date" name="Fecha" required></label>
-      <label>Hora: <input type="time" name="Hora" required></label>
-      <label>Evento: <input type="text" name="Evento" required></label>
-      <label>Notas: <input type="text" name="Notas"></label>
-      <button type="submit" class="btn">Agregar</button>
-      <button type="button" class="btn backBtn" onclick="mostrarAgenda()">Volver</button>
+    <!-- Botón para volver al menú principal -->
+    <button id="backToMenu" class="btn backBtn">⬅ Volver al Menú Principal</button>
+  </div>
+
+  <!-- ===== FORMULARIO AGREGAR EVENTO ===== -->
+  <div id="addForm" class="container hidden">
+    <h1>Agregar Evento</h1>
+    <form id="eventForm" class="form">
+      <label>
+        Nombre:
+        <input type="text" id="nombre" placeholder="Ej. Reunión">
+      </label>
+      <label>
+        Fecha:
+        <input type="date" id="fecha">
+      </label>
+      <button type="submit" class="btn">Guardar Evento</button>
     </form>
 
-    <!-- Selector de fecha -->
-    <div id="fechaSelector" class="form hidden">
-      <label>Selecciona Fecha: <input type="date" id="fechaInput"></label>
-      <button class="btn" onclick="buscarPorFecha()">Buscar</button>
-      <button class="btn backBtn" onclick="mostrarAgenda()">Volver</button>
-    </div>
+    <!-- Botón para volver a la agenda -->
+    <button id="backToAgenda" class="btn backBtn">⬅ Volver a la Agenda</button>
 
-    <!-- Mensajes -->
-    <div id="msg"></div>
-
-    <!-- Lista de eventos -->
-    <div id="agenda" class="agenda"></div>
+    <!-- Mensaje de validación -->
+    <p id="msg"></p>
   </div>
 
+  <!-- ===== BUSCAR POR FECHA ===== -->
+  <div id="searchDate" class="container hidden">
+    <h1>Buscar por Fecha</h1>
+    <input type="date" id="dateInput" class="btn">
+    <div id="results" class="agenda"></div>
+
+    <!-- Botón para volver a la agenda -->
+    <button id="backToAgenda" class="btn backBtn">⬅ Volver a la Agenda</button>
+  </div>
+
+  <!-- Vinculamos el JS -->
   <script src="app.js"></script>
 </body>
 </html>
