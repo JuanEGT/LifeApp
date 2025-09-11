@@ -34,6 +34,18 @@ button:hover {
   background-color: #333;
 }
 
+/* Botón eliminar */
+#agenda button {
+  background-color: #ff4c4c;
+  border: none;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.8rem;
+}
+
+#agenda button:hover {
+  background-color: #ff1c1c;
+}
+
 /* ===== FORMULARIOS ===== */
 form {
   display: flex;
@@ -74,17 +86,6 @@ input[type="text"]::placeholder {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-#agenda button {
-  background-color: #ff4c4c;
-  border: none;
-  padding: 0.2rem 0.5rem;
-  font-size: 0.8rem;
-}
-
-#agenda button:hover {
-  background-color: #ff1c1c;
 }
 
 /* ===== MENÚS Y CONTENEDORES ===== */

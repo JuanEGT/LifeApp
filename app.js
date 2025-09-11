@@ -21,18 +21,59 @@ window.onload = () => {
     scope: SCOPES,
     callback: (resp) => {
       token = resp.access_token;
-      document.getElementById("mainMenu").style.display = "block"; // Mostrar menú principal
+      mostrarMenuPrincipal();
     }
   });
 
   loginBtn.addEventListener("click", () => {
     tokenClient.requestAccessToken({ prompt: "consent" });
   });
+
+  // Asociar formulario de agregar evento
+  const form = document.getElementById("eventoForm");
+  if (form) form.addEventListener("submit", agregarEvento);
 };
 
-// ===== FUNCIONES =====
+// ===== FUNCIONES DE NAVEGACIÓN =====
+function ocultarTodos() {
+  document.getElementById("loginContainer").style.display = "none";
+  document.getElementById("mainMenu").style.display = "none";
+  document.getElementById("menuButtons").style.display = "none";
+  document.getElementById("eventoForm").style.display = "none";
+  document.getElementById("fechaSelector").style.display = "none";
+  document.getElementById("agendaContainer").style.display = "none";
+  document.getElementById("msg").innerText = "";
+}
 
-// Mostrar agenda por fecha
+function mostrarMenuPrincipal() {
+  ocultarTodos();
+  document.getElementById("mainMenu").style.display = "block";
+}
+
+function mostrarAgenda() {
+  ocultarTodos();
+  document.getElementById("agendaContainer").style.display = "block";
+  document.getElementById("menuButtons").style.display = "block";
+  cargarEventos();
+}
+
+function mostrarAgregarEvento() {
+  ocultarTodos();
+  document.getElementById("eventoForm").style.display = "block";
+  document.getElementById("agendaContainer").style.display = "block";
+}
+
+function mostrarBuscarFecha() {
+  ocultarTodos();
+  document.getElementById("fechaSelector").style.display = "block";
+  document.getElementById("agendaContainer").style.display = "block";
+}
+
+function volverAMenu() {
+  mostrarMenuPrincipal();
+}
+
+// ===== FUNCIONES DE AGENDA =====
 async function cargarEventos(fechaSeleccionada = null) {
   if (!token) return;
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?majorDimension=ROWS`;
@@ -48,7 +89,6 @@ async function cargarEventos(fechaSeleccionada = null) {
   }
 }
 
-// Mostrar eventos en pantalla
 function mostrarEventos(values, fechaSeleccionada = null) {
   if (!values || values.length < 2) return;
   const headers = values[0];
@@ -68,7 +108,6 @@ function mostrarEventos(values, fechaSeleccionada = null) {
   });
 }
 
-// Agregar evento
 async function agregarEvento(event) {
   event.preventDefault();
   if (!token) return;
@@ -94,18 +133,16 @@ async function agregarEvento(event) {
       body: JSON.stringify({ values: [data] })
     });
     form.reset();
-    cargarEventos();
+    mostrarAgenda();
   } catch (err) {
     console.error(err);
     document.getElementById("msg").innerText = "Error al agregar evento";
   }
 }
 
-// Eliminar evento por ID
 async function eliminarEvento(id) {
   if (!token) return;
 
-  // Leer todos los datos
   const urlGet = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?majorDimension=ROWS`;
   const resp = await fetch(urlGet, { headers: { Authorization: "Bearer " + token } });
   const data = await resp.json();
@@ -118,14 +155,13 @@ async function eliminarEvento(id) {
 
   for (let i = 0; i < rows.length; i++) {
     if (rows[i][0] == id) {
-      rowIndex = i + 2; // +2 porque Sheets indexa desde 1 y la primera fila son headers
+      rowIndex = i + 2;
       break;
     }
   }
 
   if (rowIndex === -1) return;
 
-  // Eliminar fila
   const urlDelete = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}:batchUpdate`;
   await fetch(urlDelete, {
     method: "POST",
@@ -143,31 +179,9 @@ async function eliminarEvento(id) {
   cargarEventos();
 }
 
-// ===== EVENTOS DEL DOM =====
-window.showAgenda = () => {
-  document.getElementById("menuButtons").style.display = "block";
-  document.getElementById("eventoForm").style.display = "none";
-  document.getElementById("agendaContainer").style.display = "block";
-};
-
-window.showAgregarEvento = () => {
-  document.getElementById("eventoForm").style.display = "block";
-  document.getElementById("menuButtons").style.display = "none";
-  document.getElementById("agendaContainer").style.display = "none";
-};
-
-window.showBuscarFecha = () => {
-  document.getElementById("fechaSelector").style.display = "block";
-  document.getElementById("menuButtons").style.display = "none";
-  document.getElementById("agendaContainer").style.display = "none";
-};
-
-window.buscarPorFecha = () => {
+// ===== BUSCAR POR FECHA =====
+function buscarPorFecha() {
   const fecha = document.getElementById("fechaInput").value;
   cargarEventos(fecha);
-  document.getElementById("fechaSelector").style.display = "none";
-  document.getElementById("agendaContainer").style.display = "block";
-};
-
-// Formulario agregar evento
-document.getElementById("eventoForm").addEventListener("submit", agregarEvento);
+  mostrarAgenda();
+}

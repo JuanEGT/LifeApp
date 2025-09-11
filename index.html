@@ -19,14 +19,17 @@
 
     <!-- MENÚ PRINCIPAL -->
     <div id="mainMenu" style="display:none;">
-      <button onclick="showAgenda()">Agenda</button>
+      <button onclick="mostrarAgenda()">Agenda</button>
     </div>
 
     <!-- AGENDA -->
     <div id="agendaContainer" style="display:none;">
+
+      <!-- BOTONES DE ACCIÓN -->
       <div id="menuButtons" style="display:none;">
-        <button onclick="showAgregarEvento()">Agregar Evento</button>
-        <button onclick="showBuscarFecha()">Buscar Agenda por Fecha</button>
+        <button onclick="mostrarAgregarEvento()">Agregar Evento</button>
+        <button onclick="mostrarBuscarFecha()">Buscar Agenda por Fecha</button>
+        <button onclick="volverAMenu()">Volver al Menú Principal</button>
       </div>
 
       <!-- FORMULARIO AGREGAR EVENTO -->
