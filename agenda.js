@@ -183,16 +183,16 @@ function mostrarCalendario(values) {
     const dataRows = values.slice(1);
 
     dataRows.forEach(r => {
-      const obj = {};
+    const obj = {};
       headers.forEach((h, i) => obj[h] = r[i] || "");
 
-      const fechaEvento = new Date(obj.Fecha);
+    const partes = obj.Fecha.split("-");
+    const fechaEvento = new Date(partes[0], partes[1]-1, partes[2]);
 
-      // Solo marcar si es el mes y año actuales
-      if (fechaEvento.getFullYear() === year && fechaEvento.getMonth() === month) {
+     if (fechaEvento.getFullYear() === year && fechaEvento.getMonth() === month) {
         const diaEvento = fechaEvento.getDate();
         eventosPorDia[diaEvento] = true;
-      }
+    }
     });
   }
 
