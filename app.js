@@ -10,7 +10,6 @@ let tokenClient = null;  // Cliente GIS para solicitar token
 
 // ===== LOGIN CON GIS =====
 window.onload = () => {
-  // Al inicio mostramos solo el login
   document.getElementById("loginContainer").style.display = "flex";
   document.getElementById("mainMenu").style.display = "none";
   document.getElementById("agendaContainer").style.display = "none";
@@ -18,37 +17,31 @@ window.onload = () => {
   const loginBtn = document.getElementById("loginBtn");
   if (!loginBtn) return console.error("No se encontró el botón loginBtn");
 
-  // Inicializamos el cliente de Google Identity Services
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
     scope: SCOPES,
     callback: (resp) => {
-      token = resp.access_token;          // Guardamos token
-      mostrarMenuPrincipal();             // Pasamos al menú principal
+      token = resp.access_token;
+      mostrarMenuPrincipal();
     }
   });
 
-  // Al hacer click en login, pedimos el token
   loginBtn.addEventListener("click", () => {
     tokenClient.requestAccessToken({ prompt: "consent" });
   });
 };
 
 // ===== FUNCIONES DE NAVEGACIÓN =====
-
-// Mostrar menú principal
 function mostrarMenuPrincipal() {
   document.getElementById("loginContainer").style.display = "none";
   document.getElementById("agendaContainer").style.display = "none";
   document.getElementById("mainMenu").style.display = "flex";
 }
 
-// Mostrar vista de Agenda (sub-menú)
 function mostrarAgenda() {
   document.getElementById("mainMenu").style.display = "none";
   document.getElementById("agendaContainer").style.display = "flex";
 
-  // Mostramos sub-menú y ocultamos formularios
   document.getElementById("menuButtons").style.display = "flex";
   document.getElementById("eventoForm").style.display = "none";
   document.getElementById("fechaSelector").style.display = "none";
@@ -56,7 +49,6 @@ function mostrarAgenda() {
   document.getElementById("msg").innerText = "";
 }
 
-// Mostrar formulario para agregar evento
 function mostrarAgregarEvento() {
   document.getElementById("menuButtons").style.display = "none";
   document.getElementById("eventoForm").style.display = "flex";
@@ -64,7 +56,6 @@ function mostrarAgregarEvento() {
   document.getElementById("agenda").innerHTML = "";
   document.getElementById("msg").innerText = "";
 
-  // Crear botón Volver a Agenda si no existe
   if (!document.getElementById("backToAgendaFromAdd")) {
     const backBtn = document.createElement("button");
     backBtn.id = "backToAgendaFromAdd";
@@ -75,8 +66,6 @@ function mostrarAgregarEvento() {
   }
 }
 
-
-// Mostrar selector de fecha para buscar
 function mostrarBuscarFecha() {
   document.getElementById("menuButtons").style.display = "none";
   document.getElementById("eventoForm").style.display = "none";
@@ -85,21 +74,16 @@ function mostrarBuscarFecha() {
   document.getElementById("msg").innerText = "";
 }
 
-// Volver al menú principal
 function volverAMenu() {
   mostrarMenuPrincipal();
 }
 
 // ===== FUNCIONES DE DATOS =====
-
-// Cargar todos los eventos desde Google Sheets
 async function cargarEventos() {
   if (!token) return;
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?majorDimension=ROWS`;
   try {
-    const resp = await fetch(url, {
-      headers: { Authorization: "Bearer " + token }
-    });
+    const resp = await fetch(url, { headers: { Authorization: "Bearer " + token } });
     const data = await resp.json();
     return data.values;
   } catch (err) {
@@ -109,7 +93,7 @@ async function cargarEventos() {
   }
 }
 
-// Mostrar eventos en la pantalla
+// ===== MOSTRAR EVENTOS =====
 function mostrarEventos(values) {
   const div = document.getElementById("agenda");
   div.innerHTML = "";
@@ -118,13 +102,45 @@ function mostrarEventos(values) {
   const headers = values[0];
   const rows = values.slice(1);
 
-  rows.forEach(r => {
+  rows.forEach((r) => {
     const obj = {};
     headers.forEach((h, i) => obj[h] = r[i] || "");
-    div.innerHTML += `<p>${obj.Fecha} ${obj.Hora} - ${obj.Evento} (${obj.Notas})</p>`;
+
+    const p = document.createElement("p");
+    p.innerHTML = `${obj.Fecha} ${obj.Hora} - ${obj.Evento} (${obj.Notas})`;
+
+    // Botón eliminar por ID
+    const delBtn = document.createElement("button");
+    delBtn.innerText = "Eliminar";
+    delBtn.className = "btn backBtn";
+    delBtn.onclick = async () => {
+      try {
+        const filaIndex = values.findIndex(row => row[0] == obj.ID);
+        if (filaIndex < 1) return;
+
+        const fila = filaIndex + 1;
+        await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}!A${fila}:E?valueInputOption=USER_ENTERED`, {
+          method: "PUT",
+          headers: {
+            Authorization: "Bearer " + token,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ values: [["", "", "", "", ""]] })
+        });
+
+        // Refrescar la lista completa
+        const allValues = await cargarEventos();
+        mostrarEventos(allValues);
+      } catch (err) {
+        console.error(err);
+        document.getElementById("msg").innerText = "Error al eliminar evento";
+      }
+    };
+
+    p.appendChild(delBtn);
+    div.appendChild(p);
   });
 
-  // Botón de volver al sub-menú
   div.innerHTML += `<button class="btn backBtn" onclick="mostrarAgenda()">Volver a Agenda</button>`;
 }
 
@@ -134,7 +150,10 @@ document.getElementById("eventoForm").addEventListener("submit", async e => {
   if (!token) return;
 
   const form = e.target;
+  const id = Date.now();
+
   const data = [
+    id,
     form.Fecha.value,
     form.Hora.value,
     form.Evento.value,
@@ -153,7 +172,7 @@ document.getElementById("eventoForm").addEventListener("submit", async e => {
     });
 
     form.reset();
-    mostrarAgenda(); // Regresa al sub-menú después de agregar
+    mostrarAgenda();
   } catch (err) {
     console.error(err);
     document.getElementById("msg").innerText = "Error al agregar evento";
@@ -170,38 +189,38 @@ async function buscarPorFecha() {
 
   const headers = values[0];
   const rows = values.slice(1);
-  const filtrados = rows.filter(r => r[0] === fecha);
+  const filtrados = rows.filter(r => r[1] === fecha);
 
   const div = document.getElementById("agenda");
   div.innerHTML = "";
 
-  filtrados.forEach((r, idx) => {
+  filtrados.forEach((r) => {
     const obj = {};
-    headers.forEach((h,i)=> obj[h]=r[i]||"");
+    headers.forEach((h, i) => obj[h] = r[i] || "");
 
     const p = document.createElement("p");
     p.innerHTML = `${obj.Fecha} ${obj.Hora} - ${obj.Evento} (${obj.Notas})`;
 
-    // Botón eliminar
+    // Botón eliminar por ID
     const delBtn = document.createElement("button");
     delBtn.innerText = "Eliminar";
     delBtn.className = "btn backBtn";
     delBtn.onclick = async () => {
-      // Calculamos la fila real en la hoja
-      const fila = values.indexOf(r) + 1; // +1 por los headers
-      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}!A${fila}:D?majorDimension=ROWS`;
-      
       try {
-        // Sobrescribir fila vacía para simular borrado
-        await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}!A${fila}:D?valueInputOption=USER_ENTERED`, {
+        const filaIndex = values.findIndex(row => row[0] == obj.ID);
+        if (filaIndex < 1) return;
+
+        const fila = filaIndex + 1;
+        await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}!A${fila}:E?valueInputOption=USER_ENTERED`, {
           method: "PUT",
           headers: {
             Authorization: "Bearer " + token,
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ values: [["", "", "", ""]] })
+          body: JSON.stringify({ values: [["", "", "", "", ""]] })
         });
-        buscarPorFecha(); // refrescar resultados
+
+        buscarPorFecha();
       } catch (err) {
         console.error(err);
         document.getElementById("msg").innerText = "Error al eliminar evento";
@@ -212,7 +231,6 @@ async function buscarPorFecha() {
     div.appendChild(p);
   });
 
-  // Botón para volver a sub-menú Agenda
   if (!document.getElementById("backToAgendaFromSearch")) {
     const backBtn = document.createElement("button");
     backBtn.id = "backToAgendaFromSearch";
