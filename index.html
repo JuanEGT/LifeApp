@@ -1,36 +1,35 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LifeApp - Agenda</title>
-<link rel="stylesheet" href="style.css">
-
-<!-- Google Identity Services -->
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="app.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LifeApp - Agenda</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="app.js" defer></script>
 </head>
 <body>
-<div class="container">
-  <h1>LifeApp - Agenda</h1>
+  <div class="container">
+    <h1>LifeApp - Agenda</h1>
 
-  <!-- Botón de login -->
-  <button id="loginBtn">Login con Google</button>
+    <!-- Botón login -->
+    <button id="loginBtn">Conectar con Google</button>
 
-  <!-- Mensajes -->
-  <p id="msg"></p>
+    <!-- Formulario para agregar evento -->
+    <form id="eventoForm" style="display:none">
+      <h2>Agregar Evento</h2>
+      <label>Fecha: <input type="date" name="Fecha" required></label>
+      <label>Hora: <input type="time" name="Hora" required></label>
+      <label>Evento: <input type="text" name="Evento" required></label>
+      <label>Notas: <input type="text" name="Notas"></label>
+      <button type="submit">Agregar</button>
+    </form>
 
-  <!-- Lista de eventos -->
-  <div id="agenda"></div>
+    <!-- Mensajes -->
+    <div id="msg"></div>
 
-  <!-- Formulario para agregar evento -->
-  <form id="eventoForm" style="display:none;">
-    <label>Fecha: <input type="date" name="Fecha" required></label>
-    <label>Hora: <input type="time" name="Hora" required></label>
-    <label>Evento: <input type="text" name="Evento" required></label>
-    <label>Notas: <input type="text" name="Notas"></label>
-    <button type="submit">Agregar</button>
-  </form>
-</div>
+    <!-- Agenda -->
+    <div id="agenda"></div>
+  </div>
 </body>
 </html>

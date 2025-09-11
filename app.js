@@ -8,73 +8,35 @@ const SCOPES = "https://www.googleapis.com/auth/spreadsheets";
 let token = null;
 let tokenClient = null;
 
-// ===== LOGIN Y DOM READY =====
+// ===== LOGIN CON GIS =====
 window.onload = () => {
   const loginBtn = document.getElementById("loginBtn");
-  const eventoForm = document.getElementById("eventoForm");
-  const msg = document.getElementById("msg");
-
-  if (!loginBtn || !eventoForm) {
-    console.error("No se encontraron elementos del DOM");
+  if (!loginBtn) {
+    console.error("No se encontró el botón loginBtn");
     return;
   }
 
-  // Inicializar Token Client de GIS
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
     scope: SCOPES,
     callback: (resp) => {
       token = resp.access_token;
-      eventoForm.style.display = "block";
+      document.getElementById("eventoForm").style.display = "block";
       cargarEventos();
     }
   });
 
-  // Botón de login
   loginBtn.addEventListener("click", () => {
     tokenClient.requestAccessToken({ prompt: "consent" });
-  });
-
-  // Formulario para agregar evento
-  eventoForm.addEventListener("submit", async e => {
-    e.preventDefault();
-    if (!token) return;
-
-    const data = [
-      eventoForm.Fecha.value,
-      eventoForm.Hora.value,
-      eventoForm.Evento.value,
-      eventoForm.Notas.value
-    ];
-
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}:append?valueInputOption=USER_ENTERED`;
-
-    try {
-      await fetch(url, {
-        method: "POST",
-        headers: {
-          Authorization: "Bearer " + token,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ values: [data] })
-      });
-      eventoForm.reset();
-      cargarEventos();
-    } catch (err) {
-      console.error(err);
-      msg.innerText = "Error al agregar evento";
-    }
   });
 };
 
 // ===== FUNCIONES =====
 
-// Leer eventos de la hoja
+// Leer eventos
 async function cargarEventos() {
   if (!token) return;
-
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?majorDimension=ROWS`;
-
   try {
     const resp = await fetch(url, {
       headers: { Authorization: "Bearer " + token }
@@ -87,17 +49,101 @@ async function cargarEventos() {
   }
 }
 
-// Mostrar eventos en la pantalla
+// Mostrar eventos en pantalla por hora
 function mostrarEventos(values) {
   if (!values || values.length < 2) return;
   const headers = values[0];
   const rows = values.slice(1);
   const div = document.getElementById("agenda");
   div.innerHTML = "";
-  rows.forEach(r => {
-    const obj = {};
-    headers.forEach((h,i) => obj[h] = r[i] || "");
-    div.innerHTML += `<p>${obj.Fecha} ${obj.Hora} - ${obj.Evento} (${obj.Notas})</p>`;
+
+  const horas = Array.from({ length: 24 }, (_, i) => i);
+
+  horas.forEach(h => {
+    div.innerHTML += `<h3>${String(h).padStart(2,'0')}:00 - ${String(h+1).padStart(2,'0')}:00</h3>`;
+    rows.forEach((r, idx) => {
+      const obj = {};
+      headers.forEach((head, i) => obj[head] = r[i] || "");
+      const hr = parseInt(obj.Hora.split(":")[0]);
+      if (hr === h) {
+        div.innerHTML += `<p>${obj.Hora} - ${obj.Evento} (${obj.Notas}) 
+        <button onclick="eliminarEvento('${obj.ID}')">Eliminar</button></p>`;
+      }
+    });
   });
 }
-  
+
+// Agregar evento
+document.getElementById("eventoForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!token) return;
+
+  const form = e.target;
+  const newID = Date.now().toString(); // ID único
+  const data = {
+    ID: newID,
+    Fecha: form.Fecha.value,
+    Hora: form.Hora.value,
+    Evento: form.Evento.value,
+    Notas: form.Notas.value
+  };
+
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}:append?valueInputOption=USER_ENTERED`;
+  try {
+    await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ values: [[data.ID, data.Fecha, data.Hora, data.Evento, data.Notas]] })
+    });
+    form.reset();
+    cargarEventos();
+  } catch (err) {
+    console.error(err);
+    document.getElementById("msg").innerText = "Error al agregar evento";
+  }
+});
+
+// Eliminar evento por ID
+async function eliminarEvento(id) {
+  if (!token) return;
+
+  // Leer toda la hoja
+  const urlGet = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?majorDimension=ROWS`;
+  try {
+    const resp = await fetch(urlGet, {
+      headers: { Authorization: "Bearer " + token }
+    });
+    const data = await resp.json();
+    const headers = data.values[0];
+    const rows = data.values.slice(1);
+    let rowIndex = -1;
+    rows.forEach((r, i) => {
+      if (r[0] === id) rowIndex = i + 2; // +2 porque fila 1 = headers, índice 0
+    });
+
+    if (rowIndex > 0) {
+      const batchUpdateUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}:batchUpdate`;
+      const body = {
+        requests: [
+          { deleteDimension: { range: { sheetId: 0, dimension: "ROWS", startIndex: rowIndex-1, endIndex: rowIndex } } }
+        ]
+      };
+      await fetch(batchUpdateUrl, {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer " + token,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
+      cargarEventos();
+    }
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById("msg").innerText = "Error al eliminar evento";
+  }
+}
