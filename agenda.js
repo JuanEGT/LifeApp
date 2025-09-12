@@ -208,19 +208,20 @@ function mostrarAgregarEvento() {
     document.getElementById("fechaSelector").style.display = "flex";
    
     // ===== Botón dinámico "Volver a Agenda" =====
-  let backBtn = document.getElementById("backToAgendaFromAdd");
+   let backBtn = document.getElementById("backToAgendaFromSearch");
   if (!backBtn) {
     backBtn = document.createElement("button");
-    backBtn.id = "backToAgendaFromAdd";
+    backBtn.id = "backToAgendaFromSearch";
     backBtn.className = "btn backBtn";
     backBtn.innerText = "Volver a Agenda";
     backBtn.style.display = "block";
     backBtn.style.marginTop = "10px";
-    backBtn.onclick = mostrarAgenda;
-    form.appendChild(backBtn);
+    backBtn.onclick = Agenda.mostrarAgenda; // usar el módulo
+    document.getElementById("fechaSelector").appendChild(backBtn);
   } else {
     backBtn.style.display = "block";
   }
+}
   }
 
 
