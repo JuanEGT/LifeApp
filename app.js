@@ -13,7 +13,6 @@ window.onload = () => {
   document.getElementById("loginContainer").style.display = "flex";
   document.getElementById("mainMenu").style.display = "none";
   document.getElementById("agendaContainer").style.display = "none";
-  document.getElementById("finanzasContainer").style.display = "none";
 
   // Inicializar cliente OAuth
   tokenClient = google.accounts.oauth2.initTokenClient({
@@ -38,14 +37,10 @@ window.onload = () => {
   const btnAgenda = document.getElementById("btnAgenda");
   if (btnAgenda) btnAgenda.addEventListener("click", () => Agenda.mostrarAgenda());
 
-  const btnVolverMenuFinanzas = document.getElementById("btnVolverMenuFinanzas");
-  if (btnVolverMenuFinanzas) btnVolverMenuFinanzas.addEventListener("click", mostrarMenuPrincipal);
-};
 
 // ===== FUNCIONES =====
 function mostrarMenuPrincipal() {
   document.getElementById("loginContainer").style.display = "none";
   document.getElementById("agendaContainer").style.display = "none";
-  document.getElementById("finanzasContainer").style.display = "none";
   document.getElementById("mainMenu").style.display = "flex";
 }
