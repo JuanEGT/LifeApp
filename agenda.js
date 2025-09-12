@@ -85,8 +85,6 @@ const Agenda = (() => {
       p.appendChild(delBtn);
       div.appendChild(p);
     });
-
-    div.innerHTML += `<button class="btn backBtn" onclick="Agenda.mostrarAgenda()">Volver a Agenda</button>`;
   }
 
   async function buscarPorFecha() {
@@ -122,7 +120,7 @@ const Agenda = (() => {
       div.appendChild(p);
     });
 
-    // Botón volver a agenda
+    // Botón volver a Agenda
     if (!document.getElementById("backToAgendaFromSearch")) {
       const backBtn = document.createElement("button");
       backBtn.id = "backToAgendaFromSearch";
@@ -173,33 +171,36 @@ const Agenda = (() => {
     const month = today.getMonth();
 
     const diasMes = new Date(year, month + 1, 0).getDate();
+    const rows = [];
+    for (let i = 1; i <= diasMes; i++) rows.push(i);
 
     const eventosPorDia = {};
     if (values && values.length >= 2) {
       const headers = values[0];
       const dataRows = values.slice(1);
-
       dataRows.forEach(r => {
         const obj = {};
         headers.forEach((h, i) => obj[h] = r[i] || "");
 
         const partes = obj.Fecha.split("-");
-        const fechaEvento = new Date(partes[0], partes[1]-1, partes[2]);
-
+        const fechaEvento = new Date(partes[0], partes[1] - 1, partes[2]);
         if (fechaEvento.getFullYear() === year && fechaEvento.getMonth() === month) {
           eventosPorDia[fechaEvento.getDate()] = true;
         }
       });
     }
 
-    // Crear calendario
-    for (let d = 1; d <= diasMes; d++) {
-      const diaDiv = document.createElement("div");
-      diaDiv.classList.add("dia");
-      diaDiv.classList.add(eventosPorDia[d] ? "rojo" : "verde");
-      diaDiv.innerText = d;
-      cont.appendChild(diaDiv);
-    }
+    const grid = document.createElement("div");
+    grid.className = "calendario-grid";
+
+    rows.forEach(d => {
+      const cell = document.createElement("div");
+      cell.className = "dia " + (eventosPorDia[d] ? "rojo" : "verde");
+      cell.innerText = d;
+      grid.appendChild(cell);
+    });
+
+    cont.appendChild(grid);
   }
 
   // ===================== UI de navegación =====================
@@ -208,27 +209,10 @@ const Agenda = (() => {
     document.getElementById("agendaContainer").style.display = "flex";
 
     document.getElementById("menuButtons").style.display = "flex";
-    const eventoForm = document.getElementById("eventoForm");
-    eventoForm.style.display = "none";
-    eventoForm.reset();                       // resetear inputs required
-    eventoForm.setAttribute("novalidate", "true"); // evitar errores required
+    document.getElementById("eventoForm").style.display = "none";
     document.getElementById("fechaSelector").style.display = "none";
-
     document.getElementById("agenda").innerHTML = "";
     document.getElementById("msg").innerText = "";
-
-    // Conectar botones solo una vez
-    const btnVolverAgenda = document.getElementById("btnVolverAgenda");
-    if (btnVolverAgenda && !btnVolverAgenda.dataset.listenerAttached) {
-      btnVolverAgenda.addEventListener("click", mostrarAgenda);
-      btnVolverAgenda.dataset.listenerAttached = "true";
-    }
-
-    const btnBuscarPorFecha = document.getElementById("btnBuscarPorFecha");
-    if (btnBuscarPorFecha && !btnBuscarPorFecha.dataset.listenerAttached) {
-      btnBuscarPorFecha.addEventListener("click", buscarPorFecha);
-      btnBuscarPorFecha.dataset.listenerAttached = "true";
-    }
 
     cargarEventos().then(values => {
       mostrarRecordatorios(values);
@@ -238,28 +222,19 @@ const Agenda = (() => {
 
   function mostrarAgregarEvento() {
     document.getElementById("menuButtons").style.display = "none";
-    const eventoForm = document.getElementById("eventoForm");
-    eventoForm.style.display = "flex";
-    eventoForm.removeAttribute("novalidate"); // volver a validar
+    document.getElementById("eventoForm").style.display = "flex";
     document.getElementById("fechaSelector").style.display = "none";
     document.getElementById("agenda").innerHTML = "";
     document.getElementById("msg").innerText = "";
 
-    // Listener submit solo una vez
-    if (!eventoForm.dataset.listenerAttached) {
-      eventoForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        if (!token) return;
-
-        const form = e.target;
-        const id = Date.now();
-        const data = [id, form.Fecha.value, form.Hora.value, form.Evento.value, form.Notas.value];
-
-        await agregarEvento(data);
-        form.reset();
-        mostrarAgenda();
-      });
-      eventoForm.dataset.listenerAttached = "true";
+    // Botón Volver a Agenda
+    if (!document.getElementById("backToAgendaFromAdd")) {
+      const backBtn = document.createElement("button");
+      backBtn.id = "backToAgendaFromAdd";
+      backBtn.innerText = "Volver a Agenda";
+      backBtn.className = "btn backBtn";
+      backBtn.onclick = mostrarAgenda;
+      document.getElementById("eventoForm").appendChild(backBtn);
     }
   }
 
@@ -269,18 +244,6 @@ const Agenda = (() => {
     document.getElementById("fechaSelector").style.display = "flex";
     document.getElementById("agenda").innerHTML = "";
     document.getElementById("msg").innerText = "";
-
-    const buscarBtn = document.getElementById("btnBuscarPorFecha");
-    if (buscarBtn && !buscarBtn.dataset.listenerAttached) {
-      buscarBtn.addEventListener("click", buscarPorFecha);
-      buscarBtn.dataset.listenerAttached = "true";
-    }
-
-    const btnVolverAgenda = document.getElementById("btnVolverAgenda");
-    if (btnVolverAgenda && !btnVolverAgenda.dataset.listenerAttached) {
-      btnVolverAgenda.addEventListener("click", mostrarAgenda);
-      btnVolverAgenda.dataset.listenerAttached = "true";
-    }
   }
 
   // ===================== Exportar funciones públicas =====================
