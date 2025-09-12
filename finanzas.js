@@ -23,10 +23,12 @@ async function cargarFinanzas() {
     });
     const data = await res.json();
 
-    if (!data.values) {
-      console.error("No hay datos en la hoja");
-      return;
-    }
+  console.log("Respuesta API:", data);
+  if (!data.values) {
+    console.error("No hay datos en la hoja");
+  return;
+  }
+
 
     const headers = data.values[0];
     const rows = data.values.slice(1);
