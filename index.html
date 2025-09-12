@@ -80,49 +80,56 @@
   <!--============= FIN=AGENDA ===============================-->
 
   <!-- ================= FINANZAS ================= -->
-  <div id="finanzasContainer" class="container" style="display:none">
-    <h1>Finanzas</h1>
+<div id="finanzasContainer" class="container" style="display:none">
+  <h1>Finanzas</h1>
 
-    <!-- Tabla de movimientos -->
-    <table class="tabla-finanzas">
-      <thead>
-        <tr>
-          <th>Fecha</th>
-          <th>Tipo</th>
-          <th>Cantidad</th>
-          <th>Nombre</th>
-          <th>Método de Pago</th>
-        </tr>
-      </thead>
-      <tbody id="finanzas-table-body"></tbody>
-    </table>
+  <!-- Selector de mes -->
+  <label>
+    Mes:
+    <input type="month" id="selectorMes" />
+  </label>
 
-    <!-- Resumen -->
-    <div class="resumen-finanzas">
-      <p>Ingresos: <span id="total-ingresos">0</span></p>
-      <p>Gastos: <span id="total-gastos">0</span></p>
-      <p>Saldo: <span id="saldo">0</span></p>
-    </div>
+  <!-- Tabla de movimientos -->
+  <table class="tabla-finanzas">
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Tipo</th>
+        <th>Cantidad</th>
+        <th>Nombre</th>
+        <th>Método de Pago</th>
+      </tr>
+    </thead>
+    <tbody id="finanzas-table-body"></tbody>
+  </table>
 
-    <!-- Formulario agregar movimiento -->
-    <form id="form-finanza" class="form">
-      <input type="text" id="grupo" placeholder="Grupo" required>
-      <select id="tipo">
-        <option value="Ingreso">Ingreso</option>
-        <option value="Gasto">Gasto</option>
-        <option value="Ahorro">Ahorro</option>
-        <option value="Deuda">Deuda</option>
-        <option value="Inversión">Inversión</option>
-      </select>
-      <input type="date" id="fecha" required>
-      <input type="number" id="cantidad" placeholder="Cantidad" required>
-      <input type="text" id="nombre" placeholder="Nombre" required>
-      <input type="text" id="metodoPago" placeholder="Método de Pago">
-      <button type="submit" class="btn">Agregar</button>
-      <button type="button" class="btn backBtn" id="btnVolverMenuFinanzas">Volver al Menú Principal</button>
-    </form>
+  <!-- Resumen -->
+  <div class="resumen-finanzas">
+    <p>Ingresos: <span id="total-ingresos">0</span></p>
+    <p>Gastos: <span id="total-gastos">0</span></p>
+    <p>Saldo: <span id="saldo">0</span></p>
   </div>
-  <!-- ================= FIN-FINANZAS ================= -->
+
+  <!-- Formulario agregar movimiento -->
+  <form id="form-finanza" class="form">
+    <input type="text" id="grupo" placeholder="Grupo" required>
+    <select id="tipo">
+      <option value="Ingreso">Ingreso</option>
+      <option value="Gasto">Gasto</option>
+      <option value="Ahorro">Ahorro</option>
+      <option value="Deuda">Deuda</option>
+      <option value="Inversión">Inversión</option>
+    </select>
+    <input type="date" id="fecha" required>
+    <input type="number" id="cantidad" placeholder="Cantidad" required>
+    <input type="text" id="nombre" placeholder="Nombre" required>
+    <input type="text" id="metodoPago" placeholder="Método de Pago">
+    <button type="submit" class="btn">Agregar</button>
+    <button type="button" class="btn backBtn" id="btnVolverMenuFinanzas">Volver al Menú Principal</button>
+  </form>
+</div>
+<!-- ================= FIN-FINANZAS ================= -->
+
 
   <!-- ================= SCRIPTS ================= -->
   <script src="agenda.js" defer></script>
