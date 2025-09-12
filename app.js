@@ -13,6 +13,7 @@ window.onload = () => {
   document.getElementById("loginContainer").style.display = "flex";
   document.getElementById("mainMenu").style.display = "none";
   document.getElementById("agendaContainer").style.display = "none";
+  document.getElementById("finanzasContainer").style.display = "none";
 
   // Inicializar cliente OAuth
   tokenClient = google.accounts.oauth2.initTokenClient({
