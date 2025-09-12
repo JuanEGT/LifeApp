@@ -165,58 +165,57 @@ const Agenda = (() => {
     });
   }
 
-function mostrarCalendario(values) {
-  const cont = document.getElementById("calendario");
-  cont.innerHTML = "<h3>Calendario mensual</h3>";
+  function mostrarCalendario(values) {
+    const cont = document.getElementById("calendario");
+    cont.innerHTML = "<h3>Calendario mensual</h3>";
 
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth();
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
 
-  const diasMes = new Date(year, month + 1, 0).getDate();
-  const rows = [];
-  for (let i = 1; i <= diasMes; i++) rows.push(i);
+    const diasMes = new Date(year, month + 1, 0).getDate();
+    const rows = [];
+    for (let i = 1; i <= diasMes; i++) rows.push(i);
 
-  const eventosPorDia = {};
-  if (values && values.length >= 2) {
-    const headers = values[0];
-    const dataRows = values.slice(1);
+    const eventosPorDia = {};
+    if (values && values.length >= 2) {
+      const headers = values[0];
+      const dataRows = values.slice(1);
 
-    dataRows.forEach(r => {
-    const obj = {};
-      headers.forEach((h, i) => obj[h] = r[i] || "");
+      dataRows.forEach(r => {
+        const obj = {};
+        headers.forEach((h, i) => obj[h] = r[i] || "");
 
-    const partes = obj.Fecha.split("-");
-    const fechaEvento = new Date(partes[0], partes[1]-1, partes[2]);
+        const partes = obj.Fecha.split("-");
+        const fechaEvento = new Date(partes[0], partes[1]-1, partes[2]);
 
-     if (fechaEvento.getFullYear() === year && fechaEvento.getMonth() === month) {
-        const diaEvento = fechaEvento.getDate();
-        eventosPorDia[diaEvento] = true;
+        if (fechaEvento.getFullYear() === year && fechaEvento.getMonth() === month) {
+          const diaEvento = fechaEvento.getDate();
+          eventosPorDia[diaEvento] = true;
+        }
+      });
     }
+
+    const grid = document.createElement("div");
+    grid.style.display = "grid";
+    grid.style.gridTemplateColumns = "repeat(7, 30px)";
+    grid.style.gap = "2px";
+
+    rows.forEach(d => {
+      const cell = document.createElement("div");
+      cell.style.width = "30px";
+      cell.style.height = "30px";
+      cell.style.display = "flex";
+      cell.style.alignItems = "center";
+      cell.style.justifyContent = "center";
+      cell.style.backgroundColor = eventosPorDia[d] ? "red" : "green";
+      cell.style.color = "#fff";
+      cell.innerText = d;
+      grid.appendChild(cell);
     });
+
+    cont.appendChild(grid);
   }
-
-  const grid = document.createElement("div");
-  grid.style.display = "grid";
-  grid.style.gridTemplateColumns = "repeat(7, 30px)";
-  grid.style.gap = "2px";
-
-  rows.forEach(d => {
-    const cell = document.createElement("div");
-    cell.style.width = "30px";
-    cell.style.height = "30px";
-    cell.style.display = "flex";
-    cell.style.alignItems = "center";
-    cell.style.justifyContent = "center";
-    cell.style.backgroundColor = eventosPorDia[d] ? "red" : "green";
-    cell.style.color = "#fff";
-    cell.innerText = d;
-    grid.appendChild(cell);
-  });
-
-  cont.appendChild(grid);
-}
-
 
   // ===================== UI de navegación =====================
   function mostrarAgenda() {
@@ -228,6 +227,19 @@ function mostrarCalendario(values) {
     document.getElementById("fechaSelector").style.display = "none";
     document.getElementById("agenda").innerHTML = "";
     document.getElementById("msg").innerText = "";
+
+    // Conectar botones principales de Agenda (solo una vez)
+    const btnAgregarEvento = document.getElementById("btnAgregarEvento");
+    if (btnAgregarEvento && !btnAgregarEvento.dataset.listenerAttached) {
+      btnAgregarEvento.addEventListener("click", mostrarAgregarEvento);
+      btnAgregarEvento.dataset.listenerAttached = "true";
+    }
+
+    const btnBuscarFecha = document.getElementById("btnBuscarFecha");
+    if (btnBuscarFecha && !btnBuscarFecha.dataset.listenerAttached) {
+      btnBuscarFecha.addEventListener("click", mostrarBuscarFecha);
+      btnBuscarFecha.dataset.listenerAttached = "true";
+    }
 
     cargarEventos().then(values => {
       mostrarRecordatorios(values);
@@ -241,6 +253,24 @@ function mostrarCalendario(values) {
     document.getElementById("fechaSelector").style.display = "none";
     document.getElementById("agenda").innerHTML = "";
     document.getElementById("msg").innerText = "";
+
+    const eventoForm = document.getElementById("eventoForm");
+    if (eventoForm && !eventoForm.dataset.listenerAttached) {
+      eventoForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (!token) return;
+
+        const form = e.target;
+        const id = Date.now();
+        const data = [id, form.Fecha.value, form.Hora.value, form.Evento.value, form.Notas.value];
+
+        await agregarEvento(data);
+        form.reset();
+        mostrarAgenda();
+      });
+
+      eventoForm.dataset.listenerAttached = "true";
+    }
 
     if (!document.getElementById("backToAgendaFromAdd")) {
       const backBtn = document.createElement("button");
@@ -258,6 +288,12 @@ function mostrarCalendario(values) {
     document.getElementById("fechaSelector").style.display = "flex";
     document.getElementById("agenda").innerHTML = "";
     document.getElementById("msg").innerText = "";
+
+    const buscarBtn = document.getElementById("buscarBtn");
+    if (buscarBtn && !buscarBtn.dataset.listenerAttached) {
+      buscarBtn.addEventListener("click", buscarPorFecha);
+      buscarBtn.dataset.listenerAttached = "true";
+    }
   }
 
   // ===================== Exportar funciones públicas =====================

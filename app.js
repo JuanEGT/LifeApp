@@ -9,20 +9,24 @@ let tokenClient = null;
 
 // ===== INICIALIZACIÓN =====
 window.onload = () => {
+  // Estado inicial
   document.getElementById("loginContainer").style.display = "flex";
   document.getElementById("mainMenu").style.display = "none";
   document.getElementById("agendaContainer").style.display = "none";
+  document.getElementById("finanzasContainer").style.display = "none";
 
+  // Inicializar cliente OAuth
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
     scope: SCOPES,
     callback: (resp) => {
       token = resp.access_token;
-      Agenda.setToken(token);
+      Agenda.setToken(token); // Pasamos token al módulo Agenda
       mostrarMenuPrincipal();
     }
   });
 
+  // Botón de login
   const loginBtn = document.getElementById("loginBtn");
   if (loginBtn) {
     loginBtn.addEventListener("click", () => {
@@ -34,51 +38,8 @@ window.onload = () => {
   const btnAgenda = document.getElementById("btnAgenda");
   if (btnAgenda) btnAgenda.addEventListener("click", () => Agenda.mostrarAgenda());
 
-  // Conectar botones dentro de Agenda
-  const btnAgregar = document.getElementById("btnAgregarEvento");
-  if (btnAgregar) btnAgregar.addEventListener("click", () => Agenda.mostrarAgregarEvento());
-  
-  const btnFinanzas = document.getElementById("btnFinanzas");
-  if (btnFinanzas) btnFinanzas.addEventListener("click", () => Finanzas.mostrarFinanzas());
-  
-  const btnBuscar = document.getElementById("btnBuscarFecha");
-  if (btnBuscar) btnBuscar.addEventListener("click", () => Agenda.mostrarBuscarFecha());
-
   const btnVolverMenu = document.getElementById("btnVolverMenu");
   if (btnVolverMenu) btnVolverMenu.addEventListener("click", () => mostrarMenuPrincipal());
-
-  const btnVolverAgenda = document.getElementById("btnVolverAgenda");
-  if (btnVolverAgenda) btnVolverAgenda.addEventListener("click", () => Agenda.mostrarAgenda());
-
-  // Botón de buscar por fecha dentro de selector
-  const btnBuscarPorFecha = document.getElementById("btnBuscarPorFecha");
-  if (btnBuscarPorFecha) btnBuscarPorFecha.addEventListener("click", (e) => {
-    e.preventDefault(); // evitar submit del formulario
-    Agenda.buscarPorFecha();
-  });
-
-  // Formulario de agregar evento
-  const eventoForm = document.getElementById("eventoForm");
-  if (eventoForm) {
-    eventoForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      if (!token) return;
-
-      const form = e.target;
-      const id = Date.now();
-      const data = [
-        id,
-        form.Fecha.value,
-        form.Hora.value,
-        form.Evento.value,
-        form.Notas.value
-      ];
-
-      await Agenda.agregarEvento(data);
-      form.reset();
-      Agenda.mostrarAgenda();
-    });
-  }
 };
 
 // ===== FUNCIONES =====
