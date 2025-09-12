@@ -1,21 +1,18 @@
 // ===================== Agenda.js =====================
 const Agenda = (() => {
-  // ===================== Configuración =====================
   const SPREADSHEET_ID = "1CMnA-3Ch5Ac1LLP8Hgph15IeeH7Dlvcj0IvX51mLzKU";
   const SHEET_NAME = "Agenda";
-
   let token = null;
 
-  function setToken(newToken) {
-    token = newToken;
-  }
+  function setToken(newToken) { token = newToken; }
 
-  // ===================== Funciones de Datos =====================
+  // ===== DATOS =====
   async function cargarEventos() {
     if (!token) return [];
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?majorDimension=ROWS`;
     try {
-      const resp = await fetch(url, { headers: { Authorization: "Bearer " + token } });
+      const resp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?majorDimension=ROWS`, {
+        headers: { Authorization: "Bearer " + token }
+      });
       const data = await resp.json();
       return data.values || [];
     } catch (err) {
@@ -27,9 +24,8 @@ const Agenda = (() => {
 
   async function agregarEvento(data) {
     if (!token) return;
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}:append?valueInputOption=USER_ENTERED`;
     try {
-      await fetch(url, {
+      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}:append?valueInputOption=USER_ENTERED`, {
         method: "POST",
         headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
         body: JSON.stringify({ values: [data] })
@@ -42,11 +38,10 @@ const Agenda = (() => {
 
   async function eliminarEvento(id, values) {
     if (!token) return;
-    const filaIndex = values.findIndex(row => row[0] == id);
+    const filaIndex = values.findIndex(r => r[0] == id);
     if (filaIndex < 1) return;
-    const fila = filaIndex + 1;
     try {
-      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}!A${fila}:E?valueInputOption=USER_ENTERED`, {
+      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}!A${filaIndex+1}:E?valueInputOption=USER_ENTERED`, {
         method: "PUT",
         headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
         body: JSON.stringify({ values: [["", "", "", "", ""]] })
@@ -57,61 +52,62 @@ const Agenda = (() => {
     }
   }
 
-  // ===================== Funciones de UI =====================
-  async function mostrarEventos(values) {
-    const div = document.getElementById("agenda");
-    div.innerHTML = "";
-    if (!values || values.length < 2) return;
+  // ===== UI =====
+  function mostrarAgenda() {
+    document.getElementById("mainMenu").style.display="none";
+    document.getElementById("agendaContainer").style.display="flex";
+    document.getElementById("menuButtons").style.display="flex";
+    document.getElementById("eventoForm").style.display="none";
+    document.getElementById("fechaSelector").style.display="none";
+    document.getElementById("agenda").innerHTML="";
+    document.getElementById("msg").innerText="";
 
-    const headers = values[0];
-    const rows = values.slice(1);
-
-    rows.forEach((r) => {
-      const obj = {};
-      headers.forEach((h, i) => obj[h] = r[i] || "");
-
-      const p = document.createElement("p");
-      p.innerHTML = `${obj.Fecha} ${obj.Hora} - ${obj.Evento} (${obj.Notas})`;
-
-      const delBtn = document.createElement("button");
-      delBtn.innerText = "Eliminar";
-      delBtn.className = "btn backBtn";
-      delBtn.onclick = async () => {
-        await eliminarEvento(obj.ID, values);
-        const allValues = await cargarEventos();
-        mostrarEventos(allValues);
-      };
-
-      p.appendChild(delBtn);
-      div.appendChild(p);
+    cargarEventos().then(values=>{
+      mostrarRecordatorios(values);
+      mostrarCalendario(values);
+      conectarFormAgregarEvento(); // conectar el submit del form
     });
+  }
+
+  function mostrarAgregarEvento() {
+    document.getElementById("menuButtons").style.display="none";
+    document.getElementById("eventoForm").style.display="flex";
+    document.getElementById("fechaSelector").style.display="none";
+    document.getElementById("agenda").innerHTML="";
+    document.getElementById("msg").innerText="";
+  }
+
+  function mostrarBuscarFecha() {
+    document.getElementById("menuButtons").style.display="none";
+    document.getElementById("eventoForm").style.display="none";
+    document.getElementById("fechaSelector").style.display="flex";
+    document.getElementById("agenda").innerHTML="";
+    document.getElementById("msg").innerText="";
   }
 
   async function buscarPorFecha() {
     const fecha = document.getElementById("fechaInput").value;
-    if (!fecha) return;
+    if(!fecha) return;
 
     const values = await cargarEventos();
-    if (!values || values.length < 2) return;
+    if(!values || values.length < 2) return;
 
     const headers = values[0];
-    const rows = values.slice(1);
-    const filtrados = rows.filter(r => r[1] === fecha);
+    const rows = values.slice(1).filter(r => r[1]===fecha);
 
     const div = document.getElementById("agenda");
     div.innerHTML = "";
 
-    filtrados.forEach((r) => {
+    rows.forEach(r=>{
       const obj = {};
-      headers.forEach((h, i) => obj[h] = r[i] || "");
-
+      headers.forEach((h,i)=> obj[h]=r[i]||"");
       const p = document.createElement("p");
-      p.innerHTML = `${obj.Fecha} ${obj.Hora} - ${obj.Evento} (${obj.Notas})`;
+      p.innerHTML=`${obj.Fecha} ${obj.Hora} - ${obj.Evento} (${obj.Notas})`;
 
       const delBtn = document.createElement("button");
-      delBtn.innerText = "Eliminar";
-      delBtn.className = "btn backBtn";
-      delBtn.onclick = async () => {
+      delBtn.innerText="Eliminar";
+      delBtn.className="btn backBtn";
+      delBtn.onclick = async ()=>{
         await eliminarEvento(obj.ID, values);
         buscarPorFecha();
       };
@@ -120,38 +116,31 @@ const Agenda = (() => {
       div.appendChild(p);
     });
 
-    // Botón volver a Agenda
-    if (!document.getElementById("backToAgendaFromSearch")) {
+    if(!document.getElementById("backToAgendaFromSearch")){
       const backBtn = document.createElement("button");
-      backBtn.id = "backToAgendaFromSearch";
-      backBtn.innerText = "Volver a Agenda";
-      backBtn.className = "btn backBtn";
-      backBtn.onclick = mostrarAgenda;
+      backBtn.id="backToAgendaFromSearch";
+      backBtn.className="btn backBtn";
+      backBtn.innerText="Volver a Agenda";
+      backBtn.onclick=mostrarAgenda;
       div.appendChild(backBtn);
     }
   }
 
   function mostrarRecordatorios(values) {
     const cont = document.getElementById("recordatorios");
-    cont.innerHTML = "<h3>Próximos eventos</h3>";
-    if (!values || values.length < 2) return;
-
+    cont.innerHTML="<h3>Próximos eventos</h3>";
+    if(!values || values.length<2) return;
     const headers = values[0];
-    const rows = values.slice(1);
-
-    const hoy = new Date();
-    const sieteDias = new Date();
-    sieteDias.setDate(hoy.getDate() + 7);
-
-    rows.forEach(r => {
+    values.slice(1).forEach(r=>{
       const obj = {};
-      headers.forEach((h, i) => obj[h] = r[i] || "");
-
+      headers.forEach((h,i)=>obj[h]=r[i]||"");
       const fechaEvento = new Date(obj.Fecha);
-      if (fechaEvento >= hoy && fechaEvento <= sieteDias) {
+      const hoy = new Date();
+      const sieteDias = new Date(); sieteDias.setDate(hoy.getDate()+7);
+      if(fechaEvento>=hoy && fechaEvento<=sieteDias){
         const divEvt = document.createElement("div");
-        divEvt.className = "recordatorioItem";
-        divEvt.innerHTML = `
+        divEvt.className="recordatorioItem";
+        divEvt.innerHTML=`
           <strong>Fecha:</strong> ${obj.Fecha}<br>
           <strong>Hora:</strong> ${obj.Hora || "No definida"}<br>
           <strong>Evento:</strong> ${obj.Evento}<br>
@@ -162,102 +151,94 @@ const Agenda = (() => {
     });
   }
 
-  function mostrarCalendario(values) {
-    const cont = document.getElementById("calendario");
-    cont.innerHTML = "<h3>Calendario mensual</h3>";
+function mostrarCalendario(values) {
+  const cont = document.getElementById("calendario");
+  cont.innerHTML = "<h3>Calendario mensual</h3>";
 
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth();
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
 
-    const diasMes = new Date(year, month + 1, 0).getDate();
-    const rows = [];
-    for (let i = 1; i <= diasMes; i++) rows.push(i);
+  const diasMes = new Date(year, month + 1, 0).getDate();
+  const firstDayOfWeek = new Date(year, month, 1).getDay(); // 0=Domingo
 
-    const eventosPorDia = {};
-    if (values && values.length >= 2) {
-      const headers = values[0];
-      const dataRows = values.slice(1);
-      dataRows.forEach(r => {
-        const obj = {};
-        headers.forEach((h, i) => obj[h] = r[i] || "");
+  // Mapeo nombres de días
+  const diasSemana = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
-        const partes = obj.Fecha.split("-");
-        const fechaEvento = new Date(partes[0], partes[1] - 1, partes[2]);
-        if (fechaEvento.getFullYear() === year && fechaEvento.getMonth() === month) {
-          eventosPorDia[fechaEvento.getDate()] = true;
-        }
-      });
-    }
+  // Crear grid
+  const grid = document.createElement("div");
+  grid.style.display = "grid";
+  grid.style.gridTemplateColumns = "repeat(7, 40px)";
+  grid.style.gap = "2px";
+  grid.style.textAlign = "center";
 
-    const grid = document.createElement("div");
-    grid.className = "calendario-grid";
+  // Agregar nombres de días
+  diasSemana.forEach(dia => {
+    const cell = document.createElement("div");
+    cell.innerText = dia;
+    cell.style.fontWeight = "bold";
+    grid.appendChild(cell);
+  });
 
-    rows.forEach(d => {
-      const cell = document.createElement("div");
-      cell.className = "dia " + (eventosPorDia[d] ? "rojo" : "verde");
-      cell.innerText = d;
-      grid.appendChild(cell);
-    });
-
-    cont.appendChild(grid);
-  }
-
-  // ===================== UI de navegación =====================
-  function mostrarAgenda() {
-    document.getElementById("mainMenu").style.display = "none";
-    document.getElementById("agendaContainer").style.display = "flex";
-
-    document.getElementById("menuButtons").style.display = "flex";
-    document.getElementById("eventoForm").style.display = "none";
-    document.getElementById("fechaSelector").style.display = "none";
-    document.getElementById("agenda").innerHTML = "";
-    document.getElementById("msg").innerText = "";
-
-    cargarEventos().then(values => {
-      mostrarRecordatorios(values);
-      mostrarCalendario(values);
+  // Mapear días con eventos
+  const eventosPorDia = {};
+  if (values && values.length >= 2) {
+    const headers = values[0];
+    values.slice(1).forEach(r => {
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = r[i] || "");
+      const partes = obj.Fecha.split("-");
+      const fechaEvento = new Date(partes[0], partes[1] - 1, partes[2]);
+      if (fechaEvento.getFullYear() === year && fechaEvento.getMonth() === month) {
+        eventosPorDia[fechaEvento.getDate()] = true;
+      }
     });
   }
 
-  function mostrarAgregarEvento() {
-    document.getElementById("menuButtons").style.display = "none";
-    document.getElementById("eventoForm").style.display = "flex";
-    document.getElementById("fechaSelector").style.display = "none";
-    document.getElementById("agenda").innerHTML = "";
-    document.getElementById("msg").innerText = "";
+  // Celdas vacías para el offset inicial
+  for (let i = 0; i < firstDayOfWeek; i++) {
+    const emptyCell = document.createElement("div");
+    grid.appendChild(emptyCell);
+  }
 
-    // Botón Volver a Agenda
-    if (!document.getElementById("backToAgendaFromAdd")) {
-      const backBtn = document.createElement("button");
-      backBtn.id = "backToAgendaFromAdd";
-      backBtn.innerText = "Volver a Agenda";
-      backBtn.className = "btn backBtn";
-      backBtn.onclick = mostrarAgenda;
-      document.getElementById("eventoForm").appendChild(backBtn);
+  // Agregar días del mes
+  for (let d = 1; d <= diasMes; d++) {
+    const cell = document.createElement("div");
+    cell.innerText = d;
+    cell.className = "dia " + (eventosPorDia[d] ? "rojo" : "verde");
+    grid.appendChild(cell);
+  }
+
+  cont.appendChild(grid);
+}
+
+  // ===== Conectar formulario interno =====
+  function conectarFormAgregarEvento(){
+    const form = document.getElementById("eventoForm");
+    if(form){
+      form.onsubmit = async (e)=>{
+        e.preventDefault();
+        if(!token) return;
+        const data = [
+          Date.now(),
+          form.Fecha.value,
+          form.Hora.value,
+          form.Evento.value,
+          form.Notas.value
+        ];
+        await agregarEvento(data);
+        form.reset();
+        mostrarAgenda();
+      };
     }
   }
 
-  function mostrarBuscarFecha() {
-    document.getElementById("menuButtons").style.display = "none";
-    document.getElementById("eventoForm").style.display = "none";
-    document.getElementById("fechaSelector").style.display = "flex";
-    document.getElementById("agenda").innerHTML = "";
-    document.getElementById("msg").innerText = "";
-  }
-
-  // ===================== Exportar funciones públicas =====================
+  // ===== Exportar funciones públicas =====
   return {
     setToken,
-    cargarEventos,
-    agregarEvento,
-    eliminarEvento,
-    mostrarEventos,
-    buscarPorFecha,
-    mostrarRecordatorios,
-    mostrarCalendario,
     mostrarAgenda,
     mostrarAgregarEvento,
-    mostrarBuscarFecha
+    mostrarBuscarFecha,
+    buscarPorFecha
   };
 })();
