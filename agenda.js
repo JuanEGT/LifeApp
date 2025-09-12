@@ -87,11 +87,11 @@ const Agenda = (() => {
       mostrarRecordatorios(values);
       mostrarCalendario(values);
 
-    // Conectar botones del submenú
-    document.getElementById("btnAgregarEvento").onclick = mostrarAgregarEvento;
-    document.getElementById("btnBuscarFecha").onclick = mostrarBuscarFecha;
-    document.getElementById("btnVolverMenu").onclick = mostrarMenuPrincipal;
-    document.getElementById("btnBuscarPorFecha").onclick = buscarPorFecha;
+      // Conectar botones del submenú
+      document.getElementById("btnAgregarEvento").onclick = mostrarAgregarEvento;
+      document.getElementById("btnBuscarFecha").onclick = mostrarBuscarFecha;
+      document.getElementById("btnVolverMenu").onclick = mostrarMenuPrincipal;
+      document.getElementById("btnBuscarPorFecha").onclick = buscarPorFecha;
     });
   }
 
@@ -158,47 +158,42 @@ const Agenda = (() => {
 }
 
 function mostrarAgregarEvento() {
-  // ===== Ocultar todo lo demás =====
-  document.getElementById("menuButtons").style.display = "none";
-  document.getElementById("fechaSelector").style.display = "none";
-  document.getElementById("agenda").innerHTML = "";
-  document.getElementById("msg").innerText = "";
+    // ocultar todo
+    document.getElementById("menuButtons").style.display = "none";
+    document.getElementById("fechaSelector").style.display = "none";
+    document.getElementById("agenda").innerHTML = "";
+    document.getElementById("msg").innerText = "";
 
-  // ===== Mostrar formulario =====
-  const form = document.getElementById("eventoForm");
-  form.style.display = "flex";
+    const form = document.getElementById("eventoForm");
+    form.style.display = "flex";
 
-  // ===== Conectar submit del form =====
-  form.onsubmit = async (e) => {
-    e.preventDefault();
-    const data = [
-      Date.now(),       // ID único
-      form.Fecha.value,
-      form.Hora.value,
-      form.Evento.value,
-      form.Notas.value
-    ];
-    const exito = await agregarEvento(data);
-    if (exito) {
-      form.reset();
-      mostrarAgenda();
-    }
-  };
-
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const data = [
+        Date.now(),
+        form.Fecha.value,
+        form.Hora.value,
+        form.Evento.value,
+        form.Notas.value
+      ];
+      if (await agregarEvento(data)) {
+        form.reset();
+        mostrarAgenda();
+      }
+    };
+  
   // ===== Botón dinámico "Volver a Agenda" =====
-  let backBtn = document.getElementById("backToAgendaFromAdd");
-  if (!backBtn) {
-    backBtn = document.createElement("button");
-    backBtn.id = "backToAgendaFromAdd";
-    backBtn.className = "btn backBtn";
-    backBtn.innerText = "Volver a Agenda";
-    backBtn.style.marginTop = "10px";
-    backBtn.onclick = mostrarAgenda;
-    form.appendChild(backBtn);
-  } else {
-    backBtn.style.display = "block"; // si ya existe, solo mostrarlo
+    let backBtn = document.getElementById("backToAgendaFromAdd");
+    if (!backBtn) {
+      backBtn = document.createElement("button");
+      backBtn.id = "backToAgendaFromAdd";
+      backBtn.className = "btn backBtn";
+      backBtn.innerText = "Volver a Agenda";
+      backBtn.onclick = mostrarAgenda;
+      form.appendChild(backBtn);
+    } else backBtn.style.display = "block";
   }
-}
+
     // Botón volver a agenda
     let backBtn = document.getElementById("backToAgendaFromAdd");
     if (!backBtn) {
@@ -218,17 +213,12 @@ function mostrarAgregarEvento() {
   function mostrarBuscarFecha() {
     document.getElementById("menuButtons").style.display = "none";
     document.getElementById("eventoForm").style.display = "none";
-    const selector = document.getElementById("fechaSelector");
-    selector.style.display = "flex";
     document.getElementById("agenda").innerHTML = "";
     document.getElementById("msg").innerText = "";
 
-    let backBtn = document.getElementById("btnVolverAgenda");
-    if (backBtn) {
-      backBtn.style.display = "block";
-      backBtn.onclick = mostrarAgenda;
-    }
+    document.getElementById("fechaSelector").style.display = "flex";
   }
+
 
   async function buscarPorFecha() {
     btnBuscarPorFecha.addEventListener("click", buscarPorFecha);
