@@ -9,7 +9,7 @@ let tokenClient = null;
 
 // ===== INICIALIZACIÓN =====
 window.onload = () => {
-  // Estado inicial
+  // Mostrar login y ocultar demás vistas
   document.getElementById("loginContainer").style.display = "flex";
   document.getElementById("mainMenu").style.display = "none";
   document.getElementById("agendaContainer").style.display = "none";
@@ -21,12 +21,12 @@ window.onload = () => {
     scope: SCOPES,
     callback: (resp) => {
       token = resp.access_token;
-      Agenda.setToken(token); // Pasamos token al módulo Agenda
+      Agenda.setToken(token);
       mostrarMenuPrincipal();
     }
   });
 
-  // Botón de login
+  // ===== BOTÓN LOGIN =====
   const loginBtn = document.getElementById("loginBtn");
   if (loginBtn) {
     loginBtn.addEventListener("click", () => {
@@ -34,12 +34,23 @@ window.onload = () => {
     });
   }
 
-  // Conectar botones del menú principal
+  // ===== BOTONES DEL MENÚ PRINCIPAL =====
   const btnAgenda = document.getElementById("btnAgenda");
   if (btnAgenda) btnAgenda.addEventListener("click", () => Agenda.mostrarAgenda());
 
+  // ===== BOTONES DE SUBMENÚ =====
+  const btnAgregar = document.getElementById("btnAgregarEvento");
+  if (btnAgregar) btnAgregar.addEventListener("click", () => Agenda.mostrarAgregarEvento());
+
+  const btnBuscar = document.getElementById("btnBuscarFecha");
+  if (btnBuscar) btnBuscar.addEventListener("click", () => Agenda.mostrarBuscarFecha());
+
   const btnVolverMenu = document.getElementById("btnVolverMenu");
-  if (btnVolverMenu) btnVolverMenu.addEventListener("click", () => mostrarMenuPrincipal());
+  if (btnVolverMenu) btnVolverMenu.addEventListener("click", mostrarMenuPrincipal());
+
+  // Botón volver desde Finanzas (aunque no lo usamos ahora)
+  const btnVolverMenuFinanzas = document.getElementById("btnVolverMenuFinanzas");
+  if (btnVolverMenuFinanzas) btnVolverMenuFinanzas.addEventListener("click", mostrarMenuPrincipal());
 };
 
 // ===== FUNCIONES =====

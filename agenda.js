@@ -122,6 +122,7 @@ const Agenda = (() => {
       div.appendChild(p);
     });
 
+    // Botón volver a agenda
     if (!document.getElementById("backToAgendaFromSearch")) {
       const backBtn = document.createElement("button");
       backBtn.id = "backToAgendaFromSearch";
@@ -152,14 +153,12 @@ const Agenda = (() => {
       if (fechaEvento >= hoy && fechaEvento <= sieteDias) {
         const divEvt = document.createElement("div");
         divEvt.className = "recordatorioItem";
-
         divEvt.innerHTML = `
           <strong>Fecha:</strong> ${obj.Fecha}<br>
           <strong>Hora:</strong> ${obj.Hora || "No definida"}<br>
           <strong>Evento:</strong> ${obj.Evento}<br>
           <strong>Notas:</strong> ${obj.Notas || "Sin notas"}
         `;
-
         cont.appendChild(divEvt);
       }
     });
@@ -174,8 +173,6 @@ const Agenda = (() => {
     const month = today.getMonth();
 
     const diasMes = new Date(year, month + 1, 0).getDate();
-    const rows = [];
-    for (let i = 1; i <= diasMes; i++) rows.push(i);
 
     const eventosPorDia = {};
     if (values && values.length >= 2) {
@@ -190,31 +187,19 @@ const Agenda = (() => {
         const fechaEvento = new Date(partes[0], partes[1]-1, partes[2]);
 
         if (fechaEvento.getFullYear() === year && fechaEvento.getMonth() === month) {
-          const diaEvento = fechaEvento.getDate();
-          eventosPorDia[diaEvento] = true;
+          eventosPorDia[fechaEvento.getDate()] = true;
         }
       });
     }
 
-    const grid = document.createElement("div");
-    grid.style.display = "grid";
-    grid.style.gridTemplateColumns = "repeat(7, 30px)";
-    grid.style.gap = "2px";
-
-    rows.forEach(d => {
-      const cell = document.createElement("div");
-      cell.style.width = "30px";
-      cell.style.height = "30px";
-      cell.style.display = "flex";
-      cell.style.alignItems = "center";
-      cell.style.justifyContent = "center";
-      cell.style.backgroundColor = eventosPorDia[d] ? "red" : "green";
-      cell.style.color = "#fff";
-      cell.innerText = d;
-      grid.appendChild(cell);
-    });
-
-    cont.appendChild(grid);
+    // Crear calendario
+    for (let d = 1; d <= diasMes; d++) {
+      const diaDiv = document.createElement("div");
+      diaDiv.classList.add("dia");
+      diaDiv.classList.add(eventosPorDia[d] ? "rojo" : "verde");
+      diaDiv.innerText = d;
+      cont.appendChild(diaDiv);
+    }
   }
 
   // ===================== UI de navegación =====================
@@ -223,22 +208,26 @@ const Agenda = (() => {
     document.getElementById("agendaContainer").style.display = "flex";
 
     document.getElementById("menuButtons").style.display = "flex";
-    document.getElementById("eventoForm").style.display = "none";
+    const eventoForm = document.getElementById("eventoForm");
+    eventoForm.style.display = "none";
+    eventoForm.reset();                       // resetear inputs required
+    eventoForm.setAttribute("novalidate", "true"); // evitar errores required
     document.getElementById("fechaSelector").style.display = "none";
+
     document.getElementById("agenda").innerHTML = "";
     document.getElementById("msg").innerText = "";
 
-    // Conectar botones principales de Agenda (solo una vez)
-    const btnAgregarEvento = document.getElementById("btnAgregarEvento");
-    if (btnAgregarEvento && !btnAgregarEvento.dataset.listenerAttached) {
-      btnAgregarEvento.addEventListener("click", mostrarAgregarEvento);
-      btnAgregarEvento.dataset.listenerAttached = "true";
+    // Conectar botones solo una vez
+    const btnVolverAgenda = document.getElementById("btnVolverAgenda");
+    if (btnVolverAgenda && !btnVolverAgenda.dataset.listenerAttached) {
+      btnVolverAgenda.addEventListener("click", mostrarAgenda);
+      btnVolverAgenda.dataset.listenerAttached = "true";
     }
 
-    const btnBuscarFecha = document.getElementById("btnBuscarFecha");
-    if (btnBuscarFecha && !btnBuscarFecha.dataset.listenerAttached) {
-      btnBuscarFecha.addEventListener("click", mostrarBuscarFecha);
-      btnBuscarFecha.dataset.listenerAttached = "true";
+    const btnBuscarPorFecha = document.getElementById("btnBuscarPorFecha");
+    if (btnBuscarPorFecha && !btnBuscarPorFecha.dataset.listenerAttached) {
+      btnBuscarPorFecha.addEventListener("click", buscarPorFecha);
+      btnBuscarPorFecha.dataset.listenerAttached = "true";
     }
 
     cargarEventos().then(values => {
@@ -249,13 +238,15 @@ const Agenda = (() => {
 
   function mostrarAgregarEvento() {
     document.getElementById("menuButtons").style.display = "none";
-    document.getElementById("eventoForm").style.display = "flex";
+    const eventoForm = document.getElementById("eventoForm");
+    eventoForm.style.display = "flex";
+    eventoForm.removeAttribute("novalidate"); // volver a validar
     document.getElementById("fechaSelector").style.display = "none";
     document.getElementById("agenda").innerHTML = "";
     document.getElementById("msg").innerText = "";
 
-    const eventoForm = document.getElementById("eventoForm");
-    if (eventoForm && !eventoForm.dataset.listenerAttached) {
+    // Listener submit solo una vez
+    if (!eventoForm.dataset.listenerAttached) {
       eventoForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         if (!token) return;
@@ -268,17 +259,7 @@ const Agenda = (() => {
         form.reset();
         mostrarAgenda();
       });
-
       eventoForm.dataset.listenerAttached = "true";
-    }
-
-    if (!document.getElementById("backToAgendaFromAdd")) {
-      const backBtn = document.createElement("button");
-      backBtn.id = "backToAgendaFromAdd";
-      backBtn.innerText = "Volver a Agenda";
-      backBtn.className = "btn backBtn";
-      backBtn.onclick = mostrarAgenda;
-      document.getElementById("eventoForm").appendChild(backBtn);
     }
   }
 
@@ -289,10 +270,16 @@ const Agenda = (() => {
     document.getElementById("agenda").innerHTML = "";
     document.getElementById("msg").innerText = "";
 
-    const buscarBtn = document.getElementById("buscarBtn");
+    const buscarBtn = document.getElementById("btnBuscarPorFecha");
     if (buscarBtn && !buscarBtn.dataset.listenerAttached) {
       buscarBtn.addEventListener("click", buscarPorFecha);
       buscarBtn.dataset.listenerAttached = "true";
+    }
+
+    const btnVolverAgenda = document.getElementById("btnVolverAgenda");
+    if (btnVolverAgenda && !btnVolverAgenda.dataset.listenerAttached) {
+      btnVolverAgenda.addEventListener("click", mostrarAgenda);
+      btnVolverAgenda.dataset.listenerAttached = "true";
     }
   }
 
