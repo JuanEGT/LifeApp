@@ -5,63 +5,74 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LifeApp</title>
   <link rel="stylesheet" href="style.css">
+  <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
   <!-- ================= LOGIN ================= -->
-  <section id="loginContainer" class="container">
+  <div id="loginContainer" class="container">
     <h1>Bienvenido a LifeApp</h1>
     <button id="loginBtn" class="btn">Login con Google</button>
     <p id="msg"></p>
-  </section>
+  </div>
 
   <!-- ================= MENÚ PRINCIPAL ================= -->
-  <section id="mainMenu" class="container">
+  <div id="mainMenu" class="container">
     <h1>Menú Principal</h1>
-    <div class="menuButtons">
-      <button class="btn" id="btnAgenda">Agenda</button>
-      <button class="btn" id="btnFinanzas">Finanzas</button> <!-- Futuro módulo -->
-      <!-- Otros botones de futuras funcionalidades -->
-    </div>
-  </section>
+    <button class="btn" id="btnAgenda">Agenda</button>
+    <!-- Más funciones futuras -->
+  </div>
 
-  <!-- ================= MÓDULO AGENDA ================= -->
-  <section id="agendaContainer" class="moduleContainer">
+  <!-- ================= AGENDA ================= -->
+  <div id="agendaContainer" class="container">
     <h1>Agenda</h1>
-
     <!-- Sub-menú dentro de agenda -->
-    <div id="agendaMenu" class="subMenu">
+    <div id="menuButtons" class="subMenu">
       <button class="btn" id="btnAgregarEvento">Agregar Evento</button>
       <button class="btn" id="btnBuscarFecha">Buscar por Fecha</button>
-      <button class="btn backBtn" id="btnVolverMenuAgenda">Volver al Menú Principal</button>
+      <button class="btn backBtn" id="btnVolverMenu">Volver al Menú Principal</button>
     </div>
 
     <!-- Formulario para agregar evento -->
     <form id="eventoForm" class="form">
-      <label>Fecha: <input type="date" name="Fecha" required></label>
-      <label>Hora: <input type="time" name="Hora" required></label>
-      <label>Evento: <input type="text" name="Evento" required></label>
-      <label>Notas: <input type="text" name="Notas"></label>
+      <label>
+        Fecha:
+        <input type="date" name="Fecha" required>
+      </label>
+      <label>
+        Hora:
+        <input type="time" name="Hora" required>
+      </label>
+      <label>
+        Evento:
+        <input type="text" name="Evento" required>
+      </label>
+      <label>
+        Notas:
+        <input type="text" name="Notas">
+      </label>
       <button type="submit" class="btn">Guardar Evento</button>
     </form>
 
     <!-- Selector de fecha para buscar eventos -->
     <div id="fechaSelector" class="form">
-      <label>Selecciona fecha: <input type="date" id="fechaInput"></label>
+      <label>
+        Selecciona fecha:
+        <input type="date" id="fechaInput">
+      </label>
       <button class="btn" id="btnBuscarPorFecha">Buscar</button>
     </div>
 
-    <!-- Contenedor de eventos -->
+    <!-- Contenedor donde se muestran los eventos -->
     <div id="agenda" class="agenda"></div>
 
-    <!-- Barra lateral: recordatorios + calendario -->
-    <aside id="barraYCalendario" class="sidebarContainer">
+    <!-- Barra de recordatorios y calendario -->
+    <div id="barraYCalendario" class="sidebarContainer">
       <div id="recordatorios" class="recordatorios"></div>
       <div id="calendario" class="calendario"></div>
-    </aside>
-  </section>
-
+    </div>
+  </div>
 
   <!-- ================= SCRIPTS ================= -->
   <script src="agenda.js" defer></script>
