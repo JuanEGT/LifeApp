@@ -36,6 +36,9 @@ window.onload = () => {
   // ===== BOTONES DEL MENÚ PRINCIPAL =====
   const btnAgenda = document.getElementById("btnAgenda");
   if (btnAgenda) btnAgenda.addEventListener("click", () => Agenda.mostrarAgenda());
+
+  const btnFinanzas = document.getElementById("btnFinanzas");
+  if (btnFinanzas) btnFinanzas.addEventListener("click", () => Finanzas.mostrarFinanzas());
 }; // <-- cerrar window.onload correctamente
 
 // ===== FUNCIONES =====
@@ -43,4 +46,5 @@ function mostrarMenuPrincipal() {
   document.getElementById("loginContainer").style.display = "none";
   document.getElementById("agendaContainer").style.display = "none";
   document.getElementById("mainMenu").style.display = "flex";
+  document.getElementById("finanzasContainer").style.display = "none";
 }

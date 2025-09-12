@@ -1,0 +1,123 @@
+/* finanzas.css */
+
+/* Contenedor principal */
+#finanzasContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #121212; /* dark background */
+  color: #e0e0e0; /* texto claro */
+  min-height: 80vh;
+}
+
+/* Títulos */
+#finanzasContainer h1 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  color: #ffffff;
+}
+
+/* Tabla de movimientos */
+.tabla-finanzas {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+.tabla-finanzas th, .tabla-finanzas td {
+  border: 1px solid #333;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+.tabla-finanzas th {
+  background-color: #1e1e1e;
+  color: #ffffff;
+}
+
+.tabla-finanzas tr:nth-child(even) {
+  background-color: #1a1a1a;
+}
+
+.text-green-400 {
+  color: #4caf50;
+}
+
+.text-red-400 {
+  color: #f44336;
+}
+
+.text-gray-300 {
+  color: #b0b0b0;
+}
+
+/* Resumen */
+.resumen-finanzas {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1rem;
+}
+
+.resumen-finanzas p {
+  font-weight: bold;
+}
+
+/* Formulario */
+#form-finanza {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  background-color: #1e1e1e;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+#form-finanza input,
+#form-finanza select,
+#form-finanza button {
+  padding: 0.5rem;
+  border: none;
+  border-radius: 5px;
+  font-size: 0.9rem;
+}
+
+#form-finanza input,
+#form-finanza select {
+  flex: 1 1 150px;
+  background-color: #2a2a2a;
+  color: #e0e0e0;
+}
+
+#form-finanza button {
+  flex: 1 1 120px;
+  background-color: #3a3a3a;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+#form-finanza button:hover {
+  background-color: #505050;
+}
+
+/* Botón volver al menú */
+#btnVolverMenuFinanzas {
+  background-color: #f44336;
+}
+
+#btnVolverMenuFinanzas:hover {
+  background-color: #d32f2f;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .resumen-finanzas {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  #form-finanza {
+    flex-direction: column;
+  }
+}
