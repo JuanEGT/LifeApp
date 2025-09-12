@@ -36,7 +36,7 @@ window.onload = () => {
   // ===== BOTONES DEL MENÚ PRINCIPAL =====
   const btnAgenda = document.getElementById("btnAgenda");
   if (btnAgenda) btnAgenda.addEventListener("click", () => Agenda.mostrarAgenda());
-
+}; // <-- cerrar window.onload correctamente
 
 // ===== FUNCIONES =====
 function mostrarMenuPrincipal() {
