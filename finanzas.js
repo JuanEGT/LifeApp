@@ -89,9 +89,10 @@ function renderTablaMovimientos() {
       <td>${mov.Tipo}</td>
       <td>${mov.Cantidad}</td>
       <td>${mov.Nombre}</td>
-      <td>${mov.MetododePago}</td>
+      <td>${mov.MetodoPago}</td>
     `;
-    tr.classList.add(color);
+      tr.style.color = "white"; // temporalmente para asegurarte que se vea
+    console.log("Renderizando fila:", mov);
     tableBody.appendChild(tr);
   });
   console.log("Finanzas normalizadas:", finanzasData[0]);
