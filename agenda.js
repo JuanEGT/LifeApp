@@ -207,8 +207,7 @@ function mostrarAgregarEvento() {
       form.appendChild(backBtn);
     } else {
       backBtn.style.display = "block";
-    }
-  }
+    };
 
   function mostrarBuscarFecha() {
     document.getElementById("menuButtons").style.display = "none";
