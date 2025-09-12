@@ -22,7 +22,7 @@ window.onload = () => {
     callback: (resp) => {
       token = resp.access_token;
       Agenda.setToken(token);  // pasar token a agenda.js
-      Finanzas.setToken(token); // pasar token a Finanzas
+      Finanzas.setToken(token); // pasar token a finanzas.js
       mostrarMenuPrincipal();
     }
   });
@@ -40,7 +40,7 @@ window.onload = () => {
   if (btnAgenda) btnAgenda.addEventListener("click", () => Agenda.mostrarAgenda());
 
   const btnFinanzas = document.getElementById("btnFinanzas");
-  if (btnFinanzas) btnFinanzas.addEventListener("click", () => Finanzas.mostrarFinanzas());
+  if (btnFinanzas) btnFinanzas.addEventListener("click", () => Ainanzas.mostrarFinanzas());
 }; // <-- cerrar window.onload correctamente
 
 // ===== FUNCIONES =====
