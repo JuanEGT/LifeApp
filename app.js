@@ -22,6 +22,7 @@ window.onload = () => {
     callback: (resp) => {
       token = resp.access_token;
       Agenda.setToken(token);  // pasar token a agenda.js
+      Finanzas.setToken(token); // pasar token a Finanzas
       mostrarMenuPrincipal();
     }
   });
