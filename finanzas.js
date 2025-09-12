@@ -1,6 +1,6 @@
 // finanzas.js
 
-const SPREADSHEET_ID = "TU_SPREADSHEET_ID"; // reemplaza con tu ID real
+const SPREADSHEET_ID = "1CMnA-3Ch5Ac1LLP8Hgph15IeeH7Dlvcj0IvX51mLzKU"; // reemplaza con tu ID real
 const SHEET_NAME = "Finanzas";
 let finanzasData = []; // todos los movimientos cargados
 
