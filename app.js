@@ -46,11 +46,14 @@ window.onload = () => {
   if (btnBuscar) btnBuscar.addEventListener("click", () => Agenda.mostrarBuscarFecha());
 
   const btnVolverMenu = document.getElementById("btnVolverMenu");
-  if (btnVolverMenu) btnVolverMenu.addEventListener("click", mostrarMenuPrincipal());
+  if (btnVolverMenu) btnVolverMenu.addEventListener("click", mostrarMenuPrincipal);
 
-  // Botón volver desde Finanzas (aunque no lo usamos ahora)
   const btnVolverMenuFinanzas = document.getElementById("btnVolverMenuFinanzas");
-  if (btnVolverMenuFinanzas) btnVolverMenuFinanzas.addEventListener("click", mostrarMenuPrincipal());
+  if (btnVolverMenuFinanzas) btnVolverMenuFinanzas.addEventListener("click", mostrarMenuPrincipal);
+
+  // ===== BOTÓN DE VOLVER A AGENDA DESDE BÚSQUEDA =====
+  const btnVolverAgenda = document.getElementById("btnVolverAgenda");
+  if (btnVolverAgenda) btnVolverAgenda.addEventListener("click", () => Agenda.mostrarAgenda());
 };
 
 // ===== FUNCIONES =====
