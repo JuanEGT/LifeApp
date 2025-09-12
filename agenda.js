@@ -158,56 +158,46 @@ const Agenda = (() => {
 }
 
 function mostrarAgregarEvento() {
-    // ocultar todo
-    document.getElementById("menuButtons").style.display = "none";
-    document.getElementById("fechaSelector").style.display = "none";
-    document.getElementById("agenda").innerHTML = "";
-    document.getElementById("msg").innerText = "";
+  // ocultar todo
+  document.getElementById("menuButtons").style.display = "none";
+  document.getElementById("fechaSelector").style.display = "none";
+  document.getElementById("agenda").innerHTML = "";
+  document.getElementById("msg").innerText = "";
 
-    const form = document.getElementById("eventoForm");
-    form.style.display = "flex";
+  const form = document.getElementById("eventoForm");
+  form.style.display = "flex";
 
-    form.onsubmit = async (e) => {
-      e.preventDefault();
-      const data = [
-        Date.now(),
-        form.Fecha.value,
-        form.Hora.value,
-        form.Evento.value,
-        form.Notas.value
-      ];
-      if (await agregarEvento(data)) {
-        form.reset();
-        mostrarAgenda();
-      }
-    };
-  
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    const data = [
+      Date.now(),
+      form.Fecha.value,
+      form.Hora.value,
+      form.Evento.value,
+      form.Notas.value
+    ];
+    if (await agregarEvento(data)) {
+      form.reset();
+      mostrarAgenda();
+    }
+  };
+
   // ===== Botón dinámico "Volver a Agenda" =====
-    let backBtn = document.getElementById("backToAgendaFromAdd");
-    if (!backBtn) {
-      backBtn = document.createElement("button");
-      backBtn.id = "backToAgendaFromAdd";
-      backBtn.className = "btn backBtn";
-      backBtn.innerText = "Volver a Agenda";
-      backBtn.onclick = mostrarAgenda;
-      form.appendChild(backBtn);
-    } else backBtn.style.display = "block";
+  let backBtn = document.getElementById("backToAgendaFromAdd");
+  if (!backBtn) {
+    backBtn = document.createElement("button");
+    backBtn.id = "backToAgendaFromAdd";
+    backBtn.className = "btn backBtn";
+    backBtn.innerText = "Volver a Agenda";
+    backBtn.style.display = "block";
+    backBtn.style.marginTop = "10px";
+    backBtn.onclick = mostrarAgenda;
+    form.appendChild(backBtn);
+  } else {
+    backBtn.style.display = "block";
   }
+}
 
-    // Botón volver a agenda
-    let backBtn = document.getElementById("backToAgendaFromAdd");
-    if (!backBtn) {
-      backBtn = document.createElement("button");
-      backBtn.id = "backToAgendaFromAdd";
-      backBtn.innerText = "Volver a Agenda";
-      backBtn.className = "btn backBtn";
-      backBtn.style.display = "block";
-      backBtn.style.marginTop = "10px";
-      backBtn.onclick = mostrarAgenda;
-      form.appendChild(backBtn);
-    } else {
-      backBtn.style.display = "block";
-    };
 
   function mostrarBuscarFecha() {
     document.getElementById("menuButtons").style.display = "none";
