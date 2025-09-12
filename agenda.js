@@ -157,31 +157,48 @@ const Agenda = (() => {
   cont.appendChild(grid);
 }
 
-  function mostrarAgregarEvento() {
-    document.getElementById("menuButtons").style.display = "none";
-    const form = document.getElementById("eventoForm");
-    form.style.display = "flex";
-    document.getElementById("fechaSelector").style.display = "none";
-    document.getElementById("agenda").innerHTML = "";
-    document.getElementById("msg").innerText = "";
+function mostrarAgregarEvento() {
+  // ===== Ocultar todo lo demás =====
+  document.getElementById("menuButtons").style.display = "none";
+  document.getElementById("fechaSelector").style.display = "none";
+  document.getElementById("agenda").innerHTML = "";
+  document.getElementById("msg").innerText = "";
 
-    // Conectar submit del form
-    form.onsubmit = async (e) => {
-      e.preventDefault();
-      const data = [
-        Date.now(),
-        form.Fecha.value,
-        form.Hora.value,
-        form.Evento.value,
-        form.Notas.value
-      ];
-      const exito = await agregarEvento(data);
-      if (exito) {
-        form.reset();
-        mostrarAgenda();
-      }
-    };
+  // ===== Mostrar formulario =====
+  const form = document.getElementById("eventoForm");
+  form.style.display = "flex";
 
+  // ===== Conectar submit del form =====
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    const data = [
+      Date.now(),       // ID único
+      form.Fecha.value,
+      form.Hora.value,
+      form.Evento.value,
+      form.Notas.value
+    ];
+    const exito = await agregarEvento(data);
+    if (exito) {
+      form.reset();
+      mostrarAgenda();
+    }
+  };
+
+  // ===== Botón dinámico "Volver a Agenda" =====
+  let backBtn = document.getElementById("backToAgendaFromAdd");
+  if (!backBtn) {
+    backBtn = document.createElement("button");
+    backBtn.id = "backToAgendaFromAdd";
+    backBtn.className = "btn backBtn";
+    backBtn.innerText = "Volver a Agenda";
+    backBtn.style.marginTop = "10px";
+    backBtn.onclick = mostrarAgenda;
+    form.appendChild(backBtn);
+  } else {
+    backBtn.style.display = "block"; // si ya existe, solo mostrarlo
+  }
+}
     // Botón volver a agenda
     let backBtn = document.getElementById("backToAgendaFromAdd");
     if (!backBtn) {
