@@ -1,6 +1,6 @@
 // finanzas.js
 const SPREADSHEET_ID = "1CMnA-3Ch5Ac1LLP8Hgph15IeeH7Dlvcj0IvX51mLzKU"; // reemplaza con tu ID real
-let token = null; // token OAuth2
+const SHEET_NAME = "Finanzas";
 
 // ------------------------
 // 0️⃣ Set token desde app.js
