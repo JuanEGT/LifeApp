@@ -74,46 +74,26 @@ const Agenda = (() => {
     }
   }
   // ===== UI =====
-function mostrarAgenda() {
-  document.getElementById("mainMenu").style.display = "none";
-  document.getElementById("agendaContainer").style.display = "flex";
-  document.getElementById("menuButtons").style.display = "flex";
-  document.getElementById("eventoForm").style.display = "none";
-  document.getElementById("fechaSelector").style.display = "none";
-  document.getElementById("agenda").innerHTML = "";
-  document.getElementById("msg").innerText = "";
+  function mostrarAgenda() {
+    document.getElementById("mainMenu").style.display = "none";
+    document.getElementById("agendaContainer").style.display = "flex";
+    document.getElementById("menuButtons").style.display = "flex";
+    document.getElementById("eventoForm").style.display = "none";
+    document.getElementById("fechaSelector").style.display = "none";
+    document.getElementById("agenda").innerHTML = "";
+    document.getElementById("msg").innerText = "";
 
-  cargarEventos().then(values => {
-    mostrarRecordatorios(values);
-    mostrarCalendario(values);
-
-    // Conectar el formulario directamente
-    const form = document.getElementById("eventoForm");
-    if (form) {
-      form.onsubmit = async (e) => {
-        e.preventDefault();
-        const data = [
-          Date.now(),          // ID único
-          form.Fecha.value,
-          form.Hora.value,
-          form.Evento.value,
-          form.Notas.value
-        ];
-        await agregarEvento(data);
-        form.reset();
-        mostrarAgenda(); // refrescar agenda
-      };
-    }
+    cargarEventos().then(values => {
+      mostrarRecordatorios(values);
+      mostrarCalendario(values);
 
     // Conectar botones del submenú
     document.getElementById("btnAgregarEvento").onclick = mostrarAgregarEvento;
     document.getElementById("btnBuscarFecha").onclick = mostrarBuscarFecha;
     document.getElementById("btnVolverMenu").onclick = mostrarMenuPrincipal;
     document.getElementById("btnBuscarPorFecha").onclick = buscarPorFecha;
-  });
-}
-
-
+    });
+  }
 
   function mostrarCalendario(values) {
   const cont = document.getElementById("calendario");
