@@ -73,6 +73,27 @@ const Agenda = (() => {
       return false;
     }
   }
+  form.onsubmit = async (e) => {
+  e.preventDefault();
+
+  // Validación manual
+  if (!form.Fecha.value || !form.Hora.value || !form.Evento.value) {
+    document.getElementById("msg").innerText = "Por favor completa todos los campos requeridos.";
+    return;
+  }
+
+  const data = [
+    Date.now(),
+    form.Fecha.value,
+    form.Hora.value,
+    form.Evento.value,
+    form.Notas.value
+  ];
+
+  await agregarEvento(data);
+  form.reset();
+  mostrarAgenda();
+};
 
   // ===== UI =====
 function mostrarAgenda() {
@@ -110,22 +131,11 @@ function mostrarAgenda() {
     document.getElementById("btnAgregarEvento").onclick = mostrarAgregarEvento;
     document.getElementById("btnBuscarFecha").onclick = mostrarBuscarFecha;
     document.getElementById("btnVolverMenu").onclick = mostrarMenuPrincipal;
+    document.getElementById("btnBuscarPorFecha").onclick = buscarPorFecha;
   });
 }
 
-  function conectarBotonesAgenda() {
-  const btnAgregar = document.getElementById("btnAgregarEvento");
-  if (btnAgregar) btnAgregar.onclick = mostrarAgregarEvento;
 
-  const btnBuscar = document.getElementById("btnBuscarFecha");
-  if (btnBuscar) btnBuscar.onclick = mostrarBuscarFecha;
-
-  const btnVolver = document.getElementById("btnVolverMenu");
-  if (btnVolver) btnVolver.onclick = () => {
-    document.getElementById("agendaContainer").style.display = "none";
-    document.getElementById("mainMenu").style.display = "flex";
-  };
-}
 
   function mostrarCalendario(values) {
   const cont = document.getElementById("calendario");
@@ -246,6 +256,7 @@ function mostrarAgenda() {
   }
 
   async function buscarPorFecha() {
+    btnBuscarPorFecha.addEventListener("click", buscarPorFecha);
     const fecha = document.getElementById("fechaInput").value;
     if (!fecha) return;
 
