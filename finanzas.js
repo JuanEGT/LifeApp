@@ -58,10 +58,12 @@ async function cargarFinanzas() {
 // ------------------------
 function filtrarPorMes(data, mes, anio) {
   return data.filter(mov => {
-    const fecha = new Date(mov.Fecha);
-    return fecha.getMonth() === mes && fecha.getFullYear() === anio;
+    if (!mov.Fecha) return false;
+    const [y, m] = mov.Fecha.split("-");
+    return parseInt(m, 10) - 1 === mes && parseInt(y, 10) === anio;
   });
 }
+
 
 // ------------------------
 // 3️⃣ Renderizar tabla
