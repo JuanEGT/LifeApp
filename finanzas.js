@@ -73,11 +73,15 @@ function renderTablaMovimientos() {
   tableBody.innerHTML = "";
 
   const selector = document.getElementById("selectorMes");
-  const fechaSeleccionada = selector.value ? new Date(selector.value + "-01") : new Date();
-  const mes = fechaSeleccionada.getMonth();
-  const anio = fechaSeleccionada.getFullYear();
+  const [anio, mesStr] = selector.value.split("-");
+  const mes = parseInt(mesStr, 10) - 1; // 0 = enero
+  const anioInt = parseInt(anio, 10);
 
-  const filteredData = filtrarPorMes(finanzasData, mes, anio);
+  const filteredData = finanzasData.filter(mov => {
+  if (!mov.Fecha) return false;
+  const [y, m] = mov.Fecha.split("-");
+  return parseInt(y, 10) === anioInt && parseInt(m, 10) - 1 === mes;
+  });
 
   filteredData.forEach(mov => {
     const tr = document.createElement("tr");
