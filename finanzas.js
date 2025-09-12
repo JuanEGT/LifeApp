@@ -94,7 +94,7 @@ function renderTablaMovimientos() {
     tr.classList.add(color);
     tableBody.appendChild(tr);
   });
-
+  console.log("Finanzas normalizadas:", finanzasData[0]);
   renderResumen(filteredData);
 }
 
