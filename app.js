@@ -40,7 +40,7 @@ window.onload = () => {
   if (btnAgenda) btnAgenda.addEventListener("click", () => Agenda.mostrarAgenda());
 
   const btnFinanzas = document.getElementById("btnFinanzas");
-  if (btnFinanzas) btnFinanzas.addEventListener("click", () => Ainanzas.mostrarFinanzas());
+  if (btnFinanzas) btnFinanzas.addEventListener("click", () => Finanzas.mostrarFinanzas());
 }; // <-- cerrar window.onload correctamente
 
 // ===== FUNCIONES =====
