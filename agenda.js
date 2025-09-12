@@ -206,6 +206,21 @@ function mostrarAgregarEvento() {
     document.getElementById("msg").innerText = "";
 
     document.getElementById("fechaSelector").style.display = "flex";
+   
+    // ===== Botón dinámico "Volver a Agenda" =====
+  let backBtn = document.getElementById("backToAgendaFromAdd");
+  if (!backBtn) {
+    backBtn = document.createElement("button");
+    backBtn.id = "backToAgendaFromAdd";
+    backBtn.className = "btn backBtn";
+    backBtn.innerText = "Volver a Agenda";
+    backBtn.style.display = "block";
+    backBtn.style.marginTop = "10px";
+    backBtn.onclick = mostrarAgenda;
+    form.appendChild(backBtn);
+  } else {
+    backBtn.style.display = "block";
+  }
   }
 
 
@@ -243,20 +258,6 @@ function mostrarAgregarEvento() {
       div.appendChild(p);
     });
 
-// ===== Botón dinámico "Volver a Agenda" =====
-  let backBtn = document.getElementById("backToAgendaFromAdd");
-  if (!backBtn) {
-    backBtn = document.createElement("button");
-    backBtn.id = "backToAgendaFromAdd";
-    backBtn.className = "btn backBtn";
-    backBtn.innerText = "Volver a Agenda";
-    backBtn.style.display = "block";
-    backBtn.style.marginTop = "10px";
-    backBtn.onclick = mostrarAgenda;
-    form.appendChild(backBtn);
-  } else {
-    backBtn.style.display = "block";
-  }
   }
 
   function mostrarRecordatorios(values) {
