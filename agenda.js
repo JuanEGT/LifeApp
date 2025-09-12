@@ -90,6 +90,68 @@ const Agenda = (() => {
     });
   }
 
+    function mostrarCalendario(values) {
+  const cont = document.getElementById("calendario");
+  cont.innerHTML = "<h3>Calendario mensual</h3>";
+
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+
+  const diasMes = new Date(year, month + 1, 0).getDate();
+  const firstDayOfWeek = new Date(year, month, 1).getDay(); // 0=Domingo
+
+  // Nombres de los días
+  const diasSemana = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+
+  // Crear grid
+  const grid = document.createElement("div");
+  grid.style.display = "grid";
+  grid.style.gridTemplateColumns = "repeat(7, 40px)";
+  grid.style.gap = "2px";
+  grid.style.textAlign = "center";
+
+  // Encabezado de días
+  diasSemana.forEach(dia => {
+    const cell = document.createElement("div");
+    cell.innerText = dia;
+    cell.style.fontWeight = "bold";
+    grid.appendChild(cell);
+  });
+
+  // Mapear días con eventos
+  const eventosPorDia = {};
+  if (values && values.length >= 2) {
+    const headers = values[0];
+    values.slice(1).forEach(r => {
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = r[i] || "");
+      if (!obj.Fecha) return;
+      const partes = obj.Fecha.split("-");
+      const fechaEvento = new Date(partes[0], partes[1]-1, partes[2]);
+      if (fechaEvento.getFullYear() === year && fechaEvento.getMonth() === month) {
+        eventosPorDia[fechaEvento.getDate()] = true;
+      }
+    });
+  }
+
+  // Offset inicial para el primer día de la semana
+  for (let i = 0; i < firstDayOfWeek; i++) {
+    const emptyCell = document.createElement("div");
+    grid.appendChild(emptyCell);
+  }
+
+  // Días del mes
+  for (let d = 1; d <= diasMes; d++) {
+    const cell = document.createElement("div");
+    cell.innerText = d;
+    cell.className = "dia " + (eventosPorDia[d] ? "rojo" : "verde");
+    grid.appendChild(cell);
+  }
+
+  cont.appendChild(grid);
+}
+
   function mostrarAgregarEvento() {
     document.getElementById("menuButtons").style.display = "none";
     const form = document.getElementById("eventoForm");
