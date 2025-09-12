@@ -87,8 +87,29 @@ function mostrarAgenda() {
   cargarEventos().then(values => {
     mostrarRecordatorios(values);
     mostrarCalendario(values);
-    conectarFormAgregarEvento(); // conectar submit
-    conectarBotonesAgenda();     // conectar botones de agenda
+
+    // Conectar el formulario directamente
+    const form = document.getElementById("eventoForm");
+    if (form) {
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        const data = [
+          Date.now(),          // ID único
+          form.Fecha.value,
+          form.Hora.value,
+          form.Evento.value,
+          form.Notas.value
+        ];
+        await agregarEvento(data);
+        form.reset();
+        mostrarAgenda(); // refrescar agenda
+      };
+    }
+
+    // Conectar botones del submenú
+    document.getElementById("btnAgregarEvento").onclick = mostrarAgregarEvento;
+    document.getElementById("btnBuscarFecha").onclick = mostrarBuscarFecha;
+    document.getElementById("btnVolverMenu").onclick = mostrarMenuPrincipal;
   });
 }
 
