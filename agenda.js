@@ -73,28 +73,6 @@ const Agenda = (() => {
       return false;
     }
   }
-  form.onsubmit = async (e) => {
-  e.preventDefault();
-
-  // Validación manual
-  if (!form.Fecha.value || !form.Hora.value || !form.Evento.value) {
-    document.getElementById("msg").innerText = "Por favor completa todos los campos requeridos.";
-    return;
-  }
-
-  const data = [
-    Date.now(),
-    form.Fecha.value,
-    form.Hora.value,
-    form.Evento.value,
-    form.Notas.value
-  ];
-
-  await agregarEvento(data);
-  form.reset();
-  mostrarAgenda();
-};
-
   // ===== UI =====
 function mostrarAgenda() {
   document.getElementById("mainMenu").style.display = "none";
