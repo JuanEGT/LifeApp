@@ -221,7 +221,6 @@ function mostrarAgregarEvento() {
   } else {
     backBtn.style.display = "block";
   }
-}
   }
 
 
