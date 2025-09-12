@@ -75,22 +75,38 @@ const Agenda = (() => {
   }
 
   // ===== UI =====
-  function mostrarAgenda() {
-    document.getElementById("mainMenu").style.display = "none";
-    document.getElementById("agendaContainer").style.display = "flex";
-    document.getElementById("menuButtons").style.display = "flex";
-    document.getElementById("eventoForm").style.display = "none";
-    document.getElementById("fechaSelector").style.display = "none";
-    document.getElementById("agenda").innerHTML = "";
-    document.getElementById("msg").innerText = "";
+function mostrarAgenda() {
+  document.getElementById("mainMenu").style.display = "none";
+  document.getElementById("agendaContainer").style.display = "flex";
+  document.getElementById("menuButtons").style.display = "flex";
+  document.getElementById("eventoForm").style.display = "none";
+  document.getElementById("fechaSelector").style.display = "none";
+  document.getElementById("agenda").innerHTML = "";
+  document.getElementById("msg").innerText = "";
 
-    cargarEventos().then(values => {
-      mostrarRecordatorios(values);
-      mostrarCalendario(values);
-    });
-  }
+  cargarEventos().then(values => {
+    mostrarRecordatorios(values);
+    mostrarCalendario(values);
+    conectarFormAgregarEvento(); // conectar submit
+    conectarBotonesAgenda();     // conectar botones de agenda
+  });
+}
 
-    function mostrarCalendario(values) {
+  function conectarBotonesAgenda() {
+  const btnAgregar = document.getElementById("btnAgregarEvento");
+  if (btnAgregar) btnAgregar.onclick = mostrarAgregarEvento;
+
+  const btnBuscar = document.getElementById("btnBuscarFecha");
+  if (btnBuscar) btnBuscar.onclick = mostrarBuscarFecha;
+
+  const btnVolver = document.getElementById("btnVolverMenu");
+  if (btnVolver) btnVolver.onclick = () => {
+    document.getElementById("agendaContainer").style.display = "none";
+    document.getElementById("mainMenu").style.display = "flex";
+  };
+}
+
+  function mostrarCalendario(values) {
   const cont = document.getElementById("calendario");
   cont.innerHTML = "<h3>Calendario mensual</h3>";
 
