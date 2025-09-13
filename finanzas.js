@@ -283,11 +283,13 @@ function obtenerDatosReportes() {
   };
 }
 
+let chartIngresosGastos, chartDistribucionGrupo, chartSaldoMensual, chartMetodosPago, chartHorasSalario;
+
 function renderReportes() {
   const datos = obtenerDatosReportes();
 
-  // Ingresos vs Gastos
-  new Chart(document.getElementById("graficoIngresosGastos"), {
+  if (chartIngresosGastos) chartIngresosGastos.destroy();
+  chartIngresosGastos = new Chart(document.getElementById("graficoIngresosGastos"), {
     type: "bar",
     data: {
       labels: ["Mes seleccionado"],
@@ -298,8 +300,8 @@ function renderReportes() {
     }
   });
 
-  // Distribución por Grupo
-  new Chart(document.getElementById("graficoDistribucionGrupo"), {
+  if (chartDistribucionGrupo) chartDistribucionGrupo.destroy();
+  chartDistribucionGrupo = new Chart(document.getElementById("graficoDistribucionGrupo"), {
     type: "pie",
     data: {
       labels: datos.grupos,
@@ -307,14 +309,14 @@ function renderReportes() {
     }
   });
 
-  // Saldo mensual
-  new Chart(document.getElementById("graficoSaldoMensual"), {
+  if (chartSaldoMensual) chartSaldoMensual.destroy();
+  chartSaldoMensual = new Chart(document.getElementById("graficoSaldoMensual"), {
     type: "line",
     data: { labels: ["Mes seleccionado"], datasets: [{ label: "Saldo", data: [datos.saldo], borderColor: "#ffeb3b", fill: false }] }
   });
 
-  // Métodos de pago
-  new Chart(document.getElementById("graficoMetodosPago"), {
+  if (chartMetodosPago) chartMetodosPago.destroy();
+  chartMetodosPago = new Chart(document.getElementById("graficoMetodosPago"), {
     type: "bar",
     data: {
       labels: datos.metodosPago,
@@ -323,8 +325,8 @@ function renderReportes() {
     options: { indexAxis: 'y' }
   });
 
-  // Horas trabajadas y salario promedio
-  new Chart(document.getElementById("graficoHorasSalario"), {
+  if (chartHorasSalario) chartHorasSalario.destroy();
+  chartHorasSalario = new Chart(document.getElementById("graficoHorasSalario"), {
     type: "bar",
     data: {
       labels: ["Mes seleccionado"],
@@ -335,8 +337,6 @@ function renderReportes() {
     }
   });
 }
-
-
 
 //------------------------------------------------
 //------------------------------------------------
