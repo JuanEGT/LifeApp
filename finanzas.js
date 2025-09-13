@@ -203,7 +203,7 @@ async function mostrarFinanzas() {
   await cargarFinanzas();
 }
 // ------------------------
-// 7️⃣ Cascarones nuevas funciones
+// 7️⃣ Reportes
 // ------------------------
 
 function renderReportes(data) {
@@ -269,6 +269,9 @@ function renderReportes(data) {
   });
 }
 
+
+//------------------------------------------------
+//------------------------------------------------
 function renderProyecciones() {
   console.log("Renderizando Proyecciones (vacío por ahora)");
 }
