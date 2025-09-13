@@ -189,7 +189,6 @@ async function mostrarFinanzas() {
   document.getElementById("agendaContainer").style.display = "none";
   document.getElementById("finanzasContainer").style.display = "flex";
   
-  // Mostrar solo el menú principal
   showSection("finanzasMenu");
 
   // Inicializar selector de mes
@@ -197,11 +196,17 @@ async function mostrarFinanzas() {
   if (selector) {
     const hoy = new Date();
     selector.value = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}`;
-    selector.addEventListener("change", renderTablaMovimientos);
+
+    // ⚡ Cambio importante: actualizar tabla y reportes al cambiar mes
+    selector.addEventListener("change", () => {
+      renderTablaMovimientos();
+      renderReportes();
+    });
   }
 
   await cargarFinanzas();
 }
+
 // ------------------------
 // 7️⃣ Reportes
 // ------------------------
@@ -213,15 +218,12 @@ function obtenerDatosReportes() {
   const mes = parseInt(mesStr, 10) - 1;
   const anioInt = parseInt(anio, 10);
 
-  // Filtramos movimientos del mes seleccionado
   const datosMes = finanzasData.filter(mov => {
     if (!mov.Fecha) return false;
     const [y, m] = mov.Fecha.split("-");
     return parseInt(m, 10) - 1 === mes && parseInt(y, 10) === anioInt;
   });
-  console.log("Movimientos filtrados para el mes:", datosMes);
 
-  // Inicializamos variables
   let totalIngresosNetos = 0;
   let totalGastos = 0;
   const gruposMap = {};
@@ -233,7 +235,6 @@ function obtenerDatosReportes() {
   datosMes.forEach(mov => {
     const cantidad = parseFloat(mov.Cantidad) || 0;
 
-    // Ingresos netos de horas trabajadas
     if (mov.Tipo === "Ingreso") {
       const horas = parseFloat(mov.HorasTrabajadas) || 0;
       const salario = parseFloat(mov.SalarioPorHora) || 0;
@@ -251,25 +252,10 @@ function obtenerDatosReportes() {
 
     if (mov.Tipo === "Gasto") totalGastos += cantidad;
 
-    // Grupos
     if (mov.Grupo) gruposMap[mov.Grupo] = (gruposMap[mov.Grupo] || 0) + cantidad;
-
-    // Métodos de pago
     if (mov.MetodoPago) metodosPagoMap[mov.MetodoPago] = (metodosPagoMap[mov.MetodoPago] || 0) + cantidad;
   });
 
-  console.log("Datos de reportes:", {
-    totalIngresosNetos,
-    totalGastos,
-    saldo: totalIngresosNetos - totalGastos,
-    grupos: Object.keys(gruposMap),
-    distribucionGrupo: Object.values(gruposMap),
-    metodosPago: Object.keys(metodosPagoMap),
-    usoMetodosPago: Object.values(metodosPagoMap),
-    horasTrabajadas,
-    salarioPromedio: ingresosLaborales ? salarioPorHoraSum / ingresosLaborales : 0
-  });
-  
   return {
     totalIngresosNetos,
     totalGastos,
@@ -340,6 +326,7 @@ function renderReportes() {
 
 //------------------------------------------------
 //------------------------------------------------
+
 function renderProyecciones() {
   console.log("Renderizando Proyecciones (vacío por ahora)");
 }
