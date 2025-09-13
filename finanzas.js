@@ -217,9 +217,8 @@ function obtenerDatosReportes() {
   const datosMes = finanzasData.filter(mov => {
     if (!mov.Fecha) return false;
     const [y, m] = mov.Fecha.split("-");
-    return parseInt(m, 10) - 1 === mes && parseInt(y, 10) === anio;
+    return parseInt(m, 10) - 1 === mes && parseInt(y, 10) === anioInt;
   });
-
   console.log("Movimientos filtrados para el mes:", datosMes);
 
   // Inicializamos variables
