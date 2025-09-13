@@ -151,8 +151,28 @@
   <!-- 📍 Submenús vacíos para futuras funciones -->
   <div id="finanzasReportes" style="display:none">
     <h2>📊 Reportes</h2>
+
+    <label>
+      Año:
+      <input type="number" id="anioReporte" value="2025" min="2020" max="2030">
+    </label>
+
+    <label>
+      Mes:
+      <input type="month" id="mesReporte">
+    </label>
+
+    <div class="graficas-reportes">
+      <canvas id="graficoIngresosGastos" width="400" height="200"></canvas>
+      <canvas id="graficoDistribucionGrupo" width="400" height="200"></canvas>
+      <canvas id="graficoSaldoMensual" width="400" height="200"></canvas>
+      <canvas id="graficoMetodosPago" width="400" height="200"></canvas>
+      <canvas id="graficoHorasSalario" width="400" height="200"></canvas>
+    </div>
+
     <button class="btn btnVolverFinanzas">🔙 Volver</button>
   </div>
+
 
   <div id="finanzasProyecciones" style="display:none">
     <h2>📈 Proyecciones</h2>

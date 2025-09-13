@@ -188,7 +188,7 @@ async function mostrarFinanzas() {
   document.getElementById("mainMenu").style.display = "none";
   document.getElementById("agendaContainer").style.display = "none";
   document.getElementById("finanzasContainer").style.display = "flex";
-
+  
   // Mostrar solo el menú principal
   showSection("finanzasMenu");
 
@@ -202,12 +202,71 @@ async function mostrarFinanzas() {
 
   await cargarFinanzas();
 }
-
 // ------------------------
 // 7️⃣ Cascarones nuevas funciones
 // ------------------------
-function renderReportes() {
-  console.log("Renderizando Reportes (vacío por ahora)");
+
+function renderReportes(data) {
+  // Ejemplo de datos ficticios
+  const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio"];
+  const ingresosNetos = [1500, 1800, 1200, 2000, 1700, 2100];
+  const gastos = [800, 900, 700, 1000, 850, 950];
+  const grupos = ["Ingreso", "Gasto", "Ahorro", "Deuda", "Inversión"];
+  const distribucionGrupo = [4000, 2500, 1000, 1500, 2000];
+  const metodosPago = ["Efectivo", "Tarjeta", "Transferencia"];
+  const usoMetodosPago = [3000, 4500, 2000];
+  const horasSalario = [40, 35, 45, 38, 42, 40];
+  const salarioPromedio = [70, 75, 68, 72, 70, 74];
+
+  // 1️⃣ Ingresos vs Gastos (barras)
+  new Chart(document.getElementById("graficoIngresosGastos"), {
+    type: "bar",
+    data: {
+      labels: meses,
+      datasets: [
+        { label: "Ingresos Netos", data: ingresosNetos, backgroundColor: "#4caf50" },
+        { label: "Gastos", data: gastos, backgroundColor: "#f44336" }
+      ]
+    }
+  });
+
+  // 2️⃣ Distribución por Grupo (pie)
+  new Chart(document.getElementById("graficoDistribucionGrupo"), {
+    type: "pie",
+    data: {
+      labels: grupos,
+      datasets: [{ data: distribucionGrupo, backgroundColor: ["#4caf50","#f44336","#2196f3","#ff9800","#9c27b0"] }]
+    }
+  });
+
+  // 3️⃣ Saldo mensual (línea)
+  const saldoMensual = ingresosNetos.map((i, idx) => i - gastos[idx]);
+  new Chart(document.getElementById("graficoSaldoMensual"), {
+    type: "line",
+    data: { labels: meses, datasets: [{ label: "Saldo", data: saldoMensual, borderColor: "#ffeb3b", fill: false }] }
+  });
+
+  // 4️⃣ Métodos de pago (barras horizontales)
+  new Chart(document.getElementById("graficoMetodosPago"), {
+    type: "bar",
+    data: {
+      labels: metodosPago,
+      datasets: [{ label: "Uso", data: usoMetodosPago, backgroundColor: "#2196f3" }]
+    },
+    options: { indexAxis: 'y' }
+  });
+
+  // 5️⃣ Horas trabajadas y salario promedio (barras combinadas)
+  new Chart(document.getElementById("graficoHorasSalario"), {
+    type: "bar",
+    data: {
+      labels: meses,
+      datasets: [
+        { label: "Horas Trabajadas", data: horasSalario, backgroundColor: "#ff9800" },
+        { label: "Salario Promedio", data: salarioPromedio, backgroundColor: "#9c27b0" }
+      ]
+    }
+  });
 }
 
 function renderProyecciones() {
