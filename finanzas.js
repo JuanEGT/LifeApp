@@ -202,17 +202,21 @@ async function mostrarFinanzas() {
     selector.addEventListener("change", renderTablaMovimientos);
   }
 
-  // ⚡ Selector de Reportes
-  const selectorReportes = document.getElementById("selectorMesReportes");
-  if (selectorReportes) {
-    const hoy = new Date();
-    selectorReportes.value = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}`;
-    // ⚡ Llamar renderReportes también aquí para mostrar datos iniciales
-    renderReportes();
-    selectorReportes.addEventListener("change", () => {
-      renderReportes(); // actualizar reportes al cambiar
-    });
-  }
+// ⚡ Selector de Reportes
+const selectorReportes = document.getElementById("selectorMesReportes");
+if (selectorReportes) {
+  const hoy = new Date();
+  selectorReportes.value = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}`;
+  
+  // Mostrar en consola al inicializar
+  console.log("Inicializando selector de reportes con mes:", selectorReportes.value);
+  renderReportes();
+
+  selectorReportes.addEventListener("change", () => {
+    console.log("Selector de reportes cambió a:", selectorReportes.value); // ⚡ log al cambiar
+    renderReportes(); // actualizar reportes al cambiar
+  });
+}
 }
 // ------------------------
 // 7️⃣ Reportes
