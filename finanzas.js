@@ -202,38 +202,44 @@ async function mostrarFinanzas() {
     selector.addEventListener("change", renderTablaMovimientos);
   }
 
-// ⚡ Selector de Reportes
-const selectorReportes = document.getElementById("selectorMesReportes");
-if (selectorReportes) {
-  const hoy = new Date();
-  selectorReportes.value = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}`;
-  
-  // Mostrar en consola al inicializar
-  console.log("Inicializando selector de reportes con mes:", selectorReportes.value);
-  renderReportes();
+  // ⚡ Selectores separados de Reportes: mes y año
+  const selectorMes = document.getElementById("selectorMesReportes");
+  const selectorAnio = document.getElementById("selectorAnioReportes");
+  if (selectorMes && selectorAnio) {
+    const hoy = new Date();
+    selectorMes.value = String(hoy.getMonth() + 1).padStart(2, "0");
+    selectorAnio.value = String(hoy.getFullYear());
+    
+    // Render inicial
+    renderReportes();
 
-  selectorReportes.addEventListener("change", () => {
-    console.log("Selector de reportes cambió a:", selectorReportes.value); // ⚡ log al cambiar
-    renderReportes(); // actualizar reportes al cambiar
-  });
+    // Listeners para ambos selectores
+    selectorMes.addEventListener("change", renderReportes);
+    selectorAnio.addEventListener("change", renderReportes);
+  }
 }
-}
+
 // ------------------------
 // 7️⃣ Reportes
 // ------------------------
 function obtenerDatosReportes() {
-  const selector = document.getElementById("selectorMesReportes"); // ⚡ usar selector de reportes
-  if (!selector) return {};
+  const selectorMes = document.getElementById("selectorMesReportes");
+  const selectorAnio = document.getElementById("selectorAnioReportes");
+  if (!selectorMes || !selectorAnio) return {};
 
-  const [anio, mesStr] = selector.value.split("-");
-  const mes = parseInt(mesStr, 10) - 1;
-  const anioInt = parseInt(anio, 10);
+  const mes = parseInt(selectorMes.value, 10) - 1;
+  const anioInt = parseInt(selectorAnio.value, 10);
+
+  console.log("Reportes -> Mes:", mes + 1, "Año:", anioInt);
+  console.log("Total movimientos cargados:", finanzasData.length);
 
   const datosMes = finanzasData.filter(mov => {
-    if (!mov.Fecha) return false;
+    if (!mov.Fecha || !mov.Tipo || !mov.Cantidad) return false;
     const [y, m] = mov.Fecha.split("-");
     return parseInt(y, 10) === anioInt && parseInt(m, 10) - 1 === mes;
   });
+
+  console.log("Movimientos filtrados:", datosMes.length, datosMes);
 
   let totalIngresosNetos = 0;
   let totalGastos = 0;
@@ -267,6 +273,18 @@ function obtenerDatosReportes() {
     if (mov.MetodoPago) metodosPagoMap[mov.MetodoPago] = (metodosPagoMap[mov.MetodoPago] || 0) + cantidad;
   });
 
+  console.log("Resumen reportes:", {
+    totalIngresosNetos,
+    totalGastos,
+    saldo: totalIngresosNetos - totalGastos,
+    grupos: Object.keys(gruposMap),
+    distribucionGrupo: Object.values(gruposMap),
+    metodosPago: Object.keys(metodosPagoMap),
+    usoMetodosPago: Object.values(metodosPagoMap),
+    horasTrabajadas,
+    salarioPromedio: ingresosLaborales ? salarioPorHoraSum / ingresosLaborales : 0
+  });
+
   return {
     totalIngresosNetos,
     totalGastos,
@@ -280,6 +298,9 @@ function obtenerDatosReportes() {
   };
 }
 
+// ------------------------
+// 7️⃣ Renderizar reportes con Chart.js
+// ------------------------
 let chartIngresosGastos, chartDistribucionGrupo, chartSaldoMensual, chartMetodosPago, chartHorasSalario;
 
 function renderReportes() {
@@ -336,15 +357,10 @@ function renderReportes() {
 }
 
 //------------------------------------------------
+// Proyecciones y simulaciones (vacío por ahora)
 //------------------------------------------------
-
-function renderProyecciones() {
-  console.log("Renderizando Proyecciones (vacío por ahora)");
-}
-
-function renderSimulaciones() {
-  console.log("Renderizando Simulaciones (vacío por ahora)");
-}
+function renderProyecciones() { console.log("Renderizando Proyecciones (vacío)"); }
+function renderSimulaciones() { console.log("Renderizando Simulaciones (vacío)"); }
 
 // ------------------------
 // 8️⃣ Inicialización botones navegación
