@@ -3,7 +3,7 @@
 const SPREADSHEET_ID = "1CMnA-3Ch5Ac1LLP8Hgph15IeeH7Dlvcj0IvX51mLzKU"; // tu ID real
 const SHEET_NAME = "Finanzas";
 
-let finanzasData = []; // todos los movimientos cargados
+let finanzasData = [];
 
 // ------------------------
 // 0️⃣ Set token desde app.js
@@ -53,7 +53,6 @@ async function cargarFinanzas() {
     const headers = data.values[0];
     const rows = data.values.slice(1);
 
-    // Normalizar nombres de columnas para JS
     finanzasData = rows.map(row => {
       const entry = {};
       headers.forEach((h, i) => {
@@ -64,21 +63,10 @@ async function cargarFinanzas() {
     });
 
     renderTablaMovimientos();
-    renderReportes(); // ⚡ actualizar reportes después de cargar datos
+    renderReportes();
   } catch (err) {
     console.error("Error cargando Finanzas:", err);
   }
-}
-
-// ------------------------
-// 2️⃣ Filtrar por mes y año
-// ------------------------
-function filtrarPorMes(data, mes, anio) {
-  return data.filter(mov => {
-    if (!mov.Fecha) return false;
-    const [y, m] = mov.Fecha.split("-");
-    return parseInt(m, 10) - 1 === mes && parseInt(y, 10) === anio;
-  });
 }
 
 // ------------------------
@@ -191,10 +179,9 @@ async function mostrarFinanzas() {
   
   showSection("finanzasMenu");
 
-  // ⚡ Primero cargar todos los datos
   await cargarFinanzas();
 
-  // ⚡ Selector de Movimientos
+  // Selector de Movimientos
   const selector = document.getElementById("selectorMes");
   if (selector) {
     const hoy = new Date();
@@ -202,36 +189,36 @@ async function mostrarFinanzas() {
     selector.addEventListener("change", renderTablaMovimientos);
   }
 
-  // ⚡ Selectores separados de Reportes: mes y año
-  const selectorMes = document.getElementById("selectorMesReportes");
-  const selectorAnio = document.getElementById("selectorAnioReportes");
+  // ⚡ Selectores de Reportes
+  const selectorMes = document.getElementById("mesReporte");
+  const selectorAnio = document.getElementById("anioReporte");
+
   if (selectorMes && selectorAnio) {
     const hoy = new Date();
-    selectorMes.value = String(hoy.getMonth() + 1).padStart(2, "0");
-    selectorAnio.value = String(hoy.getFullYear());
-    
-    // Render inicial
+    selectorMes.value = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}`;
+    selectorAnio.value = hoy.getFullYear();
+
     renderReportes();
 
-    // Listeners para ambos selectores
     selectorMes.addEventListener("change", renderReportes);
     selectorAnio.addEventListener("change", renderReportes);
   }
 }
 
 // ------------------------
-// 7️⃣ Reportes
+// 7️⃣ Obtener datos para reportes
 // ------------------------
 function obtenerDatosReportes() {
-  const selectorMes = document.getElementById("selectorMesReportes");
-  const selectorAnio = document.getElementById("selectorAnioReportes");
+  const selectorMes = document.getElementById("mesReporte");
+  const selectorAnio = document.getElementById("anioReporte");
   if (!selectorMes || !selectorAnio) return {};
 
-  const mes = parseInt(selectorMes.value, 10) - 1;
+  const [anioStr, mesStr] = selectorMes.value.split("-");
+  const mes = parseInt(mesStr, 10) - 1;
   const anioInt = parseInt(selectorAnio.value, 10);
 
   console.log("Reportes -> Mes:", mes + 1, "Año:", anioInt);
-  console.log("Total movimientos cargados:", finanzasData.length);
+  console.log("Movimientos totales:", finanzasData.length);
 
   const datosMes = finanzasData.filter(mov => {
     if (!mov.Fecha || !mov.Tipo || !mov.Cantidad) return false;
@@ -273,18 +260,6 @@ function obtenerDatosReportes() {
     if (mov.MetodoPago) metodosPagoMap[mov.MetodoPago] = (metodosPagoMap[mov.MetodoPago] || 0) + cantidad;
   });
 
-  console.log("Resumen reportes:", {
-    totalIngresosNetos,
-    totalGastos,
-    saldo: totalIngresosNetos - totalGastos,
-    grupos: Object.keys(gruposMap),
-    distribucionGrupo: Object.values(gruposMap),
-    metodosPago: Object.keys(metodosPagoMap),
-    usoMetodosPago: Object.values(metodosPagoMap),
-    horasTrabajadas,
-    salarioPromedio: ingresosLaborales ? salarioPorHoraSum / ingresosLaborales : 0
-  });
-
   return {
     totalIngresosNetos,
     totalGastos,
@@ -305,6 +280,7 @@ let chartIngresosGastos, chartDistribucionGrupo, chartSaldoMensual, chartMetodos
 
 function renderReportes() {
   const datos = obtenerDatosReportes();
+  if (!datos) return;
 
   if (chartIngresosGastos) chartIngresosGastos.destroy();
   chartIngresosGastos = new Chart(document.getElementById("graficoIngresosGastos"), {
