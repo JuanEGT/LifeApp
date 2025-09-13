@@ -205,69 +205,124 @@ async function mostrarFinanzas() {
 // ------------------------
 // 7️⃣ Reportes
 // ------------------------
+function obtenerDatosReportes() {
+  const selector = document.getElementById("selectorMes");
+  if (!selector) return {};
 
-function renderReportes(data) {
-  // Ejemplo de datos ficticios
-  const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio"];
-  const ingresosNetos = [1500, 1800, 1200, 2000, 1700, 2100];
-  const gastos = [800, 900, 700, 1000, 850, 950];
-  const grupos = ["Ingreso", "Gasto", "Ahorro", "Deuda", "Inversión"];
-  const distribucionGrupo = [4000, 2500, 1000, 1500, 2000];
-  const metodosPago = ["Efectivo", "Tarjeta", "Transferencia"];
-  const usoMetodosPago = [3000, 4500, 2000];
-  const horasSalario = [40, 35, 45, 38, 42, 40];
-  const salarioPromedio = [70, 75, 68, 72, 70, 74];
+  const [anio, mesStr] = selector.value.split("-");
+  const mes = parseInt(mesStr, 10) - 1;
+  const anioInt = parseInt(anio, 10);
 
-  // 1️⃣ Ingresos vs Gastos (barras)
+  // Filtramos movimientos del mes seleccionado
+  const datosMes = finanzasData.filter(mov => {
+    if (!mov.Fecha) return false;
+    const [y, m] = mov.Fecha.split("-");
+    return parseInt(m, 10) - 1 === mes && parseInt(y, 10) === anio;
+  });
+
+  // Inicializamos variables
+  let totalIngresosNetos = 0;
+  let totalGastos = 0;
+  const gruposMap = {};
+  const metodosPagoMap = {};
+  let horasTrabajadas = 0;
+  let salarioPorHoraSum = 0;
+  let ingresosLaborales = 0;
+
+  datosMes.forEach(mov => {
+    const cantidad = parseFloat(mov.Cantidad) || 0;
+
+    // Ingresos netos de horas trabajadas
+    if (mov.Tipo === "Ingreso") {
+      const horas = parseFloat(mov.HorasTrabajadas) || 0;
+      const salario = parseFloat(mov.SalarioPorHora) || 0;
+      const propinas = parseFloat(mov.Propinas) || 0;
+      const bonos = parseFloat(mov.BonosAguinaldo) || 0;
+      const deducciones = parseFloat(mov.Deducciones) || 0;
+
+      const neto = horas * salario + propinas + bonos - deducciones;
+      totalIngresosNetos += neto;
+
+      horasTrabajadas += horas;
+      salarioPorHoraSum += salario;
+      ingresosLaborales += 1;
+    }
+
+    if (mov.Tipo === "Gasto") totalGastos += cantidad;
+
+    // Grupos
+    if (mov.Grupo) gruposMap[mov.Grupo] = (gruposMap[mov.Grupo] || 0) + cantidad;
+
+    // Métodos de pago
+    if (mov.MetodoPago) metodosPagoMap[mov.MetodoPago] = (metodosPagoMap[mov.MetodoPago] || 0) + cantidad;
+  });
+
+  return {
+    totalIngresosNetos,
+    totalGastos,
+    saldo: totalIngresosNetos - totalGastos,
+    grupos: Object.keys(gruposMap),
+    distribucionGrupo: Object.values(gruposMap),
+    metodosPago: Object.keys(metodosPagoMap),
+    usoMetodosPago: Object.values(metodosPagoMap),
+    horasTrabajadas,
+    salarioPromedio: ingresosLaborales ? salarioPorHoraSum / ingresosLaborales : 0
+  };
+}
+
+function renderReportes() {
+  const datos = obtenerDatosReportes();
+
+  // Ingresos vs Gastos
   new Chart(document.getElementById("graficoIngresosGastos"), {
     type: "bar",
     data: {
-      labels: meses,
+      labels: ["Mes seleccionado"],
       datasets: [
-        { label: "Ingresos Netos", data: ingresosNetos, backgroundColor: "#4caf50" },
-        { label: "Gastos", data: gastos, backgroundColor: "#f44336" }
+        { label: "Ingresos Netos", data: [datos.totalIngresosNetos], backgroundColor: "#4caf50" },
+        { label: "Gastos", data: [datos.totalGastos], backgroundColor: "#f44336" }
       ]
     }
   });
 
-  // 2️⃣ Distribución por Grupo (pie)
+  // Distribución por Grupo
   new Chart(document.getElementById("graficoDistribucionGrupo"), {
     type: "pie",
     data: {
-      labels: grupos,
-      datasets: [{ data: distribucionGrupo, backgroundColor: ["#4caf50","#f44336","#2196f3","#ff9800","#9c27b0"] }]
+      labels: datos.grupos,
+      datasets: [{ data: datos.distribucionGrupo, backgroundColor: ["#4caf50","#f44336","#2196f3","#ff9800","#9c27b0"] }]
     }
   });
 
-  // 3️⃣ Saldo mensual (línea)
-  const saldoMensual = ingresosNetos.map((i, idx) => i - gastos[idx]);
+  // Saldo mensual
   new Chart(document.getElementById("graficoSaldoMensual"), {
     type: "line",
-    data: { labels: meses, datasets: [{ label: "Saldo", data: saldoMensual, borderColor: "#ffeb3b", fill: false }] }
+    data: { labels: ["Mes seleccionado"], datasets: [{ label: "Saldo", data: [datos.saldo], borderColor: "#ffeb3b", fill: false }] }
   });
 
-  // 4️⃣ Métodos de pago (barras horizontales)
+  // Métodos de pago
   new Chart(document.getElementById("graficoMetodosPago"), {
     type: "bar",
     data: {
-      labels: metodosPago,
-      datasets: [{ label: "Uso", data: usoMetodosPago, backgroundColor: "#2196f3" }]
+      labels: datos.metodosPago,
+      datasets: [{ label: "Uso", data: datos.usoMetodosPago, backgroundColor: "#2196f3" }]
     },
     options: { indexAxis: 'y' }
   });
 
-  // 5️⃣ Horas trabajadas y salario promedio (barras combinadas)
+  // Horas trabajadas y salario promedio
   new Chart(document.getElementById("graficoHorasSalario"), {
     type: "bar",
     data: {
-      labels: meses,
+      labels: ["Mes seleccionado"],
       datasets: [
-        { label: "Horas Trabajadas", data: horasSalario, backgroundColor: "#ff9800" },
-        { label: "Salario Promedio", data: salarioPromedio, backgroundColor: "#9c27b0" }
+        { label: "Horas Trabajadas", data: [datos.horasTrabajadas], backgroundColor: "#ff9800" },
+        { label: "Salario Promedio", data: [datos.salarioPromedio], backgroundColor: "#9c27b0" }
       ]
     }
   });
 }
+
 
 
 //------------------------------------------------
