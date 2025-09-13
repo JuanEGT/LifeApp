@@ -190,7 +190,7 @@ async function mostrarFinanzas() {
   document.getElementById("finanzasContainer").style.display = "flex";
   
   showSection("finanzasMenu");
-
+  await cargarFinanzas();
   // ⚡ Selector de Movimientos
   const selector = document.getElementById("selectorMes");
   if (selector) {
@@ -209,7 +209,7 @@ async function mostrarFinanzas() {
     });
   }
 
-  await cargarFinanzas();
+
 }
 
 // ------------------------
