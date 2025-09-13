@@ -4,6 +4,7 @@ const SPREADSHEET_ID = "1CMnA-3Ch5Ac1LLP8Hgph15IeeH7Dlvcj0IvX51mLzKU"; // tu ID 
 const SHEET_NAME = "Finanzas";
 
 let finanzasData = []; // todos los movimientos cargados
+
 // ------------------------
 // 0️⃣ Set token desde app.js
 // ------------------------
@@ -34,7 +35,6 @@ function showSection(sectionId) {
 // ------------------------
 async function cargarFinanzas() {
   if (!token) return;
-  console.log("Movimientos cargados:", finanzasData);
   try {
     const res = await fetch(
       `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?majorDimension=ROWS`,
@@ -42,12 +42,11 @@ async function cargarFinanzas() {
     );
     const data = await res.json();
 
-    console.log("Respuesta API:", data);
-
     if (!data.values || data.values.length < 2) {
       console.error("No hay datos en la hoja");
       finanzasData = [];
       renderTablaMovimientos();
+      renderReportes();
       return;
     }
 
@@ -65,6 +64,7 @@ async function cargarFinanzas() {
     });
 
     renderTablaMovimientos();
+    renderReportes(); // ⚡ actualizar reportes después de cargar datos
   } catch (err) {
     console.error("Error cargando Finanzas:", err);
   }
@@ -191,16 +191,21 @@ async function mostrarFinanzas() {
   
   showSection("finanzasMenu");
 
-  // Inicializar selector de mes
+  // ⚡ Selector de Movimientos
   const selector = document.getElementById("selectorMes");
   if (selector) {
     const hoy = new Date();
     selector.value = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}`;
+    selector.addEventListener("change", renderTablaMovimientos);
+  }
 
-    // ⚡ Cambio importante: actualizar tabla y reportes al cambiar mes
-    selector.addEventListener("change", () => {
-      renderTablaMovimientos();
-      renderReportes();
+  // ⚡ Selector de Reportes
+  const selectorReportes = document.getElementById("selectorMesReportes");
+  if (selectorReportes) {
+    const hoy = new Date();
+    selectorReportes.value = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}`;
+    selectorReportes.addEventListener("change", () => {
+      renderReportes(); // actualiza solo reportes
     });
   }
 
@@ -211,7 +216,7 @@ async function mostrarFinanzas() {
 // 7️⃣ Reportes
 // ------------------------
 function obtenerDatosReportes() {
-  const selector = document.getElementById("selectorMes");
+  const selector = document.getElementById("selectorMesReportes"); // ⚡ usar selector de reportes
   if (!selector) return {};
 
   const [anio, mesStr] = selector.value.split("-");
@@ -221,7 +226,7 @@ function obtenerDatosReportes() {
   const datosMes = finanzasData.filter(mov => {
     if (!mov.Fecha) return false;
     const [y, m] = mov.Fecha.split("-");
-    return parseInt(m, 10) - 1 === mes && parseInt(y, 10) === anioInt;
+    return parseInt(y, 10) === anioInt && parseInt(m, 10) - 1 === mes;
   });
 
   let totalIngresosNetos = 0;
