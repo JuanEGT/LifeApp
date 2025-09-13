@@ -220,6 +220,8 @@ function obtenerDatosReportes() {
     return parseInt(m, 10) - 1 === mes && parseInt(y, 10) === anio;
   });
 
+  console.log("Movimientos filtrados para el mes:", datosMes);
+
   // Inicializamos variables
   let totalIngresosNetos = 0;
   let totalGastos = 0;
@@ -257,6 +259,18 @@ function obtenerDatosReportes() {
     if (mov.MetodoPago) metodosPagoMap[mov.MetodoPago] = (metodosPagoMap[mov.MetodoPago] || 0) + cantidad;
   });
 
+  console.log("Datos de reportes:", {
+    totalIngresosNetos,
+    totalGastos,
+    saldo: totalIngresosNetos - totalGastos,
+    grupos: Object.keys(gruposMap),
+    distribucionGrupo: Object.values(gruposMap),
+    metodosPago: Object.keys(metodosPagoMap),
+    usoMetodosPago: Object.values(metodosPagoMap),
+    horasTrabajadas,
+    salarioPromedio: ingresosLaborales ? salarioPorHoraSum / ingresosLaborales : 0
+  });
+  
   return {
     totalIngresosNetos,
     totalGastos,
