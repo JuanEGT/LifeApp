@@ -4,8 +4,6 @@ const SPREADSHEET_ID = "1CMnA-3Ch5Ac1LLP8Hgph15IeeH7Dlvcj0IvX51mLzKU"; // tu ID 
 const SHEET_NAME = "Finanzas";
 
 let finanzasData = []; // todos los movimientos cargados
-let token; // token de Google API
-
 // ------------------------
 // 0️⃣ Set token desde app.js
 // ------------------------
