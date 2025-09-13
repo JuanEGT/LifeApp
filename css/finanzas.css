@@ -121,3 +121,13 @@
     flex-direction: column;
   }
 }
+
+.finanzas-screen {
+  display: none;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.finanzas-screen.active {
+  display: flex;
+}

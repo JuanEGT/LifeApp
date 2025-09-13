@@ -81,52 +81,88 @@
 
   <!-- ================= FINANZAS ================= -->
 <div id="finanzasContainer" class="container" style="display:none">
-  <h1>Finanzas</h1>
 
-  <!-- Selector de mes -->
-  <label>
-    Mes:
-    <input type="month" id="selectorMes" />
-  </label>
-
-  <!-- Tabla de movimientos -->
-  <table class="tabla-finanzas">
-    <thead>
-      <tr>
-        <th>Fecha</th>
-        <th>Tipo</th>
-        <th>Cantidad</th>
-        <th>Nombre</th>
-        <th>Método de Pago</th>
-      </tr>
-    </thead>
-    <tbody id="finanzas-table-body"></tbody>
-  </table>
-
-  <!-- Resumen -->
-  <div class="resumen-finanzas">
-    <p>Ingresos: <span id="total-ingresos">0</span></p>
-    <p>Gastos: <span id="total-gastos">0</span></p>
-    <p>Saldo: <span id="saldo">0</span></p>
+  <!-- 📍 Menú principal de Finanzas -->
+  <div id="finanzasMenu">
+    <h1>Finanzas</h1>
+    <button id="btnMovimientos">📜 Ver Movimientos</button>
+    <button id="btnAgregar">➕ Agregar Movimiento</button>
+    <button id="btnReportes">📊 Reportes</button>
+    <button id="btnProyecciones">📈 Proyecciones</button>
+    <button id="btnSimulaciones">📅 Simulaciones</button>
+    <button id="btnVolverMenuFinanzas">🔙 Volver al Menú Principal</button>
   </div>
 
-  <!-- Formulario agregar movimiento -->
-  <form id="form-finanza" class="form">
-    <input type="text" id="grupo" placeholder="Grupo" required>
-    <select id="tipo">
-      <option value="Ingreso">Ingreso</option>
-      <option value="Gasto">Gasto</option>
-      <option value="Ahorro">Ahorro</option>
-      <option value="Deuda">Deuda</option>
-      <option value="Inversión">Inversión</option>
-    </select>
-    <input type="date" id="fecha" required>
-    <input type="number" id="cantidad" placeholder="Cantidad" required>
-    <input type="text" id="nombre" placeholder="Nombre" required>
-    <input type="text" id="metodoPago" placeholder="Método de Pago">
-    <button type="submit" class="btn">Agregar</button>
-    <button type="button" class="btn backBtn" id="btnVolverMenuFinanzas">Volver al Menú Principal</button>
-  </form>
+  <!-- 📍 Submenú: Movimientos -->
+  <div id="finanzasMovimientos" style="display:none">
+    <h2>📜 Movimientos</h2>
+
+    <!-- Selector de mes -->
+    <label>
+      Mes:
+      <input type="month" id="selectorMes" />
+    </label>
+
+    <!-- Tabla -->
+    <table class="tabla-finanzas">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Tipo</th>
+          <th>Cantidad</th>
+          <th>Nombre</th>
+          <th>Método de Pago</th>
+        </tr>
+      </thead>
+      <tbody id="finanzas-table-body"></tbody>
+    </table>
+
+    <!-- Resumen -->
+    <div class="resumen-finanzas">
+      <p>Ingresos: <span id="total-ingresos">0</span></p>
+      <p>Gastos: <span id="total-gastos">0</span></p>
+      <p>Saldo: <span id="saldo">0</span></p>
+    </div>
+
+    <button class="btn btnVolverFinanzas">🔙 Volver</button>
+  </div>
+
+  <!-- 📍 Submenú: Agregar Movimiento -->
+  <div id="finanzasAgregar" style="display:none">
+    <h2>➕ Agregar Movimiento</h2>
+    <form id="form-finanza" class="form">
+      <input type="text" id="grupo" placeholder="Grupo" required>
+      <select id="tipo">
+        <option value="Ingreso">Ingreso</option>
+        <option value="Gasto">Gasto</option>
+        <option value="Ahorro">Ahorro</option>
+        <option value="Deuda">Deuda</option>
+        <option value="Inversión">Inversión</option>
+      </select>
+      <input type="date" id="fecha" required>
+      <input type="number" id="cantidad" placeholder="Cantidad" required>
+      <input type="text" id="nombre" placeholder="Nombre" required>
+      <input type="text" id="metodoPago" placeholder="Método de Pago">
+      <button type="submit" class="btn">Agregar</button>
+      <button type="button" class="btn btnVolverFinanzas">🔙 Volver</button>
+    </form>
+  </div>
+
+  <!-- 📍 Submenús vacíos para futuras funciones -->
+  <div id="finanzasReportes" style="display:none">
+    <h2>📊 Reportes</h2>
+    <button class="btn btnVolverFinanzas">🔙 Volver</button>
+  </div>
+
+  <div id="finanzasProyecciones" style="display:none">
+    <h2>📈 Proyecciones</h2>
+    <button class="btn btnVolverFinanzas">🔙 Volver</button>
+  </div>
+
+  <div id="finanzasSimulaciones" style="display:none">
+    <h2>📅 Simulaciones</h2>
+    <button class="btn btnVolverFinanzas">🔙 Volver</button>
+  </div>
 </div>
 <!-- ================= FIN-FINANZAS ================= -->
 

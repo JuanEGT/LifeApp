@@ -13,6 +13,24 @@ function setToken(newToken) {
 }
 
 // ------------------------
+// Utils: mostrar/ocultar secciones
+// ------------------------
+function showSection(sectionId) {
+  const sections = [
+    "finanzasMenu",
+    "finanzasMovimientos",
+    "finanzasAgregar",
+    "finanzasReportes",
+    "finanzasProyecciones",
+    "finanzasSimulaciones"
+  ];
+
+  sections.forEach(id => {
+    document.getElementById(id).style.display = id === sectionId ? "block" : "none";
+  });
+}
+
+// ------------------------
 // 1️⃣ Cargar datos de Finanzas desde Sheets
 // ------------------------
 async function cargarFinanzas() {
@@ -54,19 +72,7 @@ async function cargarFinanzas() {
 }
 
 // ------------------------
-// 2️⃣ Filtrar por mes y año
-// ------------------------
-function filtrarPorMes(data, mes, anio) {
-  return data.filter(mov => {
-    if (!mov.Fecha) return false;
-    const [y, m] = mov.Fecha.split("-");
-    return parseInt(m, 10) - 1 === mes && parseInt(y, 10) === anio;
-  });
-}
-
-
-// ------------------------
-// 3️⃣ Renderizar tabla
+// 2️⃣ Renderizar tabla de movimientos
 // ------------------------
 function renderTablaMovimientos() {
   const tableBody = document.getElementById("finanzas-table-body");
@@ -78,18 +84,13 @@ function renderTablaMovimientos() {
   const anioInt = parseInt(anio, 10);
 
   const filteredData = finanzasData.filter(mov => {
-  if (!mov.Fecha) return false;
-  const [y, m] = mov.Fecha.split("-");
-  return parseInt(y, 10) === anioInt && parseInt(m, 10) - 1 === mes;
+    if (!mov.Fecha) return false;
+    const [y, m] = mov.Fecha.split("-");
+    return parseInt(y, 10) === anioInt && parseInt(m, 10) - 1 === mes;
   });
 
   filteredData.forEach(mov => {
     const tr = document.createElement("tr");
-    const color =
-      mov.Tipo === "Ingreso" ? "text-green-400" :
-      mov.Tipo === "Gasto" ? "text-red-400" :
-      "text-gray-300";
-
     tr.innerHTML = `
       <td>${mov.Fecha}</td>
       <td>${mov.Tipo}</td>
@@ -97,16 +98,15 @@ function renderTablaMovimientos() {
       <td>${mov.Nombre}</td>
       <td>${mov.MetodoPago}</td>
     `;
-      tr.style.color = "white"; // temporalmente para asegurarte que se vea
-    console.log("Renderizando fila:", mov);
+    tr.style.color = "white";
     tableBody.appendChild(tr);
   });
-  console.log("Finanzas normalizadas:", finanzasData[0]);
+
   renderResumen(filteredData);
 }
 
 // ------------------------
-// 4️⃣ Renderizar resumen
+// 3️⃣ Renderizar resumen
 // ------------------------
 function renderResumen(data) {
   let totalIngresos = 0;
@@ -126,7 +126,7 @@ function renderResumen(data) {
 }
 
 // ------------------------
-// 5️⃣ Agregar movimiento
+// 4️⃣ Agregar movimiento
 // ------------------------
 async function agregarMovimiento(event) {
   event.preventDefault();
@@ -170,7 +170,7 @@ async function agregarMovimiento(event) {
 }
 
 // ------------------------
-// 6️⃣ Mostrar sección Finanzas
+// 5️⃣ Mostrar sección Finanzas principal
 // ------------------------
 async function mostrarFinanzas() {
   document.getElementById("loginContainer").style.display = "none";
@@ -178,29 +178,47 @@ async function mostrarFinanzas() {
   document.getElementById("agendaContainer").style.display = "none";
   document.getElementById("finanzasContainer").style.display = "flex";
 
+  // Mostrar solo el menú principal al entrar
+  showSection("finanzasMenu");
+
   // Inicializar selector de mes al mes actual
   const selector = document.getElementById("selectorMes");
-  const hoy = new Date();
-  selector.value = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}`;
-
-  selector.addEventListener("change", renderTablaMovimientos);
+  if (selector) {
+    const hoy = new Date();
+    selector.value = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}`;
+    selector.addEventListener("change", renderTablaMovimientos);
+  }
 
   await cargarFinanzas();
 }
 
 // ------------------------
-// 7️⃣ Inicialización botones
+// 6️⃣ Inicialización botones navegación
 // ------------------------
 document.addEventListener("DOMContentLoaded", () => {
+  // Botones del menú principal
+  document.getElementById("btnMovimientos")?.addEventListener("click", () => showSection("finanzasMovimientos"));
+  document.getElementById("btnAgregar")?.addEventListener("click", () => showSection("finanzasAgregar"));
+  document.getElementById("btnReportes")?.addEventListener("click", () => showSection("finanzasReportes"));
+  document.getElementById("btnProyecciones")?.addEventListener("click", () => showSection("finanzasProyecciones"));
+  document.getElementById("btnSimulaciones")?.addEventListener("click", () => showSection("finanzasSimulaciones"));
+
+  // Botones volver dentro de submenús
+  document.querySelectorAll(".btnVolverFinanzas").forEach(btn => {
+    btn.addEventListener("click", () => showSection("finanzasMenu"));
+  });
+
+  // Botón volver al menú principal global
   const btnVolverMenuFinanzas = document.getElementById("btnVolverMenuFinanzas");
   if (btnVolverMenuFinanzas) btnVolverMenuFinanzas.addEventListener("click", mostrarMenuPrincipal);
 
+  // Formulario agregar
   const formFinanza = document.getElementById("form-finanza");
   if (formFinanza) formFinanza.addEventListener("submit", agregarMovimiento);
 });
 
 // ------------------------
-// 8️⃣ Exportar funciones públicas
+// 7️⃣ Exportar funciones públicas
 // ------------------------
 const Finanzas = {
   mostrarFinanzas,
