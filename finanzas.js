@@ -34,7 +34,7 @@ function showSection(sectionId) {
 // ------------------------
 async function cargarFinanzas() {
   if (!token) return;
-
+  console.log("Movimientos cargados:", finanzasData);
   try {
     const res = await fetch(
       `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?majorDimension=ROWS`,
