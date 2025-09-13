@@ -190,7 +190,10 @@ async function mostrarFinanzas() {
   document.getElementById("finanzasContainer").style.display = "flex";
   
   showSection("finanzasMenu");
+
+  // ⚡ Primero cargar todos los datos
   await cargarFinanzas();
+
   // ⚡ Selector de Movimientos
   const selector = document.getElementById("selectorMes");
   if (selector) {
@@ -204,14 +207,13 @@ async function mostrarFinanzas() {
   if (selectorReportes) {
     const hoy = new Date();
     selectorReportes.value = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}`;
+    // ⚡ Llamar renderReportes también aquí para mostrar datos iniciales
+    renderReportes();
     selectorReportes.addEventListener("change", () => {
-      renderReportes(); // actualiza solo reportes
+      renderReportes(); // actualizar reportes al cambiar
     });
   }
-
-
 }
-
 // ------------------------
 // 7️⃣ Reportes
 // ------------------------
