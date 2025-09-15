@@ -1,20 +1,22 @@
 // ================= FINANZAS.JS =================
 
+// ------------------------
+// 🔹 Configuración general
+// ------------------------
 const SPREADSHEET_ID = "1CMnA-3Ch5Ac1LLP8Hgph15IeeH7Dlvcj0IvX51mLzKU"; // tu ID real
 const SHEET_NAME = "Finanzas";
-
 let finanzasData = [];
 
 // ------------------------
-// 0️⃣ Set token desde app.js
+// 0️⃣ Funciones auxiliares generales
 // ------------------------
+
+// Set token desde app.js
 function setToken(newToken) {
   token = newToken;
 }
 
-// ------------------------
-// Utils: mostrar/ocultar secciones
-// ------------------------
+// Mostrar/ocultar secciones
 function showSection(sectionId) {
   const sections = [
     "finanzasMenu",
@@ -24,14 +26,13 @@ function showSection(sectionId) {
     "finanzasProyecciones",
     "finanzasSimulaciones"
   ];
-
   sections.forEach(id => {
     document.getElementById(id).style.display = id === sectionId ? "block" : "none";
   });
 }
 
 // ------------------------
-// 1️⃣ Cargar datos de Finanzas desde Sheets
+// 1️⃣ Cargar datos desde Google Sheets
 // ------------------------
 async function cargarFinanzas() {
   if (!token) return;
@@ -70,7 +71,7 @@ async function cargarFinanzas() {
 }
 
 // ------------------------
-// 3️⃣ Renderizar tabla de movimientos
+// 2️⃣ Renderizar Movimientos
 // ------------------------
 function renderTablaMovimientos() {
   const tableBody = document.getElementById("finanzas-table-body");
@@ -78,6 +79,7 @@ function renderTablaMovimientos() {
 
   const selector = document.getElementById("selectorMes");
   if (!selector) return;
+
   const [anio, mesStr] = selector.value.split("-");
   const mes = parseInt(mesStr, 10) - 1;
   const anioInt = parseInt(anio, 10);
@@ -105,7 +107,7 @@ function renderTablaMovimientos() {
 }
 
 // ------------------------
-// 4️⃣ Renderizar resumen
+// 3️⃣ Renderizar Resumen de Movimientos
 // ------------------------
 function renderResumen(data) {
   let totalIngresos = 0;
@@ -125,7 +127,7 @@ function renderResumen(data) {
 }
 
 // ------------------------
-// 5️⃣ Agregar movimiento
+// 4️⃣ Agregar Movimiento
 // ------------------------
 async function agregarMovimiento(event) {
   event.preventDefault();
@@ -169,16 +171,16 @@ async function agregarMovimiento(event) {
 }
 
 // ------------------------
-// 6️⃣ Mostrar sección Finanzas principal
+// 5️⃣ Mostrar sección Finanzas principal
 // ------------------------
 async function mostrarFinanzas() {
+  // Ocultar otras secciones
   document.getElementById("loginContainer").style.display = "none";
   document.getElementById("mainMenu").style.display = "none";
   document.getElementById("agendaContainer").style.display = "none";
   document.getElementById("finanzasContainer").style.display = "flex";
   
   showSection("finanzasMenu");
-
   await cargarFinanzas();
 
   // Selector de Movimientos
@@ -189,7 +191,7 @@ async function mostrarFinanzas() {
     selector.addEventListener("change", renderTablaMovimientos);
   }
 
-  // ⚡ Selectores de Reportes
+  // Selector de Reportes
   const selectorMes = document.getElementById("mesReporte");
   const selectorAnio = document.getElementById("anioReporte");
 
@@ -206,7 +208,7 @@ async function mostrarFinanzas() {
 }
 
 // ------------------------
-// 7️⃣ Obtener datos para reportes
+// 6️⃣ Datos para Reportes
 // ------------------------
 function obtenerDatosReportes() {
   const selectorMes = document.getElementById("mesReporte");
@@ -217,16 +219,11 @@ function obtenerDatosReportes() {
   const mes = parseInt(mesStr, 10) - 1;
   const anioInt = parseInt(selectorAnio.value, 10);
 
-  console.log("Reportes -> Mes:", mes + 1, "Año:", anioInt);
-  console.log("Movimientos totales:", finanzasData.length);
-
   const datosMes = finanzasData.filter(mov => {
     if (!mov.Fecha || !mov.Tipo || !mov.Cantidad) return false;
     const [y, m] = mov.Fecha.split("-");
     return parseInt(y, 10) === anioInt && parseInt(m, 10) - 1 === mes;
   });
-
-  console.log("Movimientos filtrados:", datosMes.length, datosMes);
 
   let totalIngresosNetos = 0;
   let totalGastos = 0;
@@ -274,7 +271,7 @@ function obtenerDatosReportes() {
 }
 
 // ------------------------
-// 7️⃣ Renderizar reportes con Chart.js
+// 7️⃣ Renderizar Reportes con Chart.js
 // ------------------------
 let chartIngresosGastos, chartDistribucionGrupo, chartSaldoMensual, chartMetodosPago, chartHorasSalario;
 
@@ -282,6 +279,7 @@ function renderReportes() {
   const datos = obtenerDatosReportes();
   if (!datos) return;
 
+  // Gráfica Ingresos vs Gastos
   if (chartIngresosGastos) chartIngresosGastos.destroy();
   chartIngresosGastos = new Chart(document.getElementById("graficoIngresosGastos"), {
     type: "bar",
@@ -294,6 +292,7 @@ function renderReportes() {
     }
   });
 
+  // Gráfica Distribución por Grupo
   if (chartDistribucionGrupo) chartDistribucionGrupo.destroy();
   chartDistribucionGrupo = new Chart(document.getElementById("graficoDistribucionGrupo"), {
     type: "pie",
@@ -303,64 +302,53 @@ function renderReportes() {
     }
   });
 
-// --- Saldo Anual ---
-if (chartSaldoMensual) chartSaldoMensual.destroy();
-
-// Obtenemos el año seleccionado
-const anio = parseInt(document.getElementById("anioReporte").value, 10);
-
-// Calculamos saldo por cada mes del año
-const saldosMensuales = [];
-for (let m = 1; m <= 12; m++) {
-  const mesStr = m.toString().padStart(2, "0");
-  
-  const ingresos = finanzasData
-    .filter(d => d.Fecha.startsWith(`${anio}-${mesStr}`) && d.Tipo === "Ingreso")
-    .reduce((acc, d) => {
-      const horas = parseFloat(d.HorasTrabajadas) || 0;
-      const salario = parseFloat(d.SalarioPorHora) || 0;
-      const propinas = parseFloat(d.Propinas) || 0;
-      const bonos = parseFloat(d.BonosAguinaldo) || 0;
-      const deducciones = parseFloat(d.Deducciones) || 0;
-      return acc + horas * salario + propinas + bonos - deducciones;
-    }, 0);
-
-  const gastos = finanzasData
-    .filter(d => d.Fecha.startsWith(`${anio}-${mesStr}`) && d.Tipo === "Gasto")
-    .reduce((acc, d) => acc + (parseFloat(d.Cantidad) || 0), 0);
-
-  saldosMensuales.push(ingresos - gastos);
-}
-
-chartSaldoMensual = new Chart(document.getElementById("graficoSaldoMensual"), {
-  type: "line",
-  data: {
-    labels: ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
-    datasets: [{
-      label: `Saldo ${anio}`,
-      data: saldosMensuales,
-      borderColor: "#ffeb3b",
-      backgroundColor: "rgba(255,235,59,0.3)",
-      fill: true,
-      tension: 0.3
-    }]
-  },
-  options: {
-    responsive: true,
-    plugins: { legend: { position: "top" } }
+  // Gráfica Saldo Anual
+  if (chartSaldoMensual) chartSaldoMensual.destroy();
+  const anio = parseInt(document.getElementById("anioReporte").value, 10);
+  const saldosMensuales = [];
+  for (let m = 1; m <= 12; m++) {
+    const mesStr = m.toString().padStart(2, "0");
+    const ingresos = finanzasData
+      .filter(d => d.Fecha.startsWith(`${anio}-${mesStr}`) && d.Tipo === "Ingreso")
+      .reduce((acc, d) => {
+        const horas = parseFloat(d.HorasTrabajadas) || 0;
+        const salario = parseFloat(d.SalarioPorHora) || 0;
+        const propinas = parseFloat(d.Propinas) || 0;
+        const bonos = parseFloat(d.BonosAguinaldo) || 0;
+        const deducciones = parseFloat(d.Deducciones) || 0;
+        return acc + horas * salario + propinas + bonos - deducciones;
+      }, 0);
+    const gastos = finanzasData
+      .filter(d => d.Fecha.startsWith(`${anio}-${mesStr}`) && d.Tipo === "Gasto")
+      .reduce((acc, d) => acc + (parseFloat(d.Cantidad) || 0), 0);
+    saldosMensuales.push(ingresos - gastos);
   }
-});
 
+  chartSaldoMensual = new Chart(document.getElementById("graficoSaldoMensual"), {
+    type: "line",
+    data: {
+      labels: ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
+      datasets: [{
+        label: `Saldo ${anio}`,
+        data: saldosMensuales,
+        borderColor: "#ffeb3b",
+        backgroundColor: "rgba(255,235,59,0.3)",
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { position: "top" } } }
+  });
+
+  // Gráfica Métodos de Pago
   if (chartMetodosPago) chartMetodosPago.destroy();
   chartMetodosPago = new Chart(document.getElementById("graficoMetodosPago"), {
     type: "bar",
-    data: {
-      labels: datos.metodosPago,
-      datasets: [{ label: "Uso", data: datos.usoMetodosPago, backgroundColor: "#2196f3" }]
-    },
+    data: { labels: datos.metodosPago, datasets: [{ label: "Uso", data: datos.usoMetodosPago, backgroundColor: "#2196f3" }] },
     options: { indexAxis: 'y' }
   });
 
+  // Gráfica Horas y Salario
   if (chartHorasSalario) chartHorasSalario.destroy();
   chartHorasSalario = new Chart(document.getElementById("graficoHorasSalario"), {
     type: "bar",
@@ -374,34 +362,23 @@ chartSaldoMensual = new Chart(document.getElementById("graficoSaldoMensual"), {
   });
 }
 
-//------------------------------------------------
-// Proyecciones y simulaciones (vacío por ahora)
-//------------------------------------------------
+// ------------------------
+// 8️⃣ Proyecciones y Simulaciones (vacío por ahora)
+// ------------------------
 function renderProyecciones() { console.log("Renderizando Proyecciones (vacío)"); }
 function renderSimulaciones() { console.log("Renderizando Simulaciones (vacío)"); }
 
 // ------------------------
-// 8️⃣ Inicialización botones navegación
+// 9️⃣ Inicialización de botones y formularios
 // ------------------------
 function initBotonesSubmenus() {
   document.getElementById("btnMovimientos")?.addEventListener("click", () => showSection("finanzasMovimientos"));
   document.getElementById("btnAgregar")?.addEventListener("click", () => showSection("finanzasAgregar"));
-  document.getElementById("btnReportes")?.addEventListener("click", () => {
-    showSection("finanzasReportes");
-    renderReportes();
-  });
-  document.getElementById("btnProyecciones")?.addEventListener("click", () => {
-    showSection("finanzasProyecciones");
-    renderProyecciones();
-  });
-  document.getElementById("btnSimulaciones")?.addEventListener("click", () => {
-    showSection("finanzasSimulaciones");
-    renderSimulaciones();
-  });
+  document.getElementById("btnReportes")?.addEventListener("click", () => { showSection("finanzasReportes"); renderReportes(); });
+  document.getElementById("btnProyecciones")?.addEventListener("click", () => { showSection("finanzasProyecciones"); renderProyecciones(); });
+  document.getElementById("btnSimulaciones")?.addEventListener("click", () => { showSection("finanzasSimulaciones"); renderSimulaciones(); });
 
-  document.querySelectorAll(".btnVolverFinanzas").forEach(btn => {
-    btn.addEventListener("click", () => showSection("finanzasMenu"));
-  });
+  document.querySelectorAll(".btnVolverFinanzas").forEach(btn => btn.addEventListener("click", () => showSection("finanzasMenu")));
 
   const btnVolverMenuFinanzas = document.getElementById("btnVolverMenuFinanzas");
   if (btnVolverMenuFinanzas) btnVolverMenuFinanzas.addEventListener("click", mostrarMenuPrincipal);
@@ -411,14 +388,14 @@ function initBotonesSubmenus() {
 }
 
 // ------------------------
-// 9️⃣ Inicialización al cargar DOM
+// 🔟 Inicialización al cargar DOM
 // ------------------------
 document.addEventListener("DOMContentLoaded", () => {
   initBotonesSubmenus();
 });
 
 // ------------------------
-// 🔟 Exportar funciones públicas
+// 🔹 Exportar funciones públicas
 // ------------------------
 const Finanzas = {
   mostrarFinanzas,
