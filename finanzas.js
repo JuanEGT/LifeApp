@@ -252,90 +252,59 @@ function renderReportes() {
 // ------------------------
 let chartProyecciones;
 
-function calcularPromedioUltimosMeses(meses = 6) {
-  const hoy = new Date();
-  const ingresos = [];
-  const gastos = [];
-
-  for (let i = meses - 1; i >= 0; i--) {
-    const fecha = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
-    const mesStr = String(fecha.getMonth() + 1).padStart(2, "0");
-    const anio = fecha.getFullYear();
-
-    const movMes = finanzasData.filter(m => {
-      if (!m.Fecha) return false;
-      const [y, mStr] = m.Fecha.split("-");
-      return parseInt(y, 10) === anio && mStr === mesStr;
-    });
-
-    let ingresosMes = 0;
-    let gastosMes = 0;
-
-    movMes.forEach(m => {
-      const cantidad = parseFloat(m.Cantidad) || 0;
-      if (m.Tipo === "Ingreso") ingresosMes += cantidad;
-      if (m.Tipo === "Gasto") gastosMes += cantidad;
-    });
-
-    ingresos.push(ingresosMes);
-    gastos.push(gastosMes);
-  }
-
-  const promedio = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
-
-  return {
-    promedioIngresos: promedio(ingresos),
-    promedioGastos: promedio(gastos)
-  };
-}
-
 function renderProyecciones() {
-  if (!finanzasData.length) return;
+  // Asegurarnos de que el canvas exista y esté visible
+  const container = document.getElementById("finanzasProyecciones");
+  container.style.display = "block"; // mostrar temporalmente para asegurar contexto
 
-  const { promedioIngresos, promedioGastos } = calcularPromedioUltimosMeses(6);
-  const mesesProyeccion = 12;
-
-  const saldoActual = finanzasData.reduce((acc, m) => {
-    const cantidad = parseFloat(m.Cantidad) || 0;
-    return m.Tipo === "Ingreso" ? acc + cantidad : acc - cantidad;
-  }, 0);
-
-  const proyeccionBase = [];
-  const proyeccionOptimista = [];
-  const proyeccionPesimista = [];
-
-  let saldo = saldoActual;
-
-  for (let i = 1; i <= mesesProyeccion; i++) {
-    saldo += promedioIngresos - promedioGastos;
-    proyeccionBase.push(saldo);
-
-    proyeccionOptimista.push(saldo + promedioIngresos * 0.1 - promedioGastos * 0.1);
-    proyeccionPesimista.push(saldo - promedioIngresos * 0.1 + promedioGastos * 0.1);
+  let canvas = document.getElementById("graficoProyecciones");
+  if (!canvas) {
+    // Crear canvas dinámicamente si no existe
+    canvas = document.createElement("canvas");
+    canvas.id = "graficoProyecciones";
+    canvas.width = 400;
+    canvas.height = 200;
+    container.appendChild(canvas);
   }
 
+  // Datos de ejemplo: proyección de saldo mensual para el año
+  const anio = new Date().getFullYear();
+  const saldosProyectados = Array.from({ length: 12 }, (_, i) => {
+    // Ejemplo simple: saldo promedio mensual + 5% crecimiento mensual
+    const promedioMes = finanzasData
+      .filter(d => d.Fecha.startsWith(`${anio}-${String(i + 1).padStart(2, "0")}`))
+      .reduce((acc, d) => {
+        const cantidad = parseFloat(d.Cantidad) || 0;
+        return d.Tipo === "Ingreso" ? acc + cantidad : acc - cantidad;
+      }, 0);
+    return promedioMes * (1 + 0.05 * i); // crecimiento 5% mensual
+  });
+
+  // Destruir gráfico previo si existe
   if (chartProyecciones) chartProyecciones.destroy();
-  chartProyecciones = new Chart(document.getElementById("graficoProyecciones"), {
+
+  chartProyecciones = new Chart(canvas, {
     type: "line",
     data: {
-      labels: Array.from({ length: mesesProyeccion }, (_, i) => `Mes ${i + 1}`),
-      datasets: [
-        { label: "Proyección Base", data: proyeccionBase, borderColor: "#4caf50", fill: false },
-        { label: "Optimista (+10%)", data: proyeccionOptimista, borderColor: "#2196f3", fill: false },
-        { label: "Pesimista (-10%)", data: proyeccionPesimista, borderColor: "#f44336", fill: false }
-      ]
+      labels: ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
+      datasets: [{
+        label: `Proyección Saldo ${anio}`,
+        data: saldosProyectados,
+        borderColor: "#ff9800",
+        backgroundColor: "rgba(255,152,0,0.3)",
+        fill: true,
+        tension: 0.3
+      }]
     },
     options: {
       responsive: true,
-      plugins: { legend: { position: "top" } },
-      scales: { y: { beginAtZero: false } }
+      plugins: { legend: { position: "top" } }
     }
   });
+
+  // Mantener la sección visible
+  showSection("finanzasProyecciones");
 }
-
-
-
-
 
 // y simulaciones
 function renderSimulaciones() { console.log("Renderizando Simulaciones (vacío)"); }
