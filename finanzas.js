@@ -7,6 +7,7 @@ const SPREADSHEET_ID = "1CMnA-3Ch5Ac1LLP8Hgph15IeeH7Dlvcj0IvX51mLzKU";
 const SHEET_NAME = "Finanzas";
 let finanzasData = [];
 let charts = {};
+let token = ""; // Declaración de token
 
 // ------------------------
 // 0️⃣ Token
@@ -65,8 +66,10 @@ function calcularIngresosNetos(data) {
 }
 
 function renderChart(canvasId, config) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
   if (charts[canvasId]) charts[canvasId].destroy();
-  charts[canvasId] = new Chart(document.getElementById(canvasId), config);
+  charts[canvasId] = new Chart(canvas, config);
 }
 
 function parseRow(headers, row) {
@@ -110,6 +113,7 @@ async function cargarFinanzas() {
 // ------------------------
 function renderTablaMovimientos() {
   const tableBody = document.getElementById("finanzas-table-body");
+  if (!tableBody) return;
   tableBody.innerHTML = "";
   const selector = document.getElementById("selectorMes");
   if (!selector) return;
@@ -207,60 +211,16 @@ function obtenerDatosReportes() {
   };
 }
 
-function calcularSaldosMensuales(anio) {
-  return Array.from({ length: 12 }, (_, i) => {
-    const mes = (i + 1).toString().padStart(2, "0");
-    const ingresos = finanzasData.filter(d => d.Fecha.startsWith(`${anio}-${mes}`) && d.Tipo === "Ingreso").reduce((acc, d) => {
-      const h = parseFloat(d.HorasTrabajadas) || 0;
-      const s = parseFloat(d.SalarioPorHora) || 0;
-      const prop = parseFloat(d.Propinas) || 0;
-      const bonos = parseFloat(d.BonosAguinaldo) || 0;
-      const ded = parseFloat(d.Deducciones) || 0;
-      return acc + h * s + prop + bonos - ded;
-    }, 0);
-    const gastos = finanzasData.filter(d => d.Fecha.startsWith(`${anio}-${mes}`) && d.Tipo === "Gasto").reduce((acc, d) => acc + (parseFloat(d.Cantidad) || 0), 0);
-    return ingresos - gastos;
-  });
-}
-
-function renderReportes() {
-  const datos = obtenerDatosReportes();
-  if (!datos) return;
-
-  // Ingresos vs Gastos
-  renderChart("graficoIngresosGastos", {
-    type: "bar",
-    data: { labels: ["Mes seleccionado"], datasets: [{ label: "Ingresos Netos", data: [datos.totalIngresosNetos], backgroundColor: "#4caf50" }, { label: "Gastos", data: [datos.totalGastos], backgroundColor: "#f44336" }] }
-  });
-
-  // Distribución por grupo
-  renderChart("graficoDistribucionGrupo", { type: "pie", data: { labels: datos.grupos, datasets: [{ data: datos.distribucionGrupo, backgroundColor: ["#4caf50","#f44336","#2196f3","#ff9800","#9c27b0"] }] } });
-
-  // Saldo anual
-  const anio = parseInt(document.getElementById("anioReporte").value, 10);
-  renderChart("graficoSaldoMensual", { type: "line", data: { labels: ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"], datasets: [{ label: `Saldo ${anio}`, data: calcularSaldosMensuales(anio), borderColor: "#ffeb3b", backgroundColor: "rgba(255,235,59,0.3)", fill: true, tension: 0.3 }] }, options: { responsive: true, plugins: { legend: { position: "top" } } } });
-
-  // Métodos de pago
-  renderChart("graficoMetodosPago", { type: "bar", data: { labels: datos.metodosPago, datasets: [{ label: "Uso", data: datos.usoMetodosPago, backgroundColor: "#2196f3" }] }, options: { indexAxis: 'y' } });
-
-  // Horas y salario promedio
-  renderChart("graficoHorasSalario", { type: "bar", data: { labels: ["Mes seleccionado"], datasets: [{ label: "Horas Trabajadas", data: [datos.horasTrabajadas], backgroundColor: "#ff9800" }, { label: "Salario Promedio", data: [datos.salarioPromedio], backgroundColor: "#9c27b0" }] } });
-}
-
 // ------------------------ 
 // 6️⃣ Proyecciones
 // ------------------------
-
 let chartProyeccionInversion, chartProyeccionDeuda;
 
 function calcularProyecciones() {
   const anioInicio = parseInt(document.getElementById("anioInicioProyecciones").value, 10);
   const horizonte = Math.min(parseInt(document.getElementById("horizonteProyecciones").value, 10), 5);
-
   const fechaActual = new Date();
   const mesActual = fechaActual.getMonth() + 1; // 1-12
-
-  // Generar array de meses desde actual hasta horizonte
   const meses = [];
   const fechas = [];
   for (let i = 0; i < horizonte * 12; i++) {
@@ -270,11 +230,9 @@ function calcularProyecciones() {
     fechas.push(`${String(mes).padStart(2, "0")}/${anio}`);
   }
 
-  // Filtrar datos históricos hasta el mes actual
   const inversionesData = finanzasData.filter(d => d.Tipo === "Inversión");
   const deudasData = finanzasData.filter(d => d.Tipo === "Deuda");
 
-  // Función para proyectar cada elemento según periodicidad
   const proyectar = (datos, meses) => {
     const saldoMensual = [];
     let saldoActual = 0;
@@ -305,47 +263,83 @@ function calcularProyecciones() {
   const saldoInversion = proyectar(inversionesData, meses);
   const saldoDeuda = proyectar(deudasData, meses);
 
-  // Graficar Inversiones
   if (chartProyeccionInversion) chartProyeccionInversion.destroy();
-  chartProyeccionInversion = new Chart(document.getElementById("graficoProyeccionesInversion"), {
-    type: "line",
-    data: {
-      labels: fechas,
-      datasets: [{
-        label: "Inversiones proyectadas",
-        data: saldoInversion,
-        borderColor: "#4caf50",
-        backgroundColor: "rgba(76,175,80,0.2)",
-        fill: true,
-        tension: 0.3
-      }]
-    },
-    options: { responsive: true, plugins: { legend: { position: "top" } } }
-  });
+  if (document.getElementById("graficoProyeccionesInversion")) {
+    chartProyeccionInversion = new Chart(document.getElementById("graficoProyeccionesInversion"), {
+      type: "line",
+      data: {
+        labels: fechas,
+        datasets: [{
+          label: "Inversiones proyectadas",
+          data: saldoInversion,
+          borderColor: "#4caf50",
+          backgroundColor: "rgba(76,175,80,0.2)",
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { position: "top" } } }
+    });
+  }
 
-  // Graficar Deudas
   if (chartProyeccionDeuda) chartProyeccionDeuda.destroy();
-  chartProyeccionDeuda = new Chart(document.getElementById("graficoProyeccionesDeuda"), {
-    type: "line",
-    data: {
-      labels: fechas,
-      datasets: [{
-        label: "Deudas proyectadas",
-        data: saldoDeuda,
-        borderColor: "#f44336",
-        backgroundColor: "rgba(244,67,54,0.2)",
-        fill: true,
-        tension: 0.3
-      }]
-    },
-    options: { responsive: true, plugins: { legend: { position: "top" } } }
-  });
+  if (document.getElementById("graficoProyeccionesDeuda")) {
+    chartProyeccionDeuda = new Chart(document.getElementById("graficoProyeccionesDeuda"), {
+      type: "line",
+      data: {
+        labels: fechas,
+        datasets: [{
+          label: "Deudas proyectadas",
+          data: saldoDeuda,
+          borderColor: "#f44336",
+          backgroundColor: "rgba(244,67,54,0.2)",
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { position: "top" } } }
+    });
+  }
 }
 
 // Inicializar botón
 document.getElementById("btnCalcularProyecciones")?.addEventListener("click", calcularProyecciones);
 
-// Función pública para el
+// Función pública para el módulo
+function renderProyecciones() {
+  calcularProyecciones();
+}
+
+// y simulaciones
+function renderSimulaciones() { console.log("Renderizando Simulaciones (vacío)"); }
+
+// ------------------------
+// 7️⃣ Mostrar sección principal
+// ------------------------
+async function mostrarFinanzas() {
+  ["loginContainer","mainMenu","agendaContainer"].forEach(id => document.getElementById(id).style.display = "none");
+  document.getElementById("finanzasContainer").style.display = "flex";
+  showSection("finanzasMenu");
+  await cargarFinanzas();
+
+  const selector = document.getElementById("selectorMes");
+  if (selector) {
+    const hoy = new Date();
+    selector.value = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,"0")}`;
+    selector.addEventListener("change", renderTablaMovimientos);
+  }
+
+  const selectorMes = document.getElementById("mesReporte");
+  const selectorAnio = document.getElementById("anioReporte");
+  if (selectorMes && selectorAnio) {
+    const hoy = new Date();
+    selectorMes.value = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,"0")}`;
+    selectorAnio.value = hoy.getFullYear();
+    renderReportes();
+    selectorMes.addEventListener("change", renderReportes);
+    selectorAnio.addEventListener("change", renderReportes);
+  }
+}
 
 // ------------------------
 // 8️⃣ Botones y formularios
@@ -370,9 +364,6 @@ function initBotonesSubmenus() {
 // 9️⃣ Inicialización DOM
 // ------------------------
 document.addEventListener("DOMContentLoaded", () => initBotonesSubmenus());
-function renderProyecciones() {
-  calcularProyecciones();
-}
 
 // 🔟 Exportar funciones públicas
 const Finanzas = {
@@ -380,7 +371,7 @@ const Finanzas = {
   cargarFinanzas,
   setToken,
   renderReportes,
-  renderProyecciones, // ahora existe
+  renderProyecciones,
   renderSimulaciones,
   initBotonesSubmenus
 };
