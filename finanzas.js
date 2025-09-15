@@ -248,9 +248,99 @@ function renderReportes() {
 }
 
 // ------------------------
-// 6️⃣ Proyecciones y simulaciones
+// 6️⃣ Proyecciones 
 // ------------------------
-function renderProyecciones() { console.log("Renderizando Proyecciones (vacío)"); }
+// ------------------------
+// 6️⃣ Proyecciones
+// ------------------------
+let chartProyecciones;
+
+function calcularPromedioUltimosMeses(meses = 6) {
+  const hoy = new Date();
+  const ingresos = [];
+  const gastos = [];
+
+  for (let i = meses - 1; i >= 0; i--) {
+    const fecha = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
+    const mesStr = String(fecha.getMonth() + 1).padStart(2, "0");
+    const anio = fecha.getFullYear();
+
+    const movMes = finanzasData.filter(m => {
+      if (!m.Fecha) return false;
+      const [y, mStr] = m.Fecha.split("-");
+      return parseInt(y, 10) === anio && mStr === mesStr;
+    });
+
+    let ingresosMes = 0;
+    let gastosMes = 0;
+
+    movMes.forEach(m => {
+      const cantidad = parseFloat(m.Cantidad) || 0;
+      if (m.Tipo === "Ingreso") ingresosMes += cantidad;
+      if (m.Tipo === "Gasto") gastosMes += cantidad;
+    });
+
+    ingresos.push(ingresosMes);
+    gastos.push(gastosMes);
+  }
+
+  const promedio = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
+
+  return {
+    promedioIngresos: promedio(ingresos),
+    promedioGastos: promedio(gastos)
+  };
+}
+
+function renderProyecciones() {
+  if (!finanzasData.length) return;
+
+  const { promedioIngresos, promedioGastos } = calcularPromedioUltimosMeses(6);
+  const mesesProyeccion = 12;
+
+  const saldoActual = finanzasData.reduce((acc, m) => {
+    const cantidad = parseFloat(m.Cantidad) || 0;
+    return m.Tipo === "Ingreso" ? acc + cantidad : acc - cantidad;
+  }, 0);
+
+  const proyeccionBase = [];
+  const proyeccionOptimista = [];
+  const proyeccionPesimista = [];
+
+  let saldo = saldoActual;
+
+  for (let i = 1; i <= mesesProyeccion; i++) {
+    saldo += promedioIngresos - promedioGastos;
+    proyeccionBase.push(saldo);
+
+    proyeccionOptimista.push(saldo + promedioIngresos * 0.1 - promedioGastos * 0.1);
+    proyeccionPesimista.push(saldo - promedioIngresos * 0.1 + promedioGastos * 0.1);
+  }
+
+  if (chartProyecciones) chartProyecciones.destroy();
+  chartProyecciones = new Chart(document.getElementById("graficoProyecciones"), {
+    type: "line",
+    data: {
+      labels: Array.from({ length: mesesProyeccion }, (_, i) => `Mes ${i + 1}`),
+      datasets: [
+        { label: "Proyección Base", data: proyeccionBase, borderColor: "#4caf50", fill: false },
+        { label: "Optimista (+10%)", data: proyeccionOptimista, borderColor: "#2196f3", fill: false },
+        { label: "Pesimista (-10%)", data: proyeccionPesimista, borderColor: "#f44336", fill: false }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: "top" } },
+      scales: { y: { beginAtZero: false } }
+    }
+  });
+}
+
+
+
+
+
+// y simulaciones
 function renderSimulaciones() { console.log("Renderizando Simulaciones (vacío)"); }
 
 // ------------------------
