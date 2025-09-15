@@ -155,28 +155,23 @@
 
 <!-- ================= PROYECCIONES ================= -->
 <div id="finanzasProyecciones" style="display:none">
-  <h2>📈 Proyecciones</h2>
+  <h2>📈 Proyecciones Inversiones y Deudas</h2>
 
-  <!-- Selector de período para proyecciones -->
-  <div class="form-proyecciones">
-    <label>
-      Año de inicio:
-      <input type="number" id="anioProyecciones" value="2025" min="2020" max="2030">
-    </label>
-    <label>
-      Mes de inicio:
-      <input type="month" id="mesInicioProyecciones">
-    </label>
-    <label>
-      Mes final:
-      <input type="month" id="mesFinProyecciones">
-    </label>
-  </div>
+  <!-- Selector de año de inicio y horizonte -->
+  <label>Año inicial:
+    <input type="number" id="anioInicioProyecciones" value="2025" min="2020" max="2030">
+  </label>
+  <label>Años a proyectar:
+    <input type="number" id="horizonteProyecciones" value="1" min="1" max="5">
+  </label>
 
-  <!-- Gráficas de proyecciones -->
+  <!-- Contenedores de gráficas -->
   <div class="graficas-proyecciones">
-    <canvas id="graficoProyeccionesSaldo" width="400" height="200"></canvas>
-    <canvas id="graficoProyeccionesIngresosGastos" width="400" height="200"></canvas>
+    <h3>Inversiones</h3>
+    <canvas id="graficoProyeccionesInversion" width="400" height="200"></canvas>
+    
+    <h3>Deudas</h3>
+    <canvas id="graficoProyeccionesDeuda" width="400" height="200"></canvas>
   </div>
 
   <button id="btnCalcularProyecciones" class="btn">Calcular Proyecciones</button>
