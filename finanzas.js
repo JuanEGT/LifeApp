@@ -247,16 +247,15 @@ function renderReportes() {
   renderChart("graficoHorasSalario", { type: "bar", data: { labels: ["Mes seleccionado"], datasets: [{ label: "Horas Trabajadas", data: [datos.horasTrabajadas], backgroundColor: "#ff9800" }, { label: "Salario Promedio", data: [datos.salarioPromedio], backgroundColor: "#9c27b0" }] } });
 }
 
-// ------------------------
+// ------------------------ 
 // 6️⃣ Proyecciones
 // ------------------------
 
 let chartProyeccionInversion, chartProyeccionDeuda;
 
 function calcularProyecciones() {
-  // Configuración inicial
   const anioInicio = parseInt(document.getElementById("anioInicioProyecciones").value, 10);
-  const horizonte = parseInt(document.getElementById("horizonteProyecciones").value, 10);
+  const horizonte = Math.min(parseInt(document.getElementById("horizonteProyecciones").value, 10), 5);
 
   const fechaActual = new Date();
   const mesActual = fechaActual.getMonth() + 1; // 1-12
@@ -281,8 +280,7 @@ function calcularProyecciones() {
     let saldoActual = 0;
 
     meses.forEach(mesStr => {
-      // Buscar registros para este mes
-      const registrosMes = datos.filter(d => d.Fecha.startsWith(mesStr));
+      const registrosMes = datos.filter(d => d.Fecha <= mesStr);
       let incrementoMes = 0;
 
       registrosMes.forEach(d => {
@@ -291,9 +289,9 @@ function calcularProyecciones() {
         const periodicidad = d.Periodicidad || "Mensual";
 
         if (periodicidad === "Mensual") {
-          incrementoMes += cantidad + (cantidad * interes / 100);
+          incrementoMes += saldoActual * (interes / 100) + cantidad;
         } else if (periodicidad === "Anual") {
-          incrementoMes += cantidad + (cantidad * interes / 100 / 12);
+          incrementoMes += saldoActual * (interes / 100 / 12) + cantidad;
         }
       });
 
@@ -307,7 +305,7 @@ function calcularProyecciones() {
   const saldoInversion = proyectar(inversionesData, meses);
   const saldoDeuda = proyectar(deudasData, meses);
 
-  // Graficar inversiones
+  // Graficar Inversiones
   if (chartProyeccionInversion) chartProyeccionInversion.destroy();
   chartProyeccionInversion = new Chart(document.getElementById("graficoProyeccionesInversion"), {
     type: "line",
@@ -325,7 +323,7 @@ function calcularProyecciones() {
     options: { responsive: true, plugins: { legend: { position: "top" } } }
   });
 
-  // Graficar deudas
+  // Graficar Deudas
   if (chartProyeccionDeuda) chartProyeccionDeuda.destroy();
   chartProyeccionDeuda = new Chart(document.getElementById("graficoProyeccionesDeuda"), {
     type: "line",
@@ -347,30 +345,7 @@ function calcularProyecciones() {
 // Inicializar botón
 document.getElementById("btnCalcularProyecciones")?.addEventListener("click", calcularProyecciones);
 
-// y simulaciones
-function renderSimulaciones() { console.log("Renderizando Simulaciones (vacío)"); }
-
-// ------------------------
-// 7️⃣ Mostrar sección principal
-// ------------------------
-async function mostrarFinanzas() {
-  ["loginContainer","mainMenu","agendaContainer"].forEach(id => document.getElementById(id).style.display = "none");
-  document.getElementById("finanzasContainer").style.display = "flex";
-  showSection("finanzasMenu");
-  await cargarFinanzas();
-
-  const selector = document.getElementById("selectorMes");
-  if (selector) { const hoy = new Date(); selector.value = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,"0")}`; selector.addEventListener("change", renderTablaMovimientos); }
-
-  const selectorMes = document.getElementById("mesReporte");
-  const selectorAnio = document.getElementById("anioReporte");
-  if (selectorMes && selectorAnio) {
-    const hoy = new Date(); selectorMes.value = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,"0")}`; selectorAnio.value = hoy.getFullYear();
-    renderReportes();
-    selectorMes.addEventListener("change", renderReportes);
-    selectorAnio.addEventListener("change", renderReportes);
-  }
-}
+// Función pública para el
 
 // ------------------------
 // 8️⃣ Botones y formularios
