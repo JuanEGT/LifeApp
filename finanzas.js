@@ -291,58 +291,76 @@ let chartProyeccionInversion, chartProyeccionDeuda;
 
 function calcularProyecciones() {
   const anioInicio = parseInt(document.getElementById("anioInicioProyecciones")?.value, 10) || new Date().getFullYear();
-  const horizonte = Math.min(parseInt(document.getElementById("horizonteProyecciones")?.value, 10) || 1, 5);
-  
+  const horizonte = Math.min(parseInt(document.getElementById("horizonteProyecciones")?.value, 10), 5);
   const fechaActual = new Date();
   const mesActual = fechaActual.getMonth() + 1; // 1-12
-  const anioActual = fechaActual.getFullYear();
 
-  // Generar array de meses para el horizonte (hasta 5 años)
+  // Generar array de meses desde el actual hasta horizonte
   const meses = [];
   const fechas = [];
   for (let i = 0; i < horizonte * 12; i++) {
     let mes = (mesActual + i - 1) % 12 + 1;
-    let anio = anioActual + Math.floor((mesActual + i - 1) / 12);
-    meses.push({ anio, mes }); // objeto con año y mes
+    let anio = anioInicio + Math.floor((mesActual + i - 1) / 12);
+    meses.push(`${anio}-${String(mes).padStart(2, "0")}`);
     fechas.push(`${String(mes).padStart(2, "0")}/${anio}`);
   }
 
-  // Función para proyectar saldos compuestos mensuales de un conjunto de registros
-  const proyectar = (datos) => {
-    const saldosMensuales = Array(meses.length).fill(0);
-
-    datos.forEach(d => {
-      const fechaInicio = d.Fecha.split("-").map(v => parseInt(v, 10)); // [año, mes]
-      const anioInicioRegistro = fechaInicio[0];
-      const mesInicioRegistro = fechaInicio[1];
-
-      let saldo = parseFloat(d.Cantidad) || 0;
-      const tasa = parseFloat(d.Interes) || 0; // ya en decimal 0.1 = 10%
-      const periodicidad = d.Periodicidad || "Mensual";
-
-      meses.forEach((m, idx) => {
-        // Solo iniciar proyección si el mes actual >= fecha de inicio del registro
-        if (m.anio > anioInicioRegistro || (m.anio === anioInicioRegistro && m.mes >= mesInicioRegistro)) {
-          // aplicar interés según periodicidad
-          if (periodicidad === "Mensual") {
-            saldo = saldo * (1 + tasa);
-          } else if (periodicidad === "Anual" && m.mes === mesInicioRegistro) {
-            saldo = saldo * (1 + tasa);
-          }
-          // sumar saldo mensual al total de ese mes
-          saldosMensuales[idx] += parseFloat(saldo.toFixed(2));
-        }
-      });
-    });
-
-    return saldosMensuales;
-  };
-
+  // Filtrar datos históricos
   const inversionesData = finanzasData.filter(d => d.Tipo === "Inversión");
   const deudasData = finanzasData.filter(d => d.Tipo === "Deuda");
 
-  const saldoInversion = proyectar(inversionesData);
-  const saldoDeuda = proyectar(deudasData);
+  // Proyección individual de inversiones
+  function proyectarInversion(datos, meses) {
+    const saldoMensual = Array(meses.length).fill(0);
+
+    datos.forEach(d => {
+      const cantidad = parseFloat(d.Cantidad) || 0;
+      const tasa = parseFloat(d.TasaCrecimiento) || 0; // ya está en 0.1 = 10%
+      const periodicidad = d.Periodicidad || "Mensual";
+
+      // Convertir tasa anual a mensual si es anual
+      const tasaMensual = periodicidad === "Anual" ? Math.pow(1 + tasa, 1 / 12) - 1 : tasa;
+
+      // Encontrar el índice del mes inicial
+      const inicio = meses.findIndex(m => m >= d.Fecha);
+      if (inicio === -1) return;
+
+      let saldo = 0;
+      for (let i = inicio; i < meses.length; i++) {
+        saldo = (saldo + (i === inicio ? cantidad : 0)) * (1 + tasaMensual);
+        saldoMensual[i] += parseFloat(saldo.toFixed(2));
+      }
+    });
+
+    return saldoMensual;
+  }
+
+  // Proyección individual de deudas
+  function proyectarDeuda(datos, meses) {
+    const saldoMensual = Array(meses.length).fill(0);
+
+    datos.forEach(d => {
+      const cantidad = parseFloat(d.Cantidad) || 0;
+      const tasa = parseFloat(d.TasaInteres) || 0; // ya está en 0.1 = 10%
+      const periodicidad = d.Periodicidad || "Mensual";
+
+      const tasaMensual = periodicidad === "Anual" ? Math.pow(1 + tasa, 1 / 12) - 1 : tasa;
+
+      const inicio = meses.findIndex(m => m >= d.Fecha);
+      if (inicio === -1) return;
+
+      let saldo = cantidad;
+      for (let i = inicio; i < meses.length; i++) {
+        if (i > inicio) saldo = saldo * (1 + tasaMensual);
+        saldoMensual[i] += parseFloat(saldo.toFixed(2));
+      }
+    });
+
+    return saldoMensual;
+  }
+
+  const saldoInversion = proyectarInversion(inversionesData, meses);
+  const saldoDeuda = proyectarDeuda(deudasData, meses);
 
   // Graficar Inversiones
   if (chartProyeccionInversion) chartProyeccionInversion.destroy();
@@ -388,11 +406,10 @@ function calcularProyecciones() {
 // Inicializar botón
 document.getElementById("btnCalcularProyecciones")?.addEventListener("click", calcularProyecciones);
 
-// Función pública
+// Función pública para el módulo
 function renderProyecciones() {
   calcularProyecciones();
 }
-
 
 function renderSimulaciones() {
   console.log("Renderizando Simulaciones (vacío)");
