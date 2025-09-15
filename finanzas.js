@@ -395,8 +395,17 @@ function initBotonesSubmenus() {
 // 9️⃣ Inicialización DOM
 // ------------------------
 document.addEventListener("DOMContentLoaded", () => initBotonesSubmenus());
+function renderProyecciones() {
+  calcularProyecciones();
+}
 
-// ------------------------
 // 🔟 Exportar funciones públicas
-// ------------------------
-const Finanzas = { mostrarFinanzas, cargarFinanzas, setToken, renderReportes, renderProyecciones, renderSimulaciones, initBotonesSubmenus };
+const Finanzas = {
+  mostrarFinanzas,
+  cargarFinanzas,
+  setToken,
+  renderReportes,
+  renderProyecciones, // ahora existe
+  renderSimulaciones,
+  initBotonesSubmenus
+};
