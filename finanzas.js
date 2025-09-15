@@ -250,60 +250,101 @@ function renderReportes() {
 // ------------------------
 // 6️⃣ Proyecciones
 // ------------------------
-let chartProyecciones;
+let chartProyeccionesSaldo, chartProyeccionesIngresosGastos;
 
 function renderProyecciones() {
-  // Asegurarnos de que el canvas exista y esté visible
-  const container = document.getElementById("finanzasProyecciones");
-  container.style.display = "block"; // mostrar temporalmente para asegurar contexto
+  // Inicializar valores de mes de inicio y fin si no hay
+  const hoy = new Date();
+  const anioInput = document.getElementById("anioProyecciones");
+  const mesInicioInput = document.getElementById("mesInicioProyecciones");
+  const mesFinInput = document.getElementById("mesFinProyecciones");
 
-  let canvas = document.getElementById("graficoProyecciones");
-  if (!canvas) {
-    // Crear canvas dinámicamente si no existe
-    canvas = document.createElement("canvas");
-    canvas.id = "graficoProyecciones";
-    canvas.width = 400;
-    canvas.height = 200;
-    container.appendChild(canvas);
+  if (anioInput) anioInput.value = hoy.getFullYear();
+  if (mesInicioInput) mesInicioInput.value = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,"0")}`;
+  if (mesFinInput) mesFinInput.value = `${hoy.getFullYear()}-12`;
+
+  // Botón de calcular proyecciones
+  const btnCalcular = document.getElementById("btnCalcularProyecciones");
+  if (btnCalcular) {
+    btnCalcular.addEventListener("click", () => {
+      calcularProyecciones();
+    });
   }
+}
 
-  // Datos de ejemplo: proyección de saldo mensual para el año
-  const anio = new Date().getFullYear();
-  const saldosProyectados = Array.from({ length: 12 }, (_, i) => {
-    // Ejemplo simple: saldo promedio mensual + 5% crecimiento mensual
-    const promedioMes = finanzasData
-      .filter(d => d.Fecha.startsWith(`${anio}-${String(i + 1).padStart(2, "0")}`))
-      .reduce((acc, d) => {
-        const cantidad = parseFloat(d.Cantidad) || 0;
-        return d.Tipo === "Ingreso" ? acc + cantidad : acc - cantidad;
-      }, 0);
-    return promedioMes * (1 + 0.05 * i); // crecimiento 5% mensual
+function calcularProyecciones() {
+  const anioInicio = parseInt(document.getElementById("anioProyecciones").value, 10);
+  const mesInicio = parseInt(document.getElementById("mesInicioProyecciones").value.split("-")[1], 10);
+  const mesFin = parseInt(document.getElementById("mesFinProyecciones").value.split("-")[1], 10);
+
+  // Calcular promedio histórico mensual de ingresos y gastos
+  const ingresosMeses = Array(12).fill(0);
+  const gastosMeses = Array(12).fill(0);
+  const conteoMeses = Array(12).fill(0);
+
+  finanzasData.forEach(mov => {
+    if (!mov.Fecha) return;
+    const [y, m] = mov.Fecha.split("-");
+    const mesIndex = parseInt(m, 10) - 1;
+    if (mov.Tipo === "Ingreso") ingresosMeses[mesIndex] += parseFloat(mov.Cantidad) || 0;
+    if (mov.Tipo === "Gasto") gastosMeses[mesIndex] += parseFloat(mov.Cantidad) || 0;
+    conteoMeses[mesIndex] += 1;
   });
 
-  // Destruir gráfico previo si existe
-  if (chartProyecciones) chartProyecciones.destroy();
+  const promedioIngresos = ingresosMeses.map((val, i) => conteoMeses[i] ? val / conteoMeses[i] : 0);
+  const promedioGastos = gastosMeses.map((val, i) => conteoMeses[i] ? val / conteoMeses[i] : 0);
 
-  chartProyecciones = new Chart(canvas, {
+  // Crear arrays de proyección
+  const mesesProyeccion = [];
+  const saldoProyectado = [];
+  const ingresosProyectados = [];
+  const gastosProyectados = [];
+
+  let saldo = 0;
+  for (let m = mesInicio - 1; m <= mesFin - 1; m++) {
+    mesesProyeccion.push(mesIndexToName(m));
+    const ing = promedioIngresos[m] || 0;
+    const gas = promedioGastos[m] || 0;
+    ingresosProyectados.push(ing);
+    gastosProyectados.push(gas);
+    saldo += ing - gas;
+    saldoProyectado.push(saldo);
+  }
+
+  // Gráfica Saldo
+  if (chartProyeccionesSaldo) chartProyeccionesSaldo.destroy();
+  chartProyeccionesSaldo = new Chart(document.getElementById("graficoProyeccionesSaldo"), {
     type: "line",
     data: {
-      labels: ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
+      labels: mesesProyeccion,
       datasets: [{
-        label: `Proyección Saldo ${anio}`,
-        data: saldosProyectados,
+        label: `Saldo proyectado ${anioInicio}`,
+        data: saldoProyectado,
         borderColor: "#ff9800",
-        backgroundColor: "rgba(255,152,0,0.3)",
+        backgroundColor: "rgba(255,152,0,0.2)",
         fill: true,
         tension: 0.3
       }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { position: "top" } }
     }
   });
 
-  // Mantener la sección visible
-  showSection("finanzasProyecciones");
+  // Gráfica Ingresos vs Gastos
+  if (chartProyeccionesIngresosGastos) chartProyeccionesIngresosGastos.destroy();
+  chartProyeccionesIngresosGastos = new Chart(document.getElementById("graficoProyeccionesIngresosGastos"), {
+    type: "bar",
+    data: {
+      labels: mesesProyeccion,
+      datasets: [
+        { label: "Ingresos", data: ingresosProyectados, backgroundColor: "#4caf50" },
+        { label: "Gastos", data: gastosProyectados, backgroundColor: "#f44336" }
+      ]
+    },
+    options: { responsive: true }
+  });
+}
+
+function mesIndexToName(index) {
+  return ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"][index];
 }
 
 // y simulaciones

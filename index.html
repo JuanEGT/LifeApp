@@ -153,12 +153,36 @@
     <button class="btn btnVolverFinanzas">🔙 Volver</button>
   </div>
 
- <!-- ================= PROYECCIONES ================= -->
+<!-- ================= PROYECCIONES ================= -->
 <div id="finanzasProyecciones" style="display:none">
   <h2>📈 Proyecciones</h2>
+
+  <!-- Selector de período para proyecciones -->
+  <div class="form-proyecciones">
+    <label>
+      Año de inicio:
+      <input type="number" id="anioProyecciones" value="2025" min="2020" max="2030">
+    </label>
+    <label>
+      Mes de inicio:
+      <input type="month" id="mesInicioProyecciones">
+    </label>
+    <label>
+      Mes final:
+      <input type="month" id="mesFinProyecciones">
+    </label>
+  </div>
+
+  <!-- Gráficas de proyecciones -->
+  <div class="graficas-proyecciones">
+    <canvas id="graficoProyeccionesSaldo" width="400" height="200"></canvas>
+    <canvas id="graficoProyeccionesIngresosGastos" width="400" height="200"></canvas>
+  </div>
+
+  <button id="btnCalcularProyecciones" class="btn">Calcular Proyecciones</button>
   <button class="btn btnVolverFinanzas">🔙 Volver</button>
-  <!-- El canvas se crea dinámicamente con JS -->
 </div>
+
 
   <!-- ================= SIMULACIONES ================= -->
   <div id="finanzasSimulaciones" style="display:none">
