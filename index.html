@@ -79,10 +79,10 @@
   </div>
   <!--============= FIN=AGENDA ===============================-->
 
-  <!-- ================= FINANZAS ================= -->
+<!-- ================= FINANZAS ================= -->
 <div id="finanzasContainer" class="container" style="display:none">
 
-  <!-- 📍 Menú principal de Finanzas -->
+  <!-- ================= MENÚ PRINCIPAL ================= -->
   <div id="finanzasMenu">
     <h1>Finanzas</h1>
     <button id="btnMovimientos">📜 Ver Movimientos</button>
@@ -93,17 +93,10 @@
     <button id="btnVolverMenuFinanzas">🔙 Volver al Menú Principal</button>
   </div>
 
-  <!-- 📍 Submenú: Movimientos -->
+  <!-- ================= MOVIMIENTOS ================= -->
   <div id="finanzasMovimientos" style="display:none">
     <h2>📜 Movimientos</h2>
-
-    <!-- Selector de mes -->
-    <label>
-      Mes:
-      <input type="month" id="selectorMes" />
-    </label>
-
-    <!-- Tabla -->
+    <label>Mes:<input type="month" id="selectorMes" /></label>
     <table class="tabla-finanzas">
       <thead>
         <tr>
@@ -116,18 +109,15 @@
       </thead>
       <tbody id="finanzas-table-body"></tbody>
     </table>
-
-    <!-- Resumen -->
     <div class="resumen-finanzas">
       <p>Ingresos: <span id="total-ingresos">0</span></p>
       <p>Gastos: <span id="total-gastos">0</span></p>
       <p>Saldo: <span id="saldo">0</span></p>
     </div>
-
     <button class="btn btnVolverFinanzas">🔙 Volver</button>
   </div>
 
-  <!-- 📍 Submenú: Agregar Movimiento -->
+  <!-- ================= AGREGAR MOVIMIENTO ================= -->
   <div id="finanzasAgregar" style="display:none">
     <h2>➕ Agregar Movimiento</h2>
     <form id="form-finanza" class="form">
@@ -148,20 +138,11 @@
     </form>
   </div>
 
-  <!-- Reportes -->
+  <!-- ================= REPORTES ================= -->
   <div id="finanzasReportes" style="display:none">
     <h2>📊 Reportes</h2>
-
-    <label>
-      Año:
-      <input type="number" id="anioReporte" value="2025" min="2020" max="2030">
-    </label>
-
-    <label>
-      Mes:
-      <input type="month" id="mesReporte">
-    </label>
-
+    <label>Año:<input type="number" id="anioReporte" value="2025" min="2020" max="2030"></label>
+    <label>Mes:<input type="month" id="mesReporte"></label>
     <div class="graficas-reportes">
       <canvas id="graficoIngresosGastos" width="400" height="200"></canvas>
       <canvas id="graficoDistribucionGrupo" width="400" height="200"></canvas>
@@ -169,23 +150,36 @@
       <canvas id="graficoMetodosPago" width="400" height="200"></canvas>
       <canvas id="graficoHorasSalario" width="400" height="200"></canvas>
     </div>
-
     <button class="btn btnVolverFinanzas">🔙 Volver</button>
   </div>
 
-
+  <!-- ================= PROYECCIONES ================= -->
   <div id="finanzasProyecciones" style="display:none">
     <h2>📈 Proyecciones</h2>
+    
+    <!-- Selector de período para proyecciones -->
+    <label>Año:<input type="number" id="anioProyecciones" value="2025" min="2020" max="2030"></label>
+    <label>Mes de inicio:<input type="month" id="mesInicioProyecciones"></label>
+    <label>Mes final:<input type="month" id="mesFinProyecciones"></label>
+
+    <!-- Gráficas de proyecciones -->
+    <div class="graficas-proyecciones">
+      <canvas id="graficoProyeccionesSaldo" width="400" height="200"></canvas>
+      <canvas id="graficoProyeccionesIngresosGastos" width="400" height="200"></canvas>
+    </div>
+
+    <button id="btnCalcularProyecciones" class="btn">Calcular Proyecciones</button>
     <button class="btn btnVolverFinanzas">🔙 Volver</button>
   </div>
 
+  <!-- ================= SIMULACIONES ================= -->
   <div id="finanzasSimulaciones" style="display:none">
     <h2>📅 Simulaciones</h2>
     <button class="btn btnVolverFinanzas">🔙 Volver</button>
   </div>
+
 </div>
 <!-- ================= FIN-FINANZAS ================= -->
-
 
   <!-- ================= SCRIPTS ================= -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>

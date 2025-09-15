@@ -248,9 +248,6 @@ function renderReportes() {
 }
 
 // ------------------------
-// 6️⃣ Proyecciones 
-// ------------------------
-// ------------------------
 // 6️⃣ Proyecciones
 // ------------------------
 let chartProyecciones;
