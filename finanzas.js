@@ -303,11 +303,53 @@ function renderReportes() {
     }
   });
 
-  if (chartSaldoMensual) chartSaldoMensual.destroy();
-  chartSaldoMensual = new Chart(document.getElementById("graficoSaldoMensual"), {
-    type: "line",
-    data: { labels: ["Mes seleccionado"], datasets: [{ label: "Saldo", data: [datos.saldo], borderColor: "#ffeb3b", fill: false }] }
-  });
+// --- Saldo Anual ---
+if (chartSaldoMensual) chartSaldoMensual.destroy();
+
+// Obtenemos el año seleccionado
+const anio = parseInt(document.getElementById("anioReporte").value, 10);
+
+// Calculamos saldo por cada mes del año
+const saldosMensuales = [];
+for (let m = 1; m <= 12; m++) {
+  const mesStr = m.toString().padStart(2, "0");
+  
+  const ingresos = finanzasData
+    .filter(d => d.Fecha.startsWith(`${anio}-${mesStr}`) && d.Tipo === "Ingreso")
+    .reduce((acc, d) => {
+      const horas = parseFloat(d.HorasTrabajadas) || 0;
+      const salario = parseFloat(d.SalarioPorHora) || 0;
+      const propinas = parseFloat(d.Propinas) || 0;
+      const bonos = parseFloat(d.BonosAguinaldo) || 0;
+      const deducciones = parseFloat(d.Deducciones) || 0;
+      return acc + horas * salario + propinas + bonos - deducciones;
+    }, 0);
+
+  const gastos = finanzasData
+    .filter(d => d.Fecha.startsWith(`${anio}-${mesStr}`) && d.Tipo === "Gasto")
+    .reduce((acc, d) => acc + (parseFloat(d.Cantidad) || 0), 0);
+
+  saldosMensuales.push(ingresos - gastos);
+}
+
+chartSaldoMensual = new Chart(document.getElementById("graficoSaldoMensual"), {
+  type: "line",
+  data: {
+    labels: ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
+    datasets: [{
+      label: `Saldo ${anio}`,
+      data: saldosMensuales,
+      borderColor: "#ffeb3b",
+      backgroundColor: "rgba(255,235,59,0.3)",
+      fill: true,
+      tension: 0.3
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: "top" } }
+  }
+});
 
   if (chartMetodosPago) chartMetodosPago.destroy();
   chartMetodosPago = new Chart(document.getElementById("graficoMetodosPago"), {
