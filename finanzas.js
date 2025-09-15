@@ -292,50 +292,59 @@ let chartProyeccionInversion, chartProyeccionDeuda;
 function calcularProyecciones() {
   const anioInicio = parseInt(document.getElementById("anioInicioProyecciones")?.value, 10) || new Date().getFullYear();
   const horizonte = Math.min(parseInt(document.getElementById("horizonteProyecciones")?.value, 10) || 1, 5);
+  
   const fechaActual = new Date();
   const mesActual = fechaActual.getMonth() + 1; // 1-12
+  const anioActual = fechaActual.getFullYear();
+
+  // Generar array de meses para el horizonte (hasta 5 años)
   const meses = [];
   const fechas = [];
   for (let i = 0; i < horizonte * 12; i++) {
     let mes = (mesActual + i - 1) % 12 + 1;
-    let anio = anioInicio + Math.floor((mesActual + i - 1) / 12);
-    meses.push(`${anio}-${String(mes).padStart(2, "0")}`);
+    let anio = anioActual + Math.floor((mesActual + i - 1) / 12);
+    meses.push({ anio, mes }); // objeto con año y mes
     fechas.push(`${String(mes).padStart(2, "0")}/${anio}`);
   }
+
+  // Función para proyectar saldos compuestos mensuales de un conjunto de registros
+  const proyectar = (datos) => {
+    const saldosMensuales = Array(meses.length).fill(0);
+
+    datos.forEach(d => {
+      const fechaInicio = d.Fecha.split("-").map(v => parseInt(v, 10)); // [año, mes]
+      const anioInicioRegistro = fechaInicio[0];
+      const mesInicioRegistro = fechaInicio[1];
+
+      let saldo = parseFloat(d.Cantidad) || 0;
+      const tasa = parseFloat(d.Interes) || 0; // ya en decimal 0.1 = 10%
+      const periodicidad = d.Periodicidad || "Mensual";
+
+      meses.forEach((m, idx) => {
+        // Solo iniciar proyección si el mes actual >= fecha de inicio del registro
+        if (m.anio > anioInicioRegistro || (m.anio === anioInicioRegistro && m.mes >= mesInicioRegistro)) {
+          // aplicar interés según periodicidad
+          if (periodicidad === "Mensual") {
+            saldo = saldo * (1 + tasa);
+          } else if (periodicidad === "Anual" && m.mes === mesInicioRegistro) {
+            saldo = saldo * (1 + tasa);
+          }
+          // sumar saldo mensual al total de ese mes
+          saldosMensuales[idx] += parseFloat(saldo.toFixed(2));
+        }
+      });
+    });
+
+    return saldosMensuales;
+  };
 
   const inversionesData = finanzasData.filter(d => d.Tipo === "Inversión");
   const deudasData = finanzasData.filter(d => d.Tipo === "Deuda");
 
-  const proyectar = (datos, meses) => {
-    const saldoMensual = [];
-    let saldoActual = 0;
+  const saldoInversion = proyectar(inversionesData);
+  const saldoDeuda = proyectar(deudasData);
 
-    meses.forEach(mesStr => {
-      const registrosMes = datos.filter(d => d.Fecha <= mesStr);
-      let incrementoMes = 0;
-
-      registrosMes.forEach(d => {
-        const cantidad = parseFloat(d.Cantidad) || 0;
-        const interes = parseFloat(d.Interes) || 0;
-        const periodicidad = d.Periodicidad || "Mensual";
-
-        if (periodicidad === "Mensual") {
-          incrementoMes += saldoActual * (interes / 100) + cantidad;
-        } else if (periodicidad === "Anual") {
-          incrementoMes += saldoActual * (interes / 100 / 12) + cantidad;
-        }
-      });
-
-      saldoActual += incrementoMes;
-      saldoMensual.push(parseFloat(saldoActual.toFixed(2)));
-    });
-
-    return saldoMensual;
-  };
-
-  const saldoInversion = proyectar(inversionesData, meses);
-  const saldoDeuda = proyectar(deudasData, meses);
-
+  // Graficar Inversiones
   if (chartProyeccionInversion) chartProyeccionInversion.destroy();
   if (document.getElementById("graficoProyeccionesInversion")) {
     chartProyeccionInversion = new Chart(document.getElementById("graficoProyeccionesInversion"), {
@@ -355,6 +364,7 @@ function calcularProyecciones() {
     });
   }
 
+  // Graficar Deudas
   if (chartProyeccionDeuda) chartProyeccionDeuda.destroy();
   if (document.getElementById("graficoProyeccionesDeuda")) {
     chartProyeccionDeuda = new Chart(document.getElementById("graficoProyeccionesDeuda"), {
@@ -375,11 +385,14 @@ function calcularProyecciones() {
   }
 }
 
+// Inicializar botón
 document.getElementById("btnCalcularProyecciones")?.addEventListener("click", calcularProyecciones);
 
+// Función pública
 function renderProyecciones() {
   calcularProyecciones();
 }
+
 
 function renderSimulaciones() {
   console.log("Renderizando Simulaciones (vacío)");
