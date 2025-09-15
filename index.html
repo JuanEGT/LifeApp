@@ -158,23 +158,36 @@
   <h2>📈 Proyecciones</h2>
 
   <!-- Selector de año y horizonte de proyección -->
-  <label>
-    Año inicio:
-    <input type="number" id="anioInicioProyecciones" value="2025" min="2020" max="2030">
-  </label>
-  <label>
-    Horizonte (años, máximo 5):
-    <input type="number" id="horizonteProyecciones" value="1" min="1" max="5">
-  </label>
-
-  <!-- Gráficas de proyecciones -->
-  <div class="graficas-proyecciones">
-    <canvas id="graficoProyeccionesInversion" width="400" height="200"></canvas>
-    <canvas id="graficoProyeccionesDeuda" width="400" height="200"></canvas>
+  <div class="selector-proyecciones">
+    <label>
+      Año inicio:
+      <input type="number" id="anioInicioProyecciones" value="2025" min="2020" max="2030">
+    </label>
+    <label>
+      Horizonte (años, máximo 5):
+      <input type="number" id="horizonteProyecciones" value="1" min="1" max="5">
+    </label>
   </div>
 
-  <button id="btnCalcularProyecciones" class="btn">Calcular Proyecciones</button>
-  <button class="btn btnVolverFinanzas">🔙 Volver</button>
+  <!-- Resumen de inversiones y deudas -->
+  <div id="resumenInversion" style="margin-top: 10px; font-size: 16px;"></div>
+  <div id="resumenDeuda" style="margin-top: 10px; font-size: 16px;"></div>
+
+  <!-- Gráficas de proyecciones -->
+  <div class="graficas-proyecciones" style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px;">
+    <div style="flex:1; min-width: 300px;">
+      <canvas id="graficoProyeccionesInversion" width="400" height="200"></canvas>
+    </div>
+    <div style="flex:1; min-width: 300px;">
+      <canvas id="graficoProyeccionesDeuda" width="400" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- Botones -->
+  <div style="margin-top: 20px;">
+    <button id="btnCalcularProyecciones" class="btn">Calcular Proyecciones</button>
+    <button class="btn btnVolverFinanzas">🔙 Volver</button>
+  </div>
 </div>
 
   <!-- ================= SIMULACIONES ================= -->

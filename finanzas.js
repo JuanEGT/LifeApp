@@ -284,7 +284,7 @@ function renderReportes() {
   });
 }
 
-// ------------------------
+// ------------------------ 
 // 6️⃣ Proyecciones
 // ------------------------
 let chartProyeccionInversion, chartProyeccionDeuda;
@@ -295,7 +295,7 @@ function calcularProyecciones() {
   const fechaActual = new Date();
   const mesActual = fechaActual.getMonth() + 1; // 1-12
 
-  // Generar array de meses desde el actual hasta horizonte
+  // Generar arrays de meses y etiquetas
   const meses = [];
   const fechas = [];
   for (let i = 0; i < horizonte * 12; i++) {
@@ -309,58 +309,54 @@ function calcularProyecciones() {
   const inversionesData = finanzasData.filter(d => d.Tipo === "Inversión");
   const deudasData = finanzasData.filter(d => d.Tipo === "Deuda");
 
-  // Proyección individual de inversiones
-  function proyectarInversion(datos, meses) {
+  // Calcular iniciales
+  const inversionInicial = inversionesData.reduce((acc, d) => acc + (parseFloat(d.Cantidad) || 0), 0);
+  const deudaInicial = deudasData.reduce((acc, d) => acc + (parseFloat(d.Cantidad) || 0), 0);
+
+  // Función general de proyección
+  const proyectar = (datos, meses, tipo) => {
     const saldoMensual = Array(meses.length).fill(0);
 
     datos.forEach(d => {
       const cantidad = parseFloat(d.Cantidad) || 0;
-      const tasa = parseFloat(d.TasaCrecimiento) || 0; // ya está en 0.1 = 10%
+      const tasa = tipo === "Inversión" ? parseFloat(d.TasaCrecimiento) || 0 : parseFloat(d.TasaInteres) || 0;
       const periodicidad = d.Periodicidad || "Mensual";
-
-      // Convertir tasa anual a mensual si es anual
       const tasaMensual = periodicidad === "Anual" ? Math.pow(1 + tasa, 1 / 12) - 1 : tasa;
 
-      // Encontrar el índice del mes inicial
+      // Encontrar índice del mes de inicio
       const inicio = meses.findIndex(m => m >= d.Fecha);
       if (inicio === -1) return;
 
       let saldo = 0;
       for (let i = inicio; i < meses.length; i++) {
-        saldo = (saldo + (i === inicio ? cantidad : 0)) * (1 + tasaMensual);
+        saldo = (i === inicio ? cantidad : saldo) * (1 + tasaMensual);
         saldoMensual[i] += parseFloat(saldo.toFixed(2));
       }
     });
 
     return saldoMensual;
+  };
+
+  // Proyecciones
+  const saldoInversion = proyectar(inversionesData, meses, "Inversión");
+  const saldoDeuda = proyectar(deudasData, meses, "Deuda");
+
+  // Mostrar textos inicial/final
+  const divInversion = document.getElementById("resumenInversion");
+  if (divInversion) {
+    divInversion.innerHTML = `
+      Inversión inicial: <span style="color:white;">$${inversionInicial.toFixed(2)}</span><br>
+      Inversión final: <span style="color:green;">$${saldoInversion[saldoInversion.length - 1].toFixed(2)}</span>
+    `;
   }
 
-  // Proyección individual de deudas
-  function proyectarDeuda(datos, meses) {
-    const saldoMensual = Array(meses.length).fill(0);
-
-    datos.forEach(d => {
-      const cantidad = parseFloat(d.Cantidad) || 0;
-      const tasa = parseFloat(d.TasaInteres) || 0; // ya está en 0.1 = 10%
-      const periodicidad = d.Periodicidad || "Mensual";
-
-      const tasaMensual = periodicidad === "Anual" ? Math.pow(1 + tasa, 1 / 12) - 1 : tasa;
-
-      const inicio = meses.findIndex(m => m >= d.Fecha);
-      if (inicio === -1) return;
-
-      let saldo = cantidad;
-      for (let i = inicio; i < meses.length; i++) {
-        if (i > inicio) saldo = saldo * (1 + tasaMensual);
-        saldoMensual[i] += parseFloat(saldo.toFixed(2));
-      }
-    });
-
-    return saldoMensual;
+  const divDeuda = document.getElementById("resumenDeuda");
+  if (divDeuda) {
+    divDeuda.innerHTML = `
+      Deuda inicial: <span style="color:white;">$${deudaInicial.toFixed(2)}</span><br>
+      Deuda final: <span style="color:red;">$${saldoDeuda[saldoDeuda.length - 1].toFixed(2)}</span>
+    `;
   }
-
-  const saldoInversion = proyectarInversion(inversionesData, meses);
-  const saldoDeuda = proyectarDeuda(deudasData, meses);
 
   // Graficar Inversiones
   if (chartProyeccionInversion) chartProyeccionInversion.destroy();
