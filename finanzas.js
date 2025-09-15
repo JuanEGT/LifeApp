@@ -7,7 +7,6 @@ const SPREADSHEET_ID = "1CMnA-3Ch5Ac1LLP8Hgph15IeeH7Dlvcj0IvX51mLzKU";
 const SHEET_NAME = "Finanzas";
 let finanzasData = [];
 let charts = {};
-let token = ""; // Declaración de token
 
 // ------------------------
 // 0️⃣ Token
@@ -310,7 +309,7 @@ function renderProyecciones() {
   calcularProyecciones();
 }
 
-// y simulaciones
+// 
 function renderSimulaciones() { console.log("Renderizando Simulaciones (vacío)"); }
 
 // ------------------------
