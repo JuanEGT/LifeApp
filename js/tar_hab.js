@@ -1,10 +1,8 @@
-// ===================== tar_hab.js =====================
+// ===================== tarhab.js =====================
 
 // ------------------------
 // 🔹 Variables internas
 // ------------------------
-const SPREADSHEET_ID = "1CMnA-3Ch5Ac1LLP8Hgph15IeeH7Dlvcj0IvX51mLzKU";
-const SHEET_NAME = "Habitos";
 let habitosData = [];
 let chartHabitos = null;
 
@@ -42,7 +40,7 @@ async function cargarHabitos() {
   if (!TarHab.token) return;
   try {
     const res = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?majorDimension=ROWS`,
+      `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${Habitos}?majorDimension=ROWS`,
       { headers: { "Authorization": `Bearer ${TarHab.token}` } }
     );
     const data = await res.json();
