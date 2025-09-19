@@ -1,26 +1,30 @@
-// ===================== NOMBRE DEL notas.JS =====================
-let notasToken = null; // Token específico de este notas
+// ===================== Notas.js =====================
 
+// Token para la hoja de Notas
+let notasToken = null; // Token específico de este módulo
+
+// Función para recibir el token global
 function setToken(token) {
   notasToken = token;
+  console.log("[Notas] Token recibido:", notasToken);
 }
 
-// Función de inicialización del notas
-function initnotas() {
-  console.log("[notas] Inicializando notas");
+// Función de inicialización del módulo
+function initNotas() {
+  console.log("[Notas] Inicializando módulo");
 
   const backBtn = document.getElementById("backToHomeBtn");
   if (backBtn) {
-    console.log("[notas] Botón de volver al Home encontrado");
+    console.log("[Notas] Botón de volver al Home encontrado");
     backBtn.addEventListener("click", () => {
-      console.log("[notas] Volviendo al Home");
+      console.log("[Notas] Volviendo al Home");
       volverHome(); // Función global en main.js
     });
   } else {
-    console.warn("[notas] Botón de volver al Home NO encontrado");
+    console.warn("[Notas] Botón de volver al Home NO encontrado");
   }
 }
 
 // Exponer funciones al scope global
 window.setToken = setToken;
-window.initnotas = initnotas;
+window.initNotas = initNotas;
