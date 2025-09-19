@@ -13,18 +13,21 @@ function setToken(token) {
 function initAgenda() {
   console.log("[Agenda] Inicializando módulo...");
 
-  // Evento para volver al menú principal
-  const backBtn = document.getElementById("backToMenuBtn");
+  // Evento para volver al Home
+  const backBtn = document.getElementById("backToHomeBtn");
   if (backBtn) {
     backBtn.addEventListener("click", () => {
-      console.log("[Agenda] Volviendo al menú principal");
-      document.getElementById("contenedorPrincipal").innerHTML = "";
-      document.getElementById("mainMenu").style.display = "flex";
+      console.log("[Agenda] Volviendo al Home");
+      volverHome(); // Llama a la función central de main.js
     });
   }
 
-  // Aquí más lógica futura para Agenda (leer hoja de cálculo, mostrar tareas, etc.)
+  // Aquí irá la lógica futura para Agenda:
+  // - Leer hoja de cálculo usando agendaToken
+  // - Mostrar tareas, citas, etc.
+  console.log("[Agenda] Lógica de hoja de cálculo pendiente de implementar");
 }
 
+// Hacer funciones accesibles globalmente
 window.setToken = setToken;
 window.initAgenda = initAgenda;

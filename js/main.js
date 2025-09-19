@@ -30,10 +30,11 @@ window.onload = () => {
       if (window.Habitos) Habitos.setToken(token);
       if (window.Salud) Salud.setToken(token);
       if (window.Notas) Notas.setToken(token);
+      if (window.Home) Home.setToken(token);
 
-      // Cargar módulo inicial (Agenda)
-      console.log("[Main] Cargando módulo inicial: Agenda");
-      cargarModulo('agenda');
+      // Cargar módulo inicial: Home
+      console.log("[Main] Cargando módulo inicial: Home");
+      cargarModulo('home');
     }
   });
 
@@ -73,4 +74,10 @@ function cargarModulo(modulo) {
 // Función para capitalizar el nombre del módulo (ej: agenda → Agenda)
 function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+// ===================== FUNCIÓN PARA VOLVER AL HOME =====================
+function volverHome() {
+  console.log("[Main] Volviendo al módulo Home");
+  cargarModulo('home');
 }
