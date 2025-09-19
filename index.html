@@ -90,6 +90,7 @@
     <button id="btnReportes">📊 Reportes</button>
     <button id="btnProyecciones">📈 Proyecciones</button>
     <button id="btnSimulaciones">📅 Simulaciones</button>
+    <button class="btn" id="btnTarHab">Tareas & Hábitos</button>
     <button id="btnVolverMenuFinanzas">🔙 Volver al Menú Principal</button>
   </div>
 
@@ -222,10 +223,31 @@
 
 <!-- ================= FIN-FINANZAS ================= -->
 
-  <!-- ================= SCRIPTS ================= -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
-  <script src="js/agenda.js" defer></script>
-  <script src="js/app.js" defer></script>
-  <script src="js/finanzas.js" defer></script>
+<!-- ================= TAREAS & HÁBITOS ================= -->
+<div id="tarHabContainer" class="container" style="display:none">
+  <h1>📝 Tareas & Hábitos</h1>
+
+  <!-- Calendario motivacional -->
+  <div id="tarHabCalendario"></div>
+
+  <!-- Lista de tareas -->
+  <div id="tarHabTareas"></div>
+
+  <!-- Lista de hábitos -->
+  <div id="tarHabHabitos"></div>
+
+  <!-- Botones -->
+  <button id="btnExportTarHab" class="btn">📤 Exportar / Captura</button>
+  <button class="btn btnVolverTarHab">🔙 Volver al Menú Principal</button>
+</div>
+
+<!-- ================= SCRIPTS ================= -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+<script src="js/agenda.js" defer></script>
+<script src="js/app.js" defer></script>
+<script src="js/finanzas.js" defer></script>
+<script src="js/tar_hab.js" defer></script>
+  
 </body>
 </html>

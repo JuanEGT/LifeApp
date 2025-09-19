@@ -14,6 +14,7 @@ window.onload = () => {
   document.getElementById("mainMenu").style.display = "none";
   document.getElementById("agendaContainer").style.display = "none";
   document.getElementById("finanzasContainer").style.display = "none";
+  document.getElementById("tarHabContainer")?.style.display = "none";
 
   // Inicializar cliente OAuth
   tokenClient = google.accounts.oauth2.initTokenClient({
@@ -21,8 +22,9 @@ window.onload = () => {
     scope: SCOPES,
     callback: (resp) => {
       token = resp.access_token;
-      Agenda.setToken(token);  // pasar token a agenda.js
-      Finanzas.setToken(token); // pasar token a finanzas.js
+      Agenda.setToken(token);      // pasar token a agenda.js
+      Finanzas.setToken(token);    // pasar token a finanzas.js
+      TarHab.setToken(token);    // pasar token a tar_hab.js 
       mostrarMenuPrincipal();
     }
   });
@@ -41,12 +43,16 @@ window.onload = () => {
 
   const btnFinanzas = document.getElementById("btnFinanzas");
   if (btnFinanzas) btnFinanzas.addEventListener("click", () => Finanzas.mostrarFinanzas());
-}; // <-- cerrar window.onload correctamente
+
+  const btnTarHab = document.getElementById("btnTarHab");
+  if (btnTarHab) btnTarHab.addEventListener("click", () => TarHab.mostrarTarHab());
+};
 
 // ===== FUNCIONES =====
 function mostrarMenuPrincipal() {
   document.getElementById("loginContainer").style.display = "none";
   document.getElementById("agendaContainer").style.display = "none";
-  document.getElementById("mainMenu").style.display = "flex";
   document.getElementById("finanzasContainer").style.display = "none";
+  document.getElementById("tarHabContainer")?.style.display = "none"; 
+  document.getElementById("mainMenu").style.display = "flex";
 }

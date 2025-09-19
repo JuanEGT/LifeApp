@@ -1,0 +1,107 @@
+/* ================= TAR_HAB.CSS ================= */
+
+/* Contenedor principal */
+#tarHabContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #121212; /* fondo oscuro */
+  color: #e0e0e0; /* texto claro */
+  min-height: 80vh;
+}
+
+/* Título principal */
+#tarHabContainer h1 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  color: #ffffff;
+}
+
+/* Calendario motivacional */
+#tarHabCalendario {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 15px;
+}
+
+#tarHabCalendario div {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #000000; /* el texto negro resalta sobre los colores de fondo */
+}
+
+/* Colores para días completados */
+#tarHabCalendario .completado {
+  background-color: #4caf50; /* verde: todos completados */
+}
+#tarHabCalendario .parcial {
+  background-color: #ffeb3b; /* amarillo: parcial */
+}
+#tarHabCalendario .no-completado {
+  background-color: #f44336; /* rojo: nada completado */
+}
+
+/* Listas de tareas y hábitos */
+#tarHabTareas, #tarHabHabitos {
+  background-color: #1e1e1e;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+#tarHabTareas h3, #tarHabHabitos h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #ffffff;
+}
+
+#tarHabTareas div, #tarHabHabitos div {
+  padding: 5px;
+  border-bottom: 1px solid #333;
+}
+
+/* Botones */
+#tarHabContainer .btn {
+  padding: 0.5rem 1rem;
+  background-color: #3a3a3a;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-right: 5px;
+}
+
+#tarHabContainer .btn:hover {
+  background-color: #505050;
+}
+
+/* Botones de volver */
+.btnVolverTarHab {
+  background-color: #f44336;
+}
+
+.btnVolverTarHab:hover {
+  background-color: #d32f2f;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  #tarHabCalendario div {
+    width: 40px;
+    height: 40px;
+    font-size: 0.7rem;
+  }
+
+  #tarHabTareas, #tarHabHabitos {
+    padding: 0.75rem;
+  }
+}
