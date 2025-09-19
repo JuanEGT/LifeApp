@@ -52,6 +52,7 @@ window.onload = () => {
   if (btnTarHab) {
     btnTarHab.addEventListener("click", () => TarHab.mostrarTarHab());
   }
+
 };
 
 // ===== FUNCIONES =====
