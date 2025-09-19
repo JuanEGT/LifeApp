@@ -1,0 +1,15 @@
+.habitos-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #1a1a1a; /* fondo de módulo */
+  border-radius: 8px;
+}
+
+.habitosContent {
+  padding: 1rem;
+  background-color: #1f1f1f;
+  border-radius: 6px;
+  min-height: 150px;
+}
