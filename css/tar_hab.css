@@ -2,51 +2,74 @@
 
 /* Contenedor principal */
 #tarHabContainer {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
+  display: flex;               /* mostrar como flex */
+  flex-direction: column;      /* columna */
+  align-items: center;         /* centrar horizontal */
+  justify-content: flex-start; /* arriba */
   gap: 1rem;
-  padding: 1.5rem;
-  background-color: #121212; /* fondo oscuro */
-  color: #e0e0e0;            /* texto claro */
+  padding: 2rem;
+  background-color: #282c34;  /* fondo oscuro pero no negro */
+  color: #ffffff;              /* texto blanco */
   min-height: 80vh;
-  border-radius: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;          /* para z-index */
+  z-index: 999;
 }
 
 /* Título principal */
 #tarHabContainer h1 {
-  font-size: 1.8rem;
+  font-size: 2rem;
   margin-bottom: 1rem;
   color: #ffffff;
-  text-align: center;
 }
 
-/* Texto de placeholder */
+/* Texto descriptivo */
 #tarHabContainer p {
-  font-size: 1rem;
-  color: #bbbbbb;
+  font-size: 1.2rem;
+  color: #f0f0f0;
+  margin-bottom: 2rem;
   text-align: center;
 }
 
 /* Botones */
 #tarHabContainer .btn {
   padding: 0.5rem 1rem;
-  background-color: #3a3a3a;
-  color: #ffffff;
+  background-color: #61dafb; /* azul claro */
+  color: #000000;             /* texto negro */
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  font-weight: bold;
   transition: background-color 0.2s;
-  align-self: center;
 }
 
 #tarHabContainer .btn:hover {
-  background-color: #505050;
+  background-color: #21a1f1;
 }
 
-/* Botón de volver */
+/* Botón de volver específico */
 .btnVolverTarHab {
-  background-color: #f44336 !important;
+  background-color: #f44336; /* rojo */
+  color: #ffffff;
+}
+
+.btnVolverTarHab:hover {
+  background-color: #d32f2f;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  #tarHabContainer h1 {
+    font-size: 1.5rem;
+  }
+  #tarHabContainer p {
+    font-size: 1rem;
+  }
+  #tarHabContainer .btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
 }
 
 .btnVolverTarHab:hover {
