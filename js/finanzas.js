@@ -20,6 +20,7 @@ function setToken(newToken) {
 // ------------------------
 // 1️⃣ Utilidades
 // ------------------------
+
 function showSection(sectionId) {
   const sections = [
     "finanzasMenu", "finanzasMovimientos", "finanzasAgregar",
