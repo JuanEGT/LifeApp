@@ -1,0 +1,59 @@
+/* ===================== HOME - MOTIVACIÓN Y EVENTOS ===================== */
+#homeContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+#homeContainer h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  border-left: 4px solid #f0a500;
+  padding-left: 0.5rem;
+  color: #f0a500;
+}
+
+#motivacion {
+  font-size: 1.2rem;
+  background-color: #1a1a1a;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #333;
+}
+
+#eventosDelDia {
+  background-color: #1a1a1a;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #333;
+}
+
+#eventosDelDia ul {
+  list-style-type: disc;
+  padding-left: 1.2rem;
+}
+
+#eventosDelDia li {
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+/* Hover opcional para resaltar eventos */
+#eventosDelDia li:hover {
+  background-color: #222;
+  border-radius: 4px;
+  padding: 0 0.3rem;
+  transition: background-color 0.2s ease;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  #homeContainer h2 {
+    font-size: 1.3rem;
+  }
+
+  #motivacion, #eventosDelDia {
+    padding: 0.8rem;
+  }
+}
