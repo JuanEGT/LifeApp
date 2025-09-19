@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LifeApp</title>
+
+  <!-- Estilos globales -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+  <!-- ================= LOGIN ================= -->
+  <div id="loginContainer" class="container">
+    <h1>Bienvenido a LifeApp</h1>
+    <button id="loginBtn" class="btn">Login con Google</button>
+    <p id="msg"></p>
+  </div>
+
+  <!-- ================= MENÚ PRINCIPAL ================= -->
+  <header id="mainMenu" style="display:none">
+    <h1>LifeApp</h1>
+    <nav>
+      <button onclick="cargarModulo('agenda')">Agenda</button>
+      <button onclick="cargarModulo('finanzas')">Finanzas</button>
+      <button onclick="cargarModulo('habitos')">Tareas/Hábitos</button>
+      <button onclick="cargarModulo('salud')">Salud</button>
+      <button onclick="cargarModulo('notas')">Notas</button>
+    </nav>
+  </header>
+
+  <!-- ================= CONTENEDOR PRINCIPAL ================= -->
+  <main id="contenedorPrincipal">
+    <!-- Aquí se cargará el HTML de cada módulo -->
+  </main>
+
+  <!-- ================= SCRIPTS ================= -->
+  <script src="js/config.js"></script>
+  <script src="js/agenda.js"></script>
+  <script src="js/finanzas.js"></script>
+  <script src="js/habitos.js"></script>
+  <script src="js/salud.js"></script>
+  <script src="js/notas.js"></script>
+  <script src="js/main.js"></script>
+
+</body>
+</html>
