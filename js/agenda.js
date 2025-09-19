@@ -331,6 +331,7 @@ function initAgenda() {
   const backBtn = document.getElementById("backToHomeBtn");
   if (backBtn) backBtn.addEventListener("click", volverHome);
   else console.warn("[Agenda] Botón de volver al Home NO encontrado");
+  mostrarAgenda(); 
 }
 
 // ===================== EXPOSICIÓN GLOBAL =====================
