@@ -406,10 +406,81 @@ document.getElementById("btnCalcularProyecciones")?.addEventListener("click", ca
 function renderProyecciones() {
   calcularProyecciones();
 }
+// Simulaciones
+let chartSimulaciones;
 
-function renderSimulaciones() {
-  console.log("Renderizando Simulaciones (vacío)");
+// Utilidad: calcular escenario
+function calcularEscenario({ ingreso, gasto, ahorro }) {
+  const balance = ingreso - gasto - ahorro;
+  const ahorroAnual = ahorro * 12;
+  return { balance, ahorroAnual };
 }
+
+// Renderizar resultados en pantalla
+function mostrarResultadosSimulacion(nombreEscenario, datos) {
+  const div = document.getElementById("simulacionResultados");
+  if (!div) return;
+
+  let colorBalance = datos.balance >= 0 ? "lightgreen" : "red";
+
+  div.innerHTML = `
+    <h3>Escenario: ${nombreEscenario}</h3>
+    <p>Balance mensual: <span style="color:${colorBalance}">$${datos.balance.toFixed(2)}</span></p>
+    <p>Ahorro anual proyectado: <span style="color:white">$${datos.ahorroAnual.toFixed(2)}</span></p>
+  `;
+
+  // Datos para gráfico (ahorro acumulado mes a mes)
+  const datosGrafico = Array.from({ length: 12 }, (_, i) => datos.ahorroAnual / 12 * (i + 1));
+
+  if (chartSimulaciones) chartSimulaciones.destroy();
+  const canvas = document.getElementById("graficoSimulaciones");
+  if (canvas) {
+    chartSimulaciones = new Chart(canvas, {
+      type: "bar",
+      data: {
+        labels: ["Mes 1","Mes 2","Mes 3","Mes 4","Mes 5","Mes 6","Mes 7","Mes 8","Mes 9","Mes 10","Mes 11","Mes 12"],
+        datasets: [{
+          label: "Ahorro acumulado",
+          data: datosGrafico,
+          backgroundColor: "#2196f3"
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { position: "top" } } }
+    });
+  }
+}
+
+// Ejecutar simulación segun inputs y escenario
+function ejecutarSimulacion(tipo = "Base") {
+  const ingreso = parseFloat(document.getElementById("simIngreso")?.value) || 0;
+  const gasto = parseFloat(document.getElementById("simGasto")?.value) || 0;
+  const ahorro = parseFloat(document.getElementById("simAhorro")?.value) || 0;
+
+  let params = { ingreso, gasto, ahorro };
+
+  if (tipo === "Optimista") {
+    params.ingreso *= 1.1;
+    params.gasto *= 0.95;
+  } else if (tipo === "Pesimista") {
+    params.ingreso *= 0.9;
+    params.gasto *= 1.05;
+  }
+
+  const resultado = calcularEscenario(params);
+  mostrarResultadosSimulacion(tipo, resultado);
+}
+
+// Punto de entrada público
+function renderSimulaciones() {
+  // Reset resultados
+  document.getElementById("simulacionResultados").innerHTML = "<p>Ingresa tus valores y selecciona un escenario.</p>";
+
+  // Asignar eventos a botones
+  document.getElementById("btnSimularBase")?.addEventListener("click", () => ejecutarSimulacion("Base"));
+  document.getElementById("btnSimularOptimista")?.addEventListener("click", () => ejecutarSimulacion("Optimista"));
+  document.getElementById("btnSimularPesimista")?.addEventListener("click", () => ejecutarSimulacion("Pesimista"));
+}
+
 // ------------------------
 // 7️⃣ Mostrar sección principal
 // ------------------------

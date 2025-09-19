@@ -131,3 +131,39 @@
 .finanzas-screen.active {
   display: flex;
 }
+/* ================= SIMULACIONES ================= */
+#finanzasSimulaciones input {
+  width: 120px;
+  margin-right: 10px;
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid #333;
+  background-color: #2a2a2a;
+  color: #e0e0e0;
+}
+
+#finanzasSimulaciones button {
+  margin-right: 10px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: none;
+  background-color: #2196f3;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+#finanzasSimulaciones button:hover {
+  background-color: #1976d2;
+}
+
+#simulacionResultados {
+  margin-top: 15px;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+#graficoSimulaciones {
+  margin-top: 15px;
+  max-width: 600px;
+}

@@ -190,13 +190,36 @@
   </div>
 </div>
 
-  <!-- ================= SIMULACIONES ================= -->
-  <div id="finanzasSimulaciones" style="display:none">
-    <h2>📅 Simulaciones</h2>
-    <button class="btn btnVolverFinanzas">🔙 Volver</button>
+<!-- ================= SIMULACIONES ================= -->
+<div id="finanzasSimulaciones" style="display:none; color:white;">
+  <h2>📅 Simulaciones</h2>
+
+  <!-- Inputs principales -->
+  <div style="margin-top:10px;">
+    <label>Ingreso mensual: <input type="number" id="simIngreso" placeholder="15000"></label>
+    <label>Gasto fijo mensual: <input type="number" id="simGasto" placeholder="10000"></label>
+    <label>Ahorro mensual: <input type="number" id="simAhorro" placeholder="2000"></label>
   </div>
 
+  <!-- Botones de escenarios -->
+  <div style="margin-top:10px;">
+    <button id="btnSimularBase" class="btn">Escenario Base</button>
+    <button id="btnSimularOptimista" class="btn">Optimista</button>
+    <button id="btnSimularPesimista" class="btn">Pesimista</button>
+  </div>
+
+  <!-- Resultados de la simulación -->
+  <div id="simulacionResultados" style="margin-top:15px; font-size:16px;"></div>
+
+  <!-- Gráfico de ahorro acumulado -->
+  <canvas id="graficoSimulaciones" width="400" height="200" style="margin-top:15px;"></canvas>
+
+  <!-- Botón de volver -->
+  <div style="margin-top: 20px;">
+    <button class="btn btnVolverFinanzas">🔙 Volver</button>
+  </div>
 </div>
+
 <!-- ================= FIN-FINANZAS ================= -->
 
   <!-- ================= SCRIPTS ================= -->
