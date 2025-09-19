@@ -53,6 +53,6 @@ function mostrarMenuPrincipal() {
   document.getElementById("loginContainer").style.display = "none";
   document.getElementById("agendaContainer").style.display = "none";
   document.getElementById("finanzasContainer").style.display = "none";
-  document.getElementById("tarHabContainer")?.style.display = "none"; 
+  document.getElementById("tarHabContainer").style.display = "none"; 
   document.getElementById("mainMenu").style.display = "flex";
 }
