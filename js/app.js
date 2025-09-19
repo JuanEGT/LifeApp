@@ -22,10 +22,10 @@ window.onload = () => {
     scope: SCOPES,
     callback: (resp) => {
       token = resp.access_token;
+      mostrarMenuPrincipal();
       Agenda.setToken(token);      // pasar token a agenda.js
       Finanzas.setToken(token);    // pasar token a finanzas.js
       TarHab.setToken(token);    // pasar token a tar_hab.js 
-      mostrarMenuPrincipal();
     }
   });
 

@@ -1,21 +1,22 @@
-// ================= TAR_HAB.JS =================
-
-// Usa un nombre distinto para no chocar con finanzas.js
-const HABITOS_SPREADSHEET_ID = "1CMnA-3Ch5Ac1LLP8Hgph15IeeH7Dlvcj0IvX51mLzKU"; 
-const HABITOS_SHEET_NAME = "Habitos";
-
-let habitosData = [];
-let chartSimulaciones = null;
+// ===================== tar_hab.js =====================
 
 // ------------------------
-// 0️⃣ Configuración Token
+// 🔹 Variables internas
+// ------------------------
+const SPREADSHEET_ID = "1CMnA-3Ch5Ac1LLP8Hgph15IeeH7Dlvcj0IvX51mLzKU";
+const SHEET_NAME = "Habitos";
+let habitosData = [];
+let chartHabitos = null;
+
+// ------------------------
+// 0️⃣ Token
 // ------------------------
 function setToken(newToken) {
-  token = newToken;
+  TarHab.token = newToken;
 }
 
 // ------------------------
-// 1️⃣ Mostrar/Ocultar sección
+// 1️⃣ Utilidades
 // ------------------------
 function showSection(sectionId) {
   const sections = ["tarHabContainer"];
@@ -25,15 +26,24 @@ function showSection(sectionId) {
   });
 }
 
+function parseRow(headers, row) {
+  const entry = {};
+  headers.forEach((h, i) => {
+    const key = h.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s/g, "");
+    entry[key] = row[i] || "";
+  });
+  return entry;
+}
+
 // ------------------------
-// 2️⃣ Cargar datos desde Google Sheets
+// 2️⃣ Cargar datos de Habitos
 // ------------------------
 async function cargarHabitos() {
-  if (!token) return;
+  if (!TarHab.token) return;
   try {
     const res = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${HABITOS_SPREADSHEET_ID}/values/${HABITOS_SHEET_NAME}?majorDimension=ROWS`,
-      { headers: { "Authorization": `Bearer ${token}` } }
+      `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?majorDimension=ROWS`,
+      { headers: { "Authorization": `Bearer ${TarHab.token}` } }
     );
     const data = await res.json();
     if (!data.values || data.values.length < 2) {
@@ -43,14 +53,7 @@ async function cargarHabitos() {
     }
     const headers = data.values[0];
     const rows = data.values.slice(1);
-    habitosData = rows.map(row => {
-      const entry = {};
-      headers.forEach((h, i) => {
-        const key = h.replace(/\s/g, "");
-        entry[key] = row[i] || "";
-      });
-      return entry;
-    });
+    habitosData = rows.map(row => parseRow(headers, row));
     renderHabitos();
   } catch (err) {
     console.error("Error cargando Habitos:", err);
@@ -58,96 +61,82 @@ async function cargarHabitos() {
 }
 
 // ------------------------
-// 3️⃣ Renderizar tareas, hábitos y calendario motivacional
+// 3️⃣ Renderizar Habitos y Calendario
 // ------------------------
 function renderHabitos() {
-  const tareasEl = document.getElementById("tarHabTareas");
-  const habitosEl = document.getElementById("tarHabHabitos");
-  const calendarioEl = document.getElementById("tarHabCalendario");
+  const contTareas = document.getElementById("tarHabTareas");
+  const contHabitos = document.getElementById("tarHabHabitos");
+  const contCalendario = document.getElementById("tarHabCalendario");
 
-  if (tareasEl) tareasEl.innerHTML = "<h3>Tareas:</h3>" + 
-    habitosData.filter(d => d.Tipo === "Tarea").map(d => `<p>${d.Nombre}</p>`).join("");
+  if (!contTareas || !contHabitos || !contCalendario) return;
 
-  if (habitosEl) habitosEl.innerHTML = "<h3>Hábitos:</h3>" + 
-    habitosData.filter(d => d.Tipo === "Habito").map(d => `<p>${d.Nombre}</p>`).join("");
+  contTareas.innerHTML = "";
+  contHabitos.innerHTML = "";
+  contCalendario.innerHTML = "";
 
-  if (calendarioEl) calendarioEl.innerHTML = "<p>Calendario motivacional aquí 🔥</p>";
+  const hoy = new Date().toISOString().slice(0, 10);
+
+  habitosData.forEach((habito, idx) => {
+    const div = document.createElement("div");
+    div.style.marginBottom = "5px";
+
+    const fechaCumplido = habito.Fecha || "";
+    const cumplido = habito.Cumplido === "TRUE";
+
+    div.innerHTML = `
+      <strong>${habito.Habito || habito.Tarea || "Sin nombre"}</strong> - ${fechaCumplido} 
+      <span style="color:${cumplido ? "green" : "red"}">${cumplido ? "✔" : "✖"}</span>
+    `;
+
+    if (habito.Tipo === "Tarea") contTareas.appendChild(div);
+    else contHabitos.appendChild(div);
+  });
+
+  // Crear gráfico simple de hábitos cumplidos
+  const labels = habitosData.map(h => h.Habito || h.Tarea || "");
+  const data = habitosData.map(h => h.Cumplido === "TRUE" ? 1 : 0);
+
+  if (chartHabitos) chartHabitos.destroy();
+  const canvas = document.createElement("canvas");
+  canvas.id = "graficoHabitos";
+  canvas.width = 400;
+  canvas.height = 200;
+  contCalendario.appendChild(canvas);
+
+  chartHabitos = new Chart(canvas, {
+    type: "bar",
+    data: { labels, datasets: [{ label: "Días Cumplidos", data, backgroundColor: "#4caf50" }] },
+    options: { responsive: true, plugins: { legend: { display: false } } }
+  });
 }
 
 // ------------------------
-// 4️⃣ Simulaciones rápidas (escenarios)
+// 4️⃣ Funciones públicas
 // ------------------------
-function simularEscenario(escenario) {
-  const ingreso = parseFloat(document.getElementById("simIngreso").value) || 0;
-  const gasto = parseFloat(document.getElementById("simGasto").value) || 0;
-  const ahorro = parseFloat(document.getElementById("simAhorro").value) || 0;
-
-  let multiplicador = 1;
-  if (escenario === "optimista") multiplicador = 1.2;
-  if (escenario === "pesimista") multiplicador = 0.8;
-
-  const ahorroMensual = (ingreso - gasto) * multiplicador + ahorro;
-  const resultadosEl = document.getElementById("simulacionResultados");
-  if (resultadosEl) resultadosEl.textContent = `Ahorro mensual estimado: $${ahorroMensual.toFixed(2)}`;
-
-  // Graficar ahorro acumulado 12 meses
-  const acumulado = [];
-  let total = 0;
-  for (let i = 0; i < 12; i++) {
-    total += ahorroMensual;
-    acumulado.push(total.toFixed(2));
-  }
-
-  const ctx = document.getElementById("graficoSimulaciones");
-  if (ctx) {
-    if (chartSimulaciones) chartSimulaciones.destroy();
-    chartSimulaciones = new Chart(ctx, {
-      type: "line",
-      data: {
-        labels: ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
-        datasets: [{
-          label: "Ahorro acumulado",
-          data: acumulado,
-          borderColor: "#4caf50",
-          backgroundColor: "rgba(76,175,80,0.2)",
-          fill: true,
-          tension: 0.3
-        }]
-      },
-      options: { responsive: true, plugins: { legend: { position: "top" } } }
-    });
-  }
+function mostrarTarHab() {
+  showSection("tarHabContainer");
+  cargarHabitos();
 }
 
 // ------------------------
-// 5️⃣ Botones y eventos
+// 5️⃣ Botones
 // ------------------------
 function initBotonesTarHab() {
-  document.getElementById("btnExportTarHab")?.addEventListener("click", () => {
-    alert("Función de exportar o captura aún por implementar 📸");
-  });
+  const btnVolver = document.querySelectorAll(".btnVolverTarHab");
+  btnVolver.forEach(btn => btn.addEventListener("click", () => {
+    showSection("mainMenu");
+  }));
 
-  document.getElementById("btnSimularBase")?.addEventListener("click", () => simularEscenario("base"));
-  document.getElementById("btnSimularOptimista")?.addEventListener("click", () => simularEscenario("optimista"));
-  document.getElementById("btnSimularPesimista")?.addEventListener("click", () => simularEscenario("pesimista"));
-
-  document.querySelectorAll(".btnVolverTarHab").forEach(btn => {
-    btn.addEventListener("click", () => {
-      showSection("mainMenu");
+  const btnExport = document.getElementById("btnExportTarHab");
+  if (btnExport) {
+    btnExport.addEventListener("click", () => {
+      alert("Aquí podrías generar una captura de pantalla o exportar PDF.");
     });
-  });
+  }
 }
 
 // ------------------------
-// 6️⃣ Función principal para mostrar el módulo
-// ------------------------
-async function mostrarTarHab() {
-  showSection("tarHabContainer");
-  await cargarHabitos();
-}
-
-// ------------------------
-// 7️⃣ Exportar funciones públicas
+// 6️⃣ Exportar objeto TarHab
 // ------------------------
 const TarHab = {
   mostrarTarHab,
