@@ -44,8 +44,8 @@ window.onload = () => {
   const btnFinanzas = document.getElementById("btnFinanzas");
   if (btnFinanzas) btnFinanzas.addEventListener("click", () => Finanzas.mostrarFinanzas());
 
-  const btnTarHab = document.getElementById("btnTarHab");
-  if (btnTarHab) btnTarHab.addEventListener("click", () => TarHab.mostrarTarHab());
+const btnTarHab = document.getElementById("btnTarHab");
+if (btnTarHab) btnTarHab.addEventListener("click", () => TarHab.mostrarTarHab());
 };
 
 // ===== FUNCIONES =====
