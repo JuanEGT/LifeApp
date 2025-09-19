@@ -6,7 +6,7 @@ let saludToken = null; // Token específico de este módulo
 // Función para recibir el token global
 function setToken(token) {
   saludTokenToken = token;
-  console.log("[Salud] Token recibido:", agendaToken);
+  console.log("[Salud] Token recibido:", saludToken);
 }
 
 // Función de inicialización del módulo

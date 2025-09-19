@@ -1,13 +1,17 @@
-// ===================== NOMBRE DEL Habitos.JS =====================
-let habitosToken = null; // Token específico de este Habitos
+// ===================== Habitos.js =====================
 
+// Token para la hoja de Habitos
+let habitosToken = null; // Token específico de este módulo
+
+// Función para recibir el token global
 function setToken(token) {
   habitosToken = token;
+  console.log("[Habitos] Token recibido:", habitosToken);
 }
 
-// Función de inicialización del Habitos
+// Función de inicialización del módulo
 function initHabitos() {
-  console.log("[Habitos] Inicializando Habitos");
+  console.log("[Habitos] Inicializando módulo");
 
   const backBtn = document.getElementById("backToHomeBtn");
   if (backBtn) {
