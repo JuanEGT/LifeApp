@@ -6,7 +6,7 @@ let finanzasToken = null; // Token específico de este módulo
 // Función para recibir el token global
 function setToken(token) {
   finanzasToken = token;
-  console.log("[Finanzas] Token recibido:", agendaToken);
+  console.log("[Finanzas] Token recibido:", finanzasToken);
 }
 
 // Función de inicialización del módulo
