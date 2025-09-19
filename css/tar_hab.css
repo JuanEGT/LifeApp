@@ -35,18 +35,7 @@
   border-radius: 6px;
   font-size: 0.8rem;
   font-weight: bold;
-  color: #000000; /* el texto negro resalta sobre los colores de fondo */
-}
-
-/* Colores para días completados */
-#tarHabCalendario .completado {
-  background-color: #4caf50; /* verde: todos completados */
-}
-#tarHabCalendario .parcial {
-  background-color: #ffeb3b; /* amarillo: parcial */
-}
-#tarHabCalendario .no-completado {
-  background-color: #f44336; /* rojo: nada completado */
+  color: #000000;
 }
 
 /* Listas de tareas y hábitos */
