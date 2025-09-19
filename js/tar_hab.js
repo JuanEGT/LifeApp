@@ -1,145 +1,136 @@
-// ===================== tarhab.js =====================
+// ===================== tar_hab.js =====================
+const TarHab = (function () {
+  let tokenLocal; // Token que recibiremos desde app.js
+  const SPREADSHEET_ID = "1CMnA-3Ch5Ac1LLP8Hgph15IeeH7Dlvcj0IvX51mLzKU";
+  const SHEET_NAME = "Habitos";
 
-// ------------------------
-// 🔹 Variables internas
-// ------------------------
-const SPREADSHEET_ID = "1CMnA-3Ch5Ac1LLP8Hgph15IeeH7Dlvcj0IvX51mLzKU";
-const SHEET_NAME = "Habitos";
-let habitosData = [];
-let chartHabitos = null;
+  let chartHabitos = null;
 
-// ------------------------
-// 0️⃣ Token
-// ------------------------
-function setToken(newToken) {
-  TarHab.token = newToken;
-}
+  // ===================== TOKEN =====================
+  function setToken(tok) {
+    tokenLocal = tok;
+  }
 
-// ------------------------
-// 1️⃣ Utilidades
-// ------------------------
-function showSection(sectionId) {
-  const sections = ["tarHabContainer"];
-  sections.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = id === sectionId ? "block" : "none";
-  });
-}
-
-function parseRow(headers, row) {
-  const entry = {};
-  headers.forEach((h, i) => {
-    const key = h.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s/g, "");
-    entry[key] = row[i] || "";
-  });
-  return entry;
-}
-
-// ------------------------
-// 2️⃣ Cargar datos de Habitos
-// ------------------------
-async function cargarHabitos() {
-  if (!TarHab.token) return;
-  try {
-    const res = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?majorDimension=ROWS`,
-      { headers: { "Authorization": `Bearer ${TarHab.token}` } }
-    );
-    const data = await res.json();
-    if (!data.values || data.values.length < 2) {
-      habitosData = [];
-      renderHabitos();
+  // ===================== CARGAR HABITOS =====================
+  async function cargarHabitos() {
+    if (!tokenLocal) {
+      console.error("Token no definido");
       return;
     }
-    const headers = data.values[0];
-    const rows = data.values.slice(1);
-    habitosData = rows.map(row => parseRow(headers, row));
-    renderHabitos();
-  } catch (err) {
-    console.error("Error cargando Habitos:", err);
+
+    try {
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}`;
+      const resp = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${tokenLocal}`,
+        },
+      });
+      const dataJson = await resp.json();
+      const data = dataJson.values || [];
+      console.log("Habitos cargados:", data);
+
+      renderHabitos(data);
+      renderChart(data);
+    } catch (err) {
+      console.error("Error cargando Habitos:", err);
+    }
   }
-}
 
-// ------------------------
-// 3️⃣ Renderizar Habitos y Calendario
-// ------------------------
-function renderHabitos() {
-  const contTareas = document.getElementById("tarHabTareas");
-  const contHabitos = document.getElementById("tarHabHabitos");
-  const contCalendario = document.getElementById("tarHabCalendario");
+  // ===================== RENDER EN HTML =====================
+  function renderHabitos(data) {
+    const tareasDiv = document.getElementById("tarHabTareas");
+    const habitosDiv = document.getElementById("tarHabHabitos");
 
-  if (!contTareas || !contHabitos || !contCalendario) return;
+    tareasDiv.innerHTML = "<h3>Tareas</h3>";
+    habitosDiv.innerHTML = "<h3>Hábitos</h3>";
 
-  contTareas.innerHTML = "";
-  contHabitos.innerHTML = "";
-  contCalendario.innerHTML = "";
+    data.forEach((row) => {
+      const nombre = row[0] || "";
+      const tipo = row[1] || "";
+      const estado = row[2] || "";
 
-  const hoy = new Date().toISOString().slice(0, 10);
-
-  habitosData.forEach((habito, idx) => {
-    const div = document.createElement("div");
-    div.style.marginBottom = "5px";
-
-    const fechaCumplido = habito.Fecha || "";
-    const cumplido = habito.Cumplido === "TRUE";
-
-    div.innerHTML = `
-      <strong>${habito.Habito || habito.Tarea || "Sin nombre"}</strong> - ${fechaCumplido} 
-      <span style="color:${cumplido ? "green" : "red"}">${cumplido ? "✔" : "✖"}</span>
-    `;
-
-    if (habito.Tipo === "Tarea") contTareas.appendChild(div);
-    else contHabitos.appendChild(div);
-  });
-
-  // Crear gráfico simple de hábitos cumplidos
-  const labels = habitosData.map(h => h.Habito || h.Tarea || "");
-  const data = habitosData.map(h => h.Cumplido === "TRUE" ? 1 : 0);
-
-  if (chartHabitos) chartHabitos.destroy();
-  const canvas = document.createElement("canvas");
-  canvas.id = "graficoHabitos";
-  canvas.width = 400;
-  canvas.height = 200;
-  contCalendario.appendChild(canvas);
-
-  chartHabitos = new Chart(canvas, {
-    type: "bar",
-    data: { labels, datasets: [{ label: "Días Cumplidos", data, backgroundColor: "#4caf50" }] },
-    options: { responsive: true, plugins: { legend: { display: false } } }
-  });
-}
-
-// ------------------------
-// 4️⃣ Funciones públicas
-// ------------------------
-function mostrarTarHab() {
-  showSection("tarHabContainer");
-  cargarHabitos();
-}
-
-// ------------------------
-// 5️⃣ Botones
-// ------------------------
-function initBotonesTarHab() {
-  const btnVolver = document.querySelectorAll(".btnVolverTarHab");
-  btnVolver.forEach(btn => btn.addEventListener("click", () => {
-    showSection("mainMenu");
-  }));
-
-  const btnExport = document.getElementById("btnExportTarHab");
-  if (btnExport) {
-    btnExport.addEventListener("click", () => {
-      alert("Aquí podrías generar una captura de pantalla o exportar PDF.");
+      const itemDiv = document.createElement("div");
+      itemDiv.textContent = `${nombre} - ${estado}`;
+      if (tipo.toLowerCase() === "tarea") {
+        tareasDiv.appendChild(itemDiv);
+      } else {
+        habitosDiv.appendChild(itemDiv);
+      }
     });
   }
-}
 
-// ------------------------
-// 6️⃣ Exportar objeto TarHab
-// ------------------------
-const TarHab = {
-  mostrarTarHab,
-  setToken,
-  initBotonesTarHab
-};
+  // ===================== CHART =====================
+  function renderChart(data) {
+    const ctx = document.getElementById("tarHabCalendario").getContext("2d");
+    const labels = [];
+    const progreso = [];
+
+    data.forEach((row) => {
+      const tipo = row[1] || "";
+      const estado = row[2] || "";
+      if (tipo.toLowerCase() === "hábito" || tipo.toLowerCase() === "habito") {
+        labels.push(row[0]);
+        progreso.push(estado.toLowerCase() === "hecho" ? 1 : 0);
+      }
+    });
+
+    if (chartHabitos) chartHabitos.destroy();
+    chartHabitos = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "Progreso hábitos",
+            data: progreso,
+            backgroundColor: "#4caf50",
+          },
+        ],
+      },
+      options: {
+        scales: {
+          y: {
+            min: 0,
+            max: 1,
+            ticks: {
+              stepSize: 1,
+              callback: (val) => (val === 1 ? "✅" : "❌"),
+            },
+          },
+        },
+      },
+    });
+  }
+
+  // ===================== MOSTRAR MÓDULO =====================
+  function mostrarTarHab() {
+    document.getElementById("tarHabContainer").style.display = "flex";
+    document.getElementById("mainMenu").style.display = "none";
+    cargarHabitos();
+  }
+
+  // ===================== EXPORTAR / CAPTURA =====================
+  function exportTarHab() {
+    html2canvas(document.getElementById("tarHabContainer")).then((canvas) => {
+      const link = document.createElement("a");
+      link.download = "tar_hab_captura.png";
+      link.href = canvas.toDataURL();
+      link.click();
+    });
+  }
+
+  // ===================== INICIALIZAR BOTONES =====================
+  document.getElementById("btnExportTarHab")?.addEventListener("click", exportTarHab);
+  document.querySelectorAll(".btnVolverTarHab")?.forEach((btn) =>
+    btn.addEventListener("click", () => {
+      document.getElementById("tarHabContainer").style.display = "none";
+      document.getElementById("mainMenu").style.display = "flex";
+    })
+  );
+
+  // ===================== RETURN OBJETO PÚBLICO =====================
+  return {
+    setToken,
+    mostrarTarHab,
+  };
+})();
