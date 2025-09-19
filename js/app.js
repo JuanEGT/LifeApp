@@ -23,8 +23,8 @@ window.onload = () => {
     callback: (resp) => {
       token = resp.access_token;
       mostrarMenuPrincipal();
-      Agenda.setToken(token);      // pasar token a agenda.js
-      Finanzas.setToken(token);    // pasar token a finanzas.js
+      Agenda.setToken(token);    // pasar token a agenda.js
+      Finanzas.setToken(token);  // pasar token a finanzas.js
       TarHab.setToken(token);    // pasar token a tar_hab.js 
     }
   });
@@ -39,13 +39,19 @@ window.onload = () => {
 
   // ===== BOTONES DEL MENÚ PRINCIPAL =====
   const btnAgenda = document.getElementById("btnAgenda");
-  if (btnAgenda) btnAgenda.addEventListener("click", () => Agenda.mostrarAgenda());
+  if (btnAgenda) {
+    btnAgenda.addEventListener("click", () => Agenda.mostrarAgenda());
+  }
 
   const btnFinanzas = document.getElementById("btnFinanzas");
-  if (btnFinanzas) btnFinanzas.addEventListener("click", () => Finanzas.mostrarFinanzas());
+  if (btnFinanzas) {
+    btnFinanzas.addEventListener("click", () => Finanzas.mostrarFinanzas());
+  }
 
-const btnTarHab = document.getElementById("btnTarHab");
-if (btnTarHab) btnTarHab.addEventListener("click", () => TarHab.mostrarTarHab());
+  const btnTarHab = document.getElementById("btnTarHab");
+  if (btnTarHab) {
+    btnTarHab.addEventListener("click", () => TarHab.mostrarTarHab());
+  }
 };
 
 // ===== FUNCIONES =====
