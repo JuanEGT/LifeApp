@@ -1,26 +1,30 @@
-// ===================== NOMBRE DEL salud.JS =====================
-let saludToken = null; // Token específico de este salud
+// ===================== salud.js =====================
 
+// Token para la hoja de Finanzas
+let saludToken = null; // Token específico de este módulo
+
+// Función para recibir el token global
 function setToken(token) {
-  saludToken = token;
+  saludTokenToken = token;
+  console.log("[Salud] Token recibido:", agendaToken);
 }
 
-// Función de inicialización del salud
-function initsalud() {
-  console.log("[salud] Inicializando salud");
+// Función de inicialización del módulo
+function initSalud() {
+  console.log("[Salud] Inicializando módulo");
 
   const backBtn = document.getElementById("backToHomeBtn");
   if (backBtn) {
-    console.log("[salud] Botón de volver al Home encontrado");
+    console.log("[Salud] Botón de volver al Home encontrado");
     backBtn.addEventListener("click", () => {
-      console.log("[salud] Volviendo al Home");
+      console.log("[Salud] Volviendo al Home");
       volverHome(); // Función global en main.js
     });
   } else {
-    console.warn("[salud] Botón de volver al Home NO encontrado");
+    console.warn("[Salud] Botón de volver al Home NO encontrado");
   }
 }
 
 // Exponer funciones al scope global
 window.setToken = setToken;
-window.initsalud = initsalud;
+window.initSalud = initSalud;

@@ -1,8 +1,8 @@
 // ===================== NOMBRE DEL Habitos.JS =====================
-let HabitosToken = null; // Token específico de este Habitos
+let habitosToken = null; // Token específico de este Habitos
 
 function setToken(token) {
-  HabitosToken = token;
+  habitosToken = token;
 }
 
 // Función de inicialización del Habitos
