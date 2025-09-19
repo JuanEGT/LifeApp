@@ -4,11 +4,13 @@
 #tarHabContainer {
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
   gap: 1rem;
-  padding: 1rem;
+  padding: 1.5rem;
   background-color: #121212; /* fondo oscuro */
-  color: #e0e0e0; /* texto claro */
+  color: #e0e0e0;            /* texto claro */
   min-height: 80vh;
+  border-radius: 8px;
 }
 
 /* Título principal */
@@ -16,45 +18,14 @@
   font-size: 1.8rem;
   margin-bottom: 1rem;
   color: #ffffff;
+  text-align: center;
 }
 
-/* Calendario motivacional */
-#tarHabCalendario {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  margin-bottom: 15px;
-}
-
-#tarHabCalendario div {
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  font-weight: bold;
-  color: #000000;
-}
-
-/* Listas de tareas y hábitos */
-#tarHabTareas, #tarHabHabitos {
-  background-color: #1e1e1e;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 10px;
-}
-
-#tarHabTareas h3, #tarHabHabitos h3 {
-  margin-top: 0;
-  margin-bottom: 10px;
-  color: #ffffff;
-}
-
-#tarHabTareas div, #tarHabHabitos div {
-  padding: 5px;
-  border-bottom: 1px solid #333;
+/* Texto de placeholder */
+#tarHabContainer p {
+  font-size: 1rem;
+  color: #bbbbbb;
+  text-align: center;
 }
 
 /* Botones */
@@ -66,31 +37,18 @@
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.2s;
-  margin-right: 5px;
+  align-self: center;
 }
 
 #tarHabContainer .btn:hover {
   background-color: #505050;
 }
 
-/* Botones de volver */
+/* Botón de volver */
 .btnVolverTarHab {
-  background-color: #f44336;
+  background-color: #f44336 !important;
 }
 
 .btnVolverTarHab:hover {
-  background-color: #d32f2f;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  #tarHabCalendario div {
-    width: 40px;
-    height: 40px;
-    font-size: 0.7rem;
-  }
-
-  #tarHabTareas, #tarHabHabitos {
-    padding: 0.75rem;
-  }
+  background-color: #d32f2f !important;
 }
