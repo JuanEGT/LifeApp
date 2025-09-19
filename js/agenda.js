@@ -20,12 +20,9 @@ function initAgenda() {
       console.log("[Agenda] Volviendo al Home");
       volverHome(); // Llama a la función central de main.js
     });
+  } else {
+    console.warn("[Agenda] Botón de volver al Home NO encontrado");
   }
-
-  // Aquí irá la lógica futura para Agenda:
-  // - Leer hoja de cálculo usando agendaToken
-  // - Mostrar tareas, citas, etc.
-  console.log("[Agenda] Lógica de hoja de cálculo pendiente de implementar");
 }
 
 // Hacer funciones accesibles globalmente

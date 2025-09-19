@@ -1,6 +1,6 @@
 /* ===================== agenda.css ===================== */
 
-.module-container {
+.agenda-container {
   display: flex;
   flex-direction: column;
   gap: 1rem;
