@@ -2,7 +2,7 @@
 const TarHab = (function () {
   // Mostrar el módulo
   function mostrarTarHab() {
-    document.getElementById("tarHabContainer").style.display = "flex";
+    document.getElementById("tarHabContainer").style.display = "block";
     document.getElementById("mainMenu").style.display = "none";
   }
 
