@@ -1,0 +1,50 @@
+<!-- ================= AGENDA ================= -->
+<div id="agendaContainer" class="container">
+  <h1>Agenda</h1>
+
+  <!-- Sub-menú dentro de agenda -->
+  <div id="menuButtons" class="subMenu">
+    <button class="btn" id="btnAgregarEvento">Agregar Evento</button>
+    <button class="btn" id="btnBuscarFecha">Buscar por Fecha</button>
+    <button class="btn backBtn" id="btnVolverMenu">Volver al Menú Principal</button>
+  </div>
+
+  <!-- Formulario para agregar evento -->
+  <form id="eventoForm" class="form">
+    <label>
+      Fecha:
+      <input type="date" name="Fecha" required>
+    </label>
+    <label>
+      Hora:
+      <input type="time" name="Hora" required>
+    </label>
+    <label>
+      Evento:
+      <input type="text" name="Evento" required>
+    </label>
+    <label>
+      Notas:
+      <input type="text" name="Notas">
+    </label>
+    <button type="submit" class="btn">Guardar Evento</button>
+  </form>
+
+  <!-- Selector de fecha para buscar eventos -->
+  <div id="fechaSelector" class="form">
+    <label>
+      Selecciona fecha:
+      <input type="date" id="fechaInput">
+    </label>
+    <button class="btn" id="btnBuscarPorFecha">Buscar</button>
+  </div>
+
+  <!-- Contenedor donde se muestran los eventos -->
+  <div id="agenda" class="agenda"></div>
+
+  <!-- Barra de recordatorios y calendario -->
+  <div id="barraYCalendario" class="sidebarContainer">
+    <div id="recordatorios" class="recordatorios"></div>
+    <div id="calendario" class="calendario"></div>
+  </div>
+</div>

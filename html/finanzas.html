@@ -1,0 +1,122 @@
+<div id="finanzasContainer" class="container">
+  <h1>Finanzas</h1>
+
+  <!-- Menú de finanzas -->
+  <div id="finanzasMenu">
+    <button id="btnMovimientos">📜 Ver Movimientos</button>
+    <button id="btnAgregar">➕ Agregar Movimiento</button>
+    <button id="btnReportes">📊 Reportes</button>
+    <button id="btnProyecciones">📈 Proyecciones</button>
+    <button id="btnSimulaciones">📅 Simulaciones</button>
+    <button class="btnVolverFinanzas">🔙 Volver al Menú Principal</button>
+  </div>
+
+  <!-- MOVIMIENTOS -->
+  <div id="finanzasMovimientos" style="display:none">
+    <h2>📜 Movimientos</h2>
+    <label>Mes:<input type="month" id="selectorMes" /></label>
+    <table class="tabla-finanzas">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Tipo</th>
+          <th>Cantidad</th>
+          <th>Nombre</th>
+          <th>Método de Pago</th>
+        </tr>
+      </thead>
+      <tbody id="finanzas-table-body"></tbody>
+    </table>
+    <div class="resumen-finanzas">
+      <p>Ingresos: <span id="total-ingresos">0</span></p>
+      <p>Gastos: <span id="total-gastos">0</span></p>
+      <p>Saldo: <span id="saldo">0</span></p>
+    </div>
+    <button class="btnVolverFinanzas">🔙 Volver</button>
+  </div>
+
+  <!-- AGREGAR MOVIMIENTO -->
+  <div id="finanzasAgregar" style="display:none">
+    <h2>➕ Agregar Movimiento</h2>
+    <form id="form-finanza" class="form">
+      <input type="text" id="grupo" placeholder="Grupo" required>
+      <select id="tipo">
+        <option value="Ingreso">Ingreso</option>
+        <option value="Gasto">Gasto</option>
+        <option value="Ahorro">Ahorro</option>
+        <option value="Deuda">Deuda</option>
+        <option value="Inversión">Inversión</option>
+      </select>
+      <input type="date" id="fecha" required>
+      <input type="number" id="cantidad" placeholder="Cantidad" required>
+      <input type="text" id="nombre" placeholder="Nombre" required>
+      <input type="text" id="metodoPago" placeholder="Método de Pago">
+      <button type="submit" class="btn">Agregar</button>
+      <button type="button" class="btnVolverFinanzas">🔙 Volver</button>
+    </form>
+  </div>
+
+  <!-- REPORTES -->
+  <div id="finanzasReportes" style="display:none">
+    <h2>📊 Reportes</h2>
+    <label>Año:<input type="number" id="anioReporte" value="2025" min="2020" max="2030"></label>
+    <label>Mes:<input type="month" id="mesReporte"></label>
+    <div class="graficas-reportes">
+      <canvas id="graficoIngresosGastos" width="400" height="200"></canvas>
+      <canvas id="graficoDistribucionGrupo" width="400" height="200"></canvas>
+      <canvas id="graficoSaldoMensual" width="400" height="200"></canvas>
+      <canvas id="graficoMetodosPago" width="400" height="200"></canvas>
+      <canvas id="graficoHorasSalario" width="400" height="200"></canvas>
+    </div>
+    <button class="btnVolverFinanzas">🔙 Volver</button>
+  </div>
+
+  <!-- PROYECCIONES -->
+  <div id="finanzasProyecciones" style="display:none">
+    <h2>📈 Proyecciones</h2>
+    <div class="selector-proyecciones">
+      <label>
+        Año inicio:
+        <input type="number" id="anioInicioProyecciones" value="2025" min="2020" max="2030">
+      </label>
+      <label>
+        Horizonte (años, máximo 5):
+        <input type="number" id="horizonteProyecciones" value="1" min="1" max="5">
+      </label>
+    </div>
+    <div id="resumenInversion" style="margin-top: 10px; font-size: 16px;"></div>
+    <div id="resumenDeuda" style="margin-top: 10px; font-size: 16px;"></div>
+    <div class="graficas-proyecciones" style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px;">
+      <div style="flex:1; min-width: 300px;">
+        <canvas id="graficoProyeccionesInversion" width="400" height="200"></canvas>
+      </div>
+      <div style="flex:1; min-width: 300px;">
+        <canvas id="graficoProyeccionesDeuda" width="400" height="200"></canvas>
+      </div>
+    </div>
+    <div style="margin-top: 20px;">
+      <button id="btnCalcularProyecciones" class="btn">Calcular Proyecciones</button>
+      <button class="btnVolverFinanzas">🔙 Volver</button>
+    </div>
+  </div>
+
+  <!-- SIMULACIONES -->
+  <div id="finanzasSimulaciones" style="display:none; color:white;">
+    <h2>📅 Simulaciones</h2>
+    <div style="margin-top:10px;">
+      <label>Ingreso mensual: <input type="number" id="simIngreso" placeholder="15000"></label>
+      <label>Gasto fijo mensual: <input type="number" id="simGasto" placeholder="10000"></label>
+      <label>Ahorro mensual: <input type="number" id="simAhorro" placeholder="2000"></label>
+    </div>
+    <div style="margin-top:10px;">
+      <button id="btnSimularBase" class="btn">Escenario Base</button>
+      <button id="btnSimularOptimista" class="btn">Optimista</button>
+      <button id="btnSimularPesimista" class="btn">Pesimista</button>
+    </div>
+    <div id="simulacionResultados" style="margin-top:15px; font-size:16px;"></div>
+    <canvas id="graficoSimulaciones" width="400" height="200" style="margin-top:15px;"></canvas>
+    <div style="margin-top: 20px;">
+      <button class="btnVolverFinanzas">🔙 Volver</button>
+    </div>
+  </div>
+</div>

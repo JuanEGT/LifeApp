@@ -7,12 +7,14 @@ const SPREADSHEET_ID = "1CMnA-3Ch5Ac1LLP8Hgph15IeeH7Dlvcj0IvX51mLzKU";
 const SHEET_NAME = "Finanzas";
 let finanzasData = [];
 let charts = {};
+let token = null; // token para Google Sheets
 
 // ------------------------
 // 0️⃣ Token
 // ------------------------
 function setToken(newToken) {
   token = newToken;
+  console.log("Token actualizado");
 }
 
 // ------------------------
@@ -103,10 +105,12 @@ async function cargarFinanzas() {
     const headers = data.values[0];
     const rows = data.values.slice(1);
     finanzasData = rows.map(row => parseRow(headers, row));
+    console.log("Finanzas cargadas", finanzasData);
     renderTablaMovimientos();
     renderReportes();
   } catch (err) {
     console.error("Error cargando Finanzas:", err);
+    document.getElementById("msgFinanzas")?.innerText = "Error cargando datos de Finanzas";
   }
 }
 
@@ -244,7 +248,7 @@ function renderReportes() {
     data: { labels: datos.grupos, datasets: [{ data: datos.distribucionGrupo, backgroundColor: ["#4caf50","#f44336","#2196f3","#ff9800","#9c27b0"] }] } 
   });
 
-  // Saldo anual (verificación de función calcularSaldosMensuales)
+  // Saldo anual
   const anio = parseInt(document.getElementById("anioReporte")?.value, 10) || new Date().getFullYear();
   if (typeof calcularSaldosMensuales === "function") {
     renderChart("graficoSaldoMensual", { 
@@ -406,80 +410,6 @@ document.getElementById("btnCalcularProyecciones")?.addEventListener("click", ca
 function renderProyecciones() {
   calcularProyecciones();
 }
-// Simulaciones
-let chartSimulaciones;
-
-// Utilidad: calcular escenario
-function calcularEscenario({ ingreso, gasto, ahorro }) {
-  const balance = ingreso - gasto - ahorro;
-  const ahorroAnual = ahorro * 12;
-  return { balance, ahorroAnual };
-}
-
-// Renderizar resultados en pantalla
-function mostrarResultadosSimulacion(nombreEscenario, datos) {
-  const div = document.getElementById("simulacionResultados");
-  if (!div) return;
-
-  let colorBalance = datos.balance >= 0 ? "lightgreen" : "red";
-
-  div.innerHTML = `
-    <h3>Escenario: ${nombreEscenario}</h3>
-    <p>Balance mensual: <span style="color:${colorBalance}">$${datos.balance.toFixed(2)}</span></p>
-    <p>Ahorro anual proyectado: <span style="color:white">$${datos.ahorroAnual.toFixed(2)}</span></p>
-  `;
-
-  // Datos para gráfico (ahorro acumulado mes a mes)
-  const datosGrafico = Array.from({ length: 12 }, (_, i) => datos.ahorroAnual / 12 * (i + 1));
-
-  if (chartSimulaciones) chartSimulaciones.destroy();
-  const canvas = document.getElementById("graficoSimulaciones");
-  if (canvas) {
-    chartSimulaciones = new Chart(canvas, {
-      type: "bar",
-      data: {
-        labels: ["Mes 1","Mes 2","Mes 3","Mes 4","Mes 5","Mes 6","Mes 7","Mes 8","Mes 9","Mes 10","Mes 11","Mes 12"],
-        datasets: [{
-          label: "Ahorro acumulado",
-          data: datosGrafico,
-          backgroundColor: "#2196f3"
-        }]
-      },
-      options: { responsive: true, plugins: { legend: { position: "top" } } }
-    });
-  }
-}
-
-// Ejecutar simulación segun inputs y escenario
-function ejecutarSimulacion(tipo = "Base") {
-  const ingreso = parseFloat(document.getElementById("simIngreso")?.value) || 0;
-  const gasto = parseFloat(document.getElementById("simGasto")?.value) || 0;
-  const ahorro = parseFloat(document.getElementById("simAhorro")?.value) || 0;
-
-  let params = { ingreso, gasto, ahorro };
-
-  if (tipo === "Optimista") {
-    params.ingreso *= 1.1;
-    params.gasto *= 0.95;
-  } else if (tipo === "Pesimista") {
-    params.ingreso *= 0.9;
-    params.gasto *= 1.05;
-  }
-
-  const resultado = calcularEscenario(params);
-  mostrarResultadosSimulacion(tipo, resultado);
-}
-
-// Punto de entrada público
-function renderSimulaciones() {
-  // Reset resultados
-  document.getElementById("simulacionResultados").innerHTML = "<p>Ingresa tus valores y selecciona un escenario.</p>";
-
-  // Asignar eventos a botones
-  document.getElementById("btnSimularBase")?.addEventListener("click", () => ejecutarSimulacion("Base"));
-  document.getElementById("btnSimularOptimista")?.addEventListener("click", () => ejecutarSimulacion("Optimista"));
-  document.getElementById("btnSimularPesimista")?.addEventListener("click", () => ejecutarSimulacion("Pesimista"));
-}
 
 // ------------------------
 // 7️⃣ Mostrar sección principal
@@ -557,6 +487,5 @@ const Finanzas = {
   setToken,
   renderReportes,
   renderProyecciones,
-  renderSimulaciones,
   initBotonesSubmenus
 };
