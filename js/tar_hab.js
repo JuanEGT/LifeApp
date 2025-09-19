@@ -4,7 +4,6 @@
 const HABITOS_SPREADSHEET_ID = "1CMnA-3Ch5Ac1LLP8Hgph15IeeH7Dlvcj0IvX51mLzKU"; 
 const HABITOS_SHEET_NAME = "Habitos";
 
-let token = null; // el token lo recibimos de app.js
 let habitosData = [];
 let chartSimulaciones = null;
 
