@@ -9,18 +9,24 @@ const frases = [
 
 function fraseDelDia() {
   const hoy = new Date();
-  const index = hoy.getDate() % frases.length; // cambia cada día
+  const index = hoy.getDate() % frases.length;
   return frases[index];
 }
 
-// ===================== EVENTOS HISTÓRICOS =====================
+// ===================== EVENTOS HISTÓRICOS (Wikipedia ES) =====================
 async function eventosHistoricos() {
   const contenedor = document.getElementById('eventosDelDia');
   try {
-    const res = await fetch('https://history.muffinlabs.com/date');
+    const hoy = new Date();
+    const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+    const dia = String(hoy.getDate()).padStart(2, '0');
+
+    const url = `https://es.wikipedia.org/api/rest_v1/feed/onthisday/events/${mes}/${dia}`;
+    const res = await fetch(url);
     const data = await res.json();
 
-    const eventos = data.data.Events.slice(0, 5); // top 5 eventos
+    // Wikipedia devuelve un array llamado 'events'
+    const eventos = data.events.slice(0, 5); // top 5 eventos
     const lista = eventos.map(ev => `<li>${ev.year}: ${ev.text}</li>`).join('');
 
     contenedor.innerHTML = `<ul>${lista}</ul>`;
