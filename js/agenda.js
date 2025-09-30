@@ -107,19 +107,24 @@ async function eliminarEvento(id, values) {
 }
 
 // ===================== UI =====================
-/**
- * Muestra la agenda con recordatorios y calendario
- */
 async function mostrarAgenda() {
   const cont = document.getElementById("agendaContent");
   if (!cont) return;
   cont.innerHTML = ""; // limpiar
 
   const values = await cargarEventos();
-
   mostrarRecordatorios(values);
   mostrarCalendario(values);
+
+  // Crear botón Volver al Home dentro del contenedor
+  const backBtn = document.createElement("button");
+  backBtn.id = "backToHomeBtn";
+  backBtn.className = "btn backBtn";
+  backBtn.innerText = "← Volver al Home";
+  backBtn.onclick = () => window.volverHome();
+  cont.appendChild(backBtn);
 }
+
 
 /**
  * Muestra el calendario mensual con días destacados según eventos
@@ -329,29 +334,21 @@ function mostrarRecordatorios(values) {
 function initAgenda() {
   console.log("[Agenda] Inicializando módulo...");
 
-  // 1️⃣ Inyectar o mostrar el HTML de la agenda
-  mostrarAgenda(); // Asegúrate de que esto deje #backToHomeBtn en el DOM
+  // Mostrar agenda (esto inyecta recordatorios y calendario)
+  mostrarAgenda();
 
-  // 2️⃣ Obtener el botón de volver al home
+  // Obtener el botón global existente en el HTML
   const backBtn = document.getElementById("backToHomeBtn");
-
   if (backBtn) {
-    // 3️⃣ Asociar evento al botón usando la función global
     backBtn.addEventListener("click", () => {
       console.log("[Agenda] Botón Volver al Home clickeado");
-      window.volverHome(); // Llama a la función global de main.js
+      window.volverHome(); // Llama a la función global en main.js
     });
   } else {
     console.warn("[Agenda] Botón de volver al Home NO encontrado");
   }
-
-  // 4️⃣ Inicializar otros elementos de la agenda
-  const btnAgregarEvento = document.getElementById("btnAgregarEvento");
-  const btnBuscarFecha = document.getElementById("btnBuscarPorFecha");
-  // Aquí podrías agregar eventos para estos botones...
-
-  console.log("[Agenda] Módulo inicializado correctamente");
 }
+
 
 // ===================== EJECUTAR INIT =====================
 window.addEventListener("DOMContentLoaded", () => {
