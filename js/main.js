@@ -100,8 +100,28 @@ function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-// ===================== FUNCIÓN PARA VOLVER AL HOME =====================
-window.volverHome = function() {
-  console.log("[Main] Volviendo al módulo Home");
-  cargarModulo('home');
-};
+// ===================== INIT AGENDA =====================
+function initAgenda() {
+  console.log("[Agenda] Inicializando módulo...");
+
+  // Obtener el botón de volver al home
+  const backBtn = document.getElementById("backToHomeBtn");
+
+  if (backBtn) {
+    // Asociar el evento al botón usando la función global
+    backBtn.addEventListener("click", () => {
+      console.log("[Agenda] Botón Volver al Home clickeado");
+      window.volverHome(); // <-- Llama a la función global de main.js
+    });
+  } else {
+    console.warn("[Agenda] Botón de volver al Home NO encontrado");
+  }
+
+  // Aquí puedes inicializar lo que necesites mostrar de la agenda
+  mostrarAgenda();
+}
+
+// ===================== EJECUTAR INIT =====================
+window.addEventListener("DOMContentLoaded", () => {
+  initAgenda();
+});
