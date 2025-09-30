@@ -31,14 +31,28 @@ async function cargarEventos() {
 }
 
 // ===================== UI =====================
-// Mostrar agenda (solo mensaje por ahora)
+// Mostrar agenda con eventos
 async function mostrarAgenda() {
   const cont = document.getElementById("agendaContent");
   const msg = document.getElementById("msg");
   if (!cont || !msg) return;
 
   msg.innerText = "Cargando agenda...";
-  cont.innerHTML = "<p>Agenda lista. Eventos precargados en memoria.</p>";
+  cont.innerHTML = "";
+
+  if (eventosCache.length < 2) {
+    cont.innerHTML = "<p>No hay eventos.</p>";
+  } else {
+    const headers = eventosCache[0];
+    eventosCache.slice(1).forEach(r => {
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = r[i] || "");
+      const p = document.createElement("p");
+      p.innerText = `${obj.Fecha} ${obj.Hora} - ${obj.Evento} (${obj.Notas})`;
+      cont.appendChild(p);
+    });
+  }
+
   msg.innerText = "";
 }
 
@@ -72,7 +86,6 @@ function agregarEvento() {
 
       const data = [id, fecha, hora, eventoTexto, notas];
 
-      // Guardar en Google Sheets
       try {
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}:append?valueInputOption=USER_ENTERED`;
         const resp = await fetch(url, {
@@ -104,13 +117,64 @@ function agregarEvento() {
   }
 }
 
+// ===================== FUNCION UNICA PARA BUSCAR POR FECHA =====================
+function buscarPorFecha() {
+  const menu = document.getElementById("menuButtons");
+  const form = document.getElementById("formAgregarEvento");
+  const fechaSelector = document.getElementById("fechaSelector");
+  const agendaDiv = document.getElementById("agendaContent");
+  const msg = document.getElementById("msg");
+
+  if (!menu || !form || !fechaSelector || !agendaDiv || !msg) return;
+
+  // Ocultar elementos principales
+  menu.style.display = "none";
+  form.style.display = "none";
+  agendaDiv.innerHTML = "";
+  msg.innerText = "";
+
+  // Mostrar selector de fecha
+  fechaSelector.style.display = "flex";
+
+  const btnBuscar = document.getElementById("btnBuscarPorFecha");
+  const btnVolver = document.getElementById("btnVolverAgenda");
+
+  // Volver a agenda
+  btnVolver.onclick = async () => {
+    fechaSelector.style.display = "none";
+    menu.style.display = "flex";
+    await mostrarAgenda(); // recargar vista de agenda
+  };
+
+  // Buscar eventos por fecha
+  btnBuscar.onclick = async () => {
+    const fecha = document.getElementById("fechaInput").value;
+    if (!fecha) return;
+
+    const allValues = await cargarEventos();
+    if (!allValues || allValues.length < 2) return;
+
+    const headers = allValues[0];
+    const rows = allValues.slice(1).filter(r => r[1] === fecha);
+
+    agendaDiv.innerHTML = "";
+
+    rows.forEach(r => {
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = r[i] || "");
+      const p = document.createElement("p");
+      p.innerText = `${obj.Fecha} ${obj.Hora} - ${obj.Evento} (${obj.Notas})`;
+      agendaDiv.appendChild(p);
+    });
+  };
+}
+
 // ===================== INICIALIZACIÓN =====================
 async function initAgenda() {
   console.log("[Agenda] Inicializando módulo...");
 
-  // Cargar eventos
   await cargarEventos();
-  mostrarAgenda();
+  await mostrarAgenda();
 
   // Botón volver al Home
   const backBtn = document.getElementById("backToHomeBtn");
@@ -121,13 +185,8 @@ async function initAgenda() {
   if (agregarBtn) agregarBtn.onclick = agregarEvento;
 
   // Botón buscar por fecha
-  const buscarBtn = document.getElementById("btnBuscarFecha");
-  if (buscarBtn) {
-    buscarBtn.addEventListener("click", () => {
-      const fechaInput = document.getElementById("inputBuscarFecha");
-      if (fechaInput) fechaInput.style.display = "block";
-    });
-  }
+  const btnBuscarFecha = document.getElementById("btnBuscarFecha");
+  if (btnBuscarFecha) btnBuscarFecha.onclick = buscarPorFecha;
 }
 
 // ===================== EXPOSICIÓN GLOBAL =====================
