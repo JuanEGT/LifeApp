@@ -104,21 +104,28 @@ function capitalize(str) {
 function initAgenda() {
   console.log("[Agenda] Inicializando módulo...");
 
-  // Obtener el botón de volver al home
+  // 1️⃣ Inyectar o mostrar el HTML de la agenda
+  mostrarAgenda(); // Asegúrate de que esto deje #backToHomeBtn en el DOM
+
+  // 2️⃣ Obtener el botón de volver al home
   const backBtn = document.getElementById("backToHomeBtn");
 
   if (backBtn) {
-    // Asociar el evento al botón usando la función global
+    // 3️⃣ Asociar evento al botón usando la función global
     backBtn.addEventListener("click", () => {
       console.log("[Agenda] Botón Volver al Home clickeado");
-      window.volverHome(); // <-- Llama a la función global de main.js
+      window.volverHome(); // Llama a la función global de main.js
     });
   } else {
     console.warn("[Agenda] Botón de volver al Home NO encontrado");
   }
 
-  // Aquí puedes inicializar lo que necesites mostrar de la agenda
-  mostrarAgenda();
+  // 4️⃣ Inicializar otros elementos de la agenda
+  const btnAgregarEvento = document.getElementById("btnAgregarEvento");
+  const btnBuscarFecha = document.getElementById("btnBuscarPorFecha");
+  // Aquí podrías agregar eventos para estos botones...
+
+  console.log("[Agenda] Módulo inicializado correctamente");
 }
 
 // ===================== EJECUTAR INIT =====================
