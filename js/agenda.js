@@ -110,19 +110,15 @@ async function eliminarEvento(id, values) {
 async function mostrarAgenda() {
   const cont = document.getElementById("agendaContent");
   if (!cont) return;
-  cont.innerHTML = ""; // limpiar
 
+  cont.innerHTML = ""; // limpiar contenido existente
+
+  // 1️⃣ Cargar los eventos desde Google Sheets
   const values = await cargarEventos();
+
+  // 2️⃣ Mostrar recordatorios y calendario
   mostrarRecordatorios(values);
   mostrarCalendario(values);
-
-  // Crear botón Volver al Home dentro del contenedor
-  const backBtn = document.createElement("button");
-  backBtn.id = "backToHomeBtn";
-  backBtn.className = "btn";
-  backBtn.innerText = "← Volver al Home";
-  backBtn.onclick = () => window.volverHome();
-  cont.appendChild(backBtn);
 }
 
 
@@ -331,18 +327,21 @@ function mostrarRecordatorios(values) {
 }
 
 function initAgenda() {
-  console.log("[Agenda] Inicializando módulo");
+  console.log("[Agenda] Inicializando módulo...");
 
+  mostrarAgenda();
+
+  // Asociar listener al botón que ya existe en el HTML
   const backBtn = document.getElementById("backToHomeBtn");
   if (backBtn) {
-    console.log("[Agenda] Botón de volver al Home encontrado");
     backBtn.addEventListener("click", () => {
-      console.log("[Agenda] Volviendo al Home");
-      volverHome(); // Función global en main.js
+      console.log("[Agenda] Botón Volver al Home clickeado");
+      window.volverHome(); // función global de main.js
     });
   } else {
-    console.warn("[Finanzas] Botón de volver al Home NO encontrado");
+    console.warn("[Agenda] Botón de volver al Home NO encontrado");
   }
+
 }
 
 // ===================== EXPOSICIÓN GLOBAL =====================
