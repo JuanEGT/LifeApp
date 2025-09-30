@@ -1,22 +1,23 @@
-  <!-- ================= AGENDA ================= -->
-  <div id="agendaContainer" class="container">
-    <h1>Agenda</h1>
+<div class="agenda-container"> <!-- ahora es agenda-container -->
+  <h2>📅 Agenda</h2>
 
-    <!-- Mensaje de error o info -->
-    <div id="msg" class="agenda-msg"></div>
+  <!-- Botón para volver al menú principal -->
+  <button id="backToHomeBtn" class="btn">← Volver al menú principal</button>
 
-    <!-- Sub-menú dentro de agenda -->
+  <!-- Contenedor de botones de acciones -->
+  <div class="moduloContent">
     <div id="menuButtons" class="subMenu">
       <button id="btnAgregarEvento" class="btn">Agregar Evento</button>
       <button class="btn" id="btnBuscarFecha">Buscar por Fecha</button>
-      <button id="backToHomeBtn" class="btn">← Volver a Home</button>
     </div>
 
     <!-- Contenedor principal de agenda -->
-    <div id="agendaContent" class="agenda-content"></div>
+    <div id="agendaContent" class="moduloContent">
+      <p>Agenda lista. Eventos precargados en memoria.</p>
+    </div>
 
     <!-- Formulario para agregar evento -->
-    <form id="formAgregarEvento" style="display:none;" class="agenda-form">
+    <form id="formAgregarEvento" class="agenda-form" style="display:none;">
       <label>Fecha: <input type="date" id="inputFecha" required></label>
       <label>Hora: <input type="time" id="inputHora" required></label>
       <label>Evento: <input type="text" id="inputEvento" required></label>
@@ -24,10 +25,5 @@
       <button type="submit">Guardar Evento</button>
       <button type="button" id="btnCancelarEvento">Cancelar</button>
     </form>
-    
-    <!-- Barra lateral con recordatorios y calendario -->
-    <div id="barraYCalendario" class="sidebarContainer">
-      <div id="recordatorios" class="agenda-recordatorios"></div>
-      <div id="calendario" class="agenda-calendario"></div>
-    </div>
   </div>
+</div>
