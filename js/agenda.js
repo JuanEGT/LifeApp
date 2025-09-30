@@ -119,21 +119,28 @@ function agregarEvento() {
 
 // ===================== FUNCION UNICA PARA BUSCAR POR FECHA =====================
 function buscarPorFecha() {
+  console.log("[Agenda] Se ejecutó buscarPorFecha"); // <- log al iniciar función
+
   const menu = document.getElementById("menuButtons");
   const form = document.getElementById("formAgregarEvento");
   const fechaSelector = document.getElementById("fechaSelector");
   const agendaDiv = document.getElementById("agendaContent");
   const msg = document.getElementById("msg");
 
-  if (!menu || !form || !fechaSelector || !agendaDiv || !msg) return;
+  if (!menu || !form || !fechaSelector || !agendaDiv || !msg) {
+    console.log("[Agenda] ERROR: algún elemento no se encontró en el DOM");
+    return;
+  }
 
   // Ocultar elementos principales
+  console.log("[Agenda] Ocultando menú y formulario");
   menu.style.display = "none";
   form.style.display = "none";
   agendaDiv.innerHTML = "";
   msg.innerText = "";
 
   // Mostrar selector de fecha
+  console.log("[Agenda] Mostrando selector de fecha");
   fechaSelector.style.display = "flex";
 
   const btnBuscar = document.getElementById("btnBuscarPorFecha");
@@ -141,6 +148,7 @@ function buscarPorFecha() {
 
   // Volver a agenda
   btnVolver.onclick = async () => {
+    console.log("[Agenda] Volver a agenda presionado");
     fechaSelector.style.display = "none";
     menu.style.display = "flex";
     await mostrarAgenda(); // recargar vista de agenda
@@ -149,14 +157,19 @@ function buscarPorFecha() {
   // Buscar eventos por fecha
   btnBuscar.onclick = async () => {
     const fecha = document.getElementById("fechaInput").value;
+    console.log("[Agenda] Botón buscar presionado. Fecha:", fecha);
     if (!fecha) return;
 
     const allValues = await cargarEventos();
-    if (!allValues || allValues.length < 2) return;
+    if (!allValues || allValues.length < 2) {
+      console.log("[Agenda] No hay eventos en la agenda");
+      return;
+    }
 
     const headers = allValues[0];
     const rows = allValues.slice(1).filter(r => r[1] === fecha);
 
+    console.log("[Agenda] Eventos encontrados:", rows.length);
     agendaDiv.innerHTML = "";
 
     rows.forEach(r => {
@@ -169,25 +182,55 @@ function buscarPorFecha() {
   };
 }
 
+
 // ===================== INICIALIZACIÓN =====================
 async function initAgenda() {
   console.log("[Agenda] Inicializando módulo...");
 
+  // Cargar eventos
   await cargarEventos();
+  console.log("[Agenda] Eventos cargados:", eventosCache.length);
+
   await mostrarAgenda();
+  console.log("[Agenda] Agenda mostrada en UI");
 
   // Botón volver al Home
   const backBtn = document.getElementById("backToHomeBtn");
-  if (backBtn) backBtn.addEventListener("click", () => window.volverHome());
+  if (backBtn) {
+    backBtn.addEventListener("click", () => {
+      console.log("[Agenda] Botón Volver al Home presionado");
+      window.volverHome();
+    });
+    console.log("[Agenda] Botón Volver al Home conectado");
+  } else {
+    console.log("[Agenda] ERROR: Botón Volver al Home no encontrado");
+  }
 
   // Botón agregar evento → nuestra función única
   const agregarBtn = document.getElementById("btnAgregarEvento");
-  if (agregarBtn) agregarBtn.onclick = agregarEvento;
+  if (agregarBtn) {
+    agregarBtn.onclick = () => {
+      console.log("[Agenda] Botón Agregar Evento presionado");
+      agregarEvento();
+    };
+    console.log("[Agenda] Botón Agregar Evento conectado");
+  } else {
+    console.log("[Agenda] ERROR: Botón Agregar Evento no encontrado");
+  }
 
   // Botón buscar por fecha
   const btnBuscarFecha = document.getElementById("btnBuscarFecha");
-  if (btnBuscarFecha) btnBuscarFecha.onclick = () => buscarPorFecha();
+  if (btnBuscarFecha) {
+    btnBuscarFecha.onclick = () => {
+      console.log("[Agenda] Botón Buscar por Fecha presionado");
+      buscarPorFecha();
+    };
+    console.log("[Agenda] Botón Buscar por Fecha conectado");
+  } else {
+    console.log("[Agenda] ERROR: Botón Buscar por Fecha no encontrado");
+  }
 }
+
 
 // ===================== EXPOSICIÓN GLOBAL =====================
 window.initAgenda = initAgenda;
