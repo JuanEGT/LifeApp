@@ -38,31 +38,29 @@ async function mostrarAgenda() {
   const msg = document.getElementById("msg");
   if (!cont || !msg) return;
 
-  // Mostrar mensaje mientras cargamos
+  // Mostrar mensaje de carga
   msg.innerText = "Cargando eventos...";
   cont.innerHTML = "";
 
-  // 1️⃣ Cargar los eventos desde Google Sheets
   const eventos = await cargarEventos();
 
-  // 2️⃣ Mostrar los eventos
   if (eventos.length === 0) {
     cont.innerHTML = "<p>No hay eventos registrados.</p>";
   } else {
     const lista = document.createElement("ul");
     lista.classList.add("agenda-lista");
 
-    eventos.forEach(fila => {
-      // fila = [fecha, título, descripción]
+    // Saltar la primera fila si es encabezado
+    for (let i = 1; i < eventos.length; i++) {
+      const fila = eventos[i]; // fila = [ID, Fecha, Hora, Evento, Notas]
       const li = document.createElement("li");
-      li.innerHTML = `<strong>${fila[0]}</strong> - ${fila[1]}: ${fila[2] || ""}`;
+      li.innerHTML = `<strong>${fila[1]}</strong> ${fila[2]} - ${fila[3]} ${fila[4] ? "- " + fila[4] : ""}`;
       lista.appendChild(li);
-    });
+    }
 
     cont.appendChild(lista);
   }
 
-  // Limpiar mensaje
   msg.innerText = "";
 }
 
