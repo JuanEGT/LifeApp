@@ -1,6 +1,9 @@
 <div class="agenda-container"> <!-- ahora es agenda-container -->
   <h2>📅 Agenda</h2>
 
+  <!-- Mensaje de error o info -->
+  <div id="msg" class="agenda-msg"></div>
+
   <!-- Botón para volver al menú principal -->
   <button id="backToHomeBtn" class="btn">← Volver al menú principal</button>
 
@@ -25,7 +28,8 @@
       <button type="submit">Guardar Evento</button>
       <button type="button" id="btnCancelarEvento">Cancelar</button>
     </form>
-        <!-- Selector de fecha (invisible al inicio) -->
+
+    <!-- Selector de fecha (invisible al inicio) -->
     <div id="fechaSelector" style="display:none; flex-direction: column; gap: 0.5rem;">
       <label>Selecciona una fecha:
         <input type="date" id="fechaInput">
