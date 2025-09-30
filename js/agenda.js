@@ -32,14 +32,40 @@ async function cargarEventos() {
 }
 
 // ===================== UI =====================
-// Función para mostrar la agenda (actualmente solo muestra los botones existentes)
+// Función para mostrar la agenda 
 async function mostrarAgenda() {
   const cont = document.getElementById("agendaContent");
-  if (!cont) return;
+  const msg = document.getElementById("msg");
+  if (!cont || !msg) return;
 
-  // Por ahora, solo mostrar un mensaje para verificar que se cargó la sección
-  cont.innerHTML = "<p>Agenda cargada</p>";
+  // Mostrar mensaje mientras cargamos
+  msg.innerText = "Cargando eventos...";
+  cont.innerHTML = "";
+
+  // 1️⃣ Cargar los eventos desde Google Sheets
+  const eventos = await cargarEventos();
+
+  // 2️⃣ Mostrar los eventos
+  if (eventos.length === 0) {
+    cont.innerHTML = "<p>No hay eventos registrados.</p>";
+  } else {
+    const lista = document.createElement("ul");
+    lista.classList.add("agenda-lista");
+
+    eventos.forEach(fila => {
+      // fila = [fecha, título, descripción]
+      const li = document.createElement("li");
+      li.innerHTML = `<strong>${fila[0]}</strong> - ${fila[1]}: ${fila[2] || ""}`;
+      lista.appendChild(li);
+    });
+
+    cont.appendChild(lista);
+  }
+
+  // Limpiar mensaje
+  msg.innerText = "";
 }
+
 
 // Inicializa el módulo de agenda
 function initAgenda() {
