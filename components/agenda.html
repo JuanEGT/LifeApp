@@ -15,6 +15,16 @@
     <!-- Contenedor principal de agenda -->
     <div id="agendaContent" class="agenda-content"></div>
 
+    <!-- Formulario para agregar evento -->
+    <form id="formAgregarEvento" style="display:none;" class="agenda-form">
+      <label>Fecha: <input type="date" id="inputFecha" required></label>
+      <label>Hora: <input type="time" id="inputHora" required></label>
+      <label>Evento: <input type="text" id="inputEvento" required></label>
+      <label>Notas: <input type="text" id="inputNotas"></label>
+      <button type="submit">Guardar Evento</button>
+      <button type="button" id="btnCancelarEvento">Cancelar</button>
+    </form>
+    
     <!-- Barra lateral con recordatorios y calendario -->
     <div id="barraYCalendario" class="sidebarContainer">
       <div id="recordatorios" class="agenda-recordatorios"></div>
