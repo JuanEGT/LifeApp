@@ -186,7 +186,7 @@ async function initAgenda() {
 
   // Botón buscar por fecha
   const btnBuscarFecha = document.getElementById("btnBuscarFecha");
-  if (btnBuscarFecha) btnBuscarFecha.onclick = buscarPorFecha;
+  if (btnBuscarFecha) btnBuscarFecha.onclick = () => buscarPorFecha();
 }
 
 // ===================== EXPOSICIÓN GLOBAL =====================
