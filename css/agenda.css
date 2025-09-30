@@ -26,9 +26,13 @@
 
 /* Formularios */
 .agenda-form {
-  display: flex;
+  display: none; /* oculto por defecto */
   flex-direction: column;
   gap: 0.5rem;
+  max-height: 0;          /* para animación */
+  overflow: hidden;       /* para que no se vea contenido oculto */
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  opacity: 0;             /* invisible al inicio */
 }
 
 .agenda-form label {
@@ -138,4 +142,9 @@
 
 .agenda-calendario .rojo {
   background-color: #7d2d2d;
+}
+.agenda-form.show {
+  display: flex;
+  max-height: 500px; /* ajustar según el contenido del formulario */
+  opacity: 1;
 }

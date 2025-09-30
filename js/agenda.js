@@ -111,15 +111,18 @@ async function mostrarAgenda() {
   const cont = document.getElementById("agendaContent");
   if (!cont) return;
 
-  cont.innerHTML = ""; // limpiar contenido existente
-
   // 1️⃣ Cargar los eventos desde Google Sheets
   const values = await cargarEventos();
 
-  // 2️⃣ Mostrar recordatorios y calendario
-  mostrarRecordatorios(values);
-  mostrarCalendario(values);
+  // 2️⃣ Limpiar solo la lista de eventos o recordatorios, sin tocar el formulario
+  const recordatoriosContainer = cont.querySelector(".agenda-recordatorios");
+  if (recordatoriosContainer) recordatoriosContainer.innerHTML = "";
+
+  // 3️⃣ Mostrar recordatorios y calendario
+  mostrarRecordatorios(values); // esta función puede llenar recordatoriosContainer
+  mostrarCalendario(values);    // esta función puede actualizar la vista del calendario
 }
+
 
 
 /**
