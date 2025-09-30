@@ -3,26 +3,16 @@
 // Nombre de la hoja de Google Sheets
 const SHEET_NAME = "Agenda";
 
-// Token global para acceder a Google Sheets
-let agendaToken = null;
-
 // Variable interna para almacenar los eventos cargados
 let eventosCache = [];
 
-// ===================== CONFIG =====================
-// Función para recibir y guardar el token
-function setToken(token) {
-  agendaToken = token;
-  console.log("[Agenda] Token recibido:", agendaToken);
-}
-
 // ===================== DATOS =====================
-// Función para cargar eventos desde Google Sheets
+// Función para cargar eventos desde Google Sheets usando el token global 'token'
 async function cargarEventos() {
   try {
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?majorDimension=ROWS`;
     const resp = await fetch(url, {
-      headers: { Authorization: "Bearer " + agendaToken }
+      headers: { Authorization: "Bearer " + token } // token global de config.js
     });
 
     if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
@@ -55,7 +45,7 @@ async function agregarEvento(data) {
     const resp = await fetch(url, {
       method: "POST",
       headers: {
-        Authorization: "Bearer " + agendaToken,
+        Authorization: "Bearer " + token, // token global de config.js
         "Content-Type": "application/json"
       },
       body: JSON.stringify({ values: [data] })
@@ -72,11 +62,15 @@ async function agregarEvento(data) {
 }
 
 // ===================== UI =====================
-// Función para mostrar la agenda (actualmente solo un mensaje)
+// Función para mostrar la agenda (solo mensaje por ahora)
 async function mostrarAgenda() {
   const cont = document.getElementById("agendaContent");
   const msg = document.getElementById("msg");
   if (!cont || !msg) return;
+
+  msg.innerText = "Cargando agenda...";
+  cont.innerHTML = "<p>Agenda lista. Eventos precargados en memoria.</p>";
+  msg.innerText = "";
 }
 
 // Función modular para iniciar el flujo de agregar evento
@@ -123,7 +117,7 @@ function iniciarAgregarEvento() {
 async function initAgenda() {
   console.log("[Agenda] Inicializando módulo...");
 
-  // Cargar eventos en memoria
+  // Cargar eventos en memoria usando el token global
   await cargarEventos();
 
   // Mostrar la agenda
@@ -152,11 +146,10 @@ async function initAgenda() {
 }
 
 // ===================== EXPOSICIÓN GLOBAL =====================
-window.setToken = setToken;
 window.initAgenda = initAgenda;
 window.mostrarAgenda = mostrarAgenda;
 
 // ===================== NOTA =====================
+// Ahora usamos el token global de config.js directamente.
 // Eventos se cargan en 'eventosCache' al iniciar.
 // El flujo de agregar evento está encapsulado en 'iniciarAgregarEvento'.
-// Así mantenemos initAgenda limpio y modular.
