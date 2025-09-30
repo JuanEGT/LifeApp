@@ -127,10 +127,12 @@ function buscarPorFecha() {
   const agendaDiv = document.getElementById("agendaContent");
   const msg = document.getElementById("msg");
 
-  if (!menu || !form || !fechaSelector || !agendaDiv || !msg) {
-    console.log("[Agenda] ERROR: algún elemento no se encontró en el DOM");
-    return;
-  }
+    console.log("menuButtons:", menu);
+    console.log("formAgregarEvento:", form);
+    console.log("fechaSelector:", fechaSelector);
+    console.log("agendaContent:", agendaDiv);
+    console.log("msg:", msg);
+
 
   // Ocultar elementos principales
   console.log("[Agenda] Ocultando menú y formulario");
