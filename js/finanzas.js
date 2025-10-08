@@ -1,12 +1,12 @@
 // ===================== finanzas.js =====================
 
 // --------------------- Configuración ---------------------
-const SHEET_NAME = "Finanzas";
+const SHEET_NAME_1 = "Finanzas";
 
 // --------------------- Función para cargar movimientos financieros ---------------------
 async function cargarFinanzas() {
   try {
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?majorDimension=ROWS`;
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME_1}?majorDimension=ROWS`;
     const resp = await fetch(url, {
       headers: { Authorization: "Bearer " + token }
     });
