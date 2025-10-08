@@ -104,3 +104,27 @@ td:hover {
   background-color: #555; /* resaltado al pasar el cursor */
   cursor: pointer;
 }
+
+#proximosEventos {
+  margin-bottom: 1rem; /* separación del calendario */
+  padding: 0.5rem;
+  background-color: #1f1f1f; /* acorde con los módulos */
+  border-radius: 6px;
+}
+
+#proximosEventos h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  color: #e0e0e0;
+}
+
+#proximosEventos ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+#proximosEventos ul li {
+  padding: 0.3rem 0;
+  color: #cfcfcf; /* un gris claro */
+}
