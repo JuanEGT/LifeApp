@@ -115,6 +115,7 @@ function mostrarCalendario(eventosCache) {
 }
 
 // ===================== FUNCION UNICA PARA AGREGAR EVENTO =====================
+// 
 function agregarEvento() {
   const form = document.getElementById("formAgregarEvento");
   const btnCancelar = document.getElementById("btnCancelarEvento");
@@ -175,6 +176,7 @@ function agregarEvento() {
 }
 
 // ===================== FUNCION UNICA PARA BUSCAR POR FECHA =====================
+//
 function buscarPorFecha() {
   const menu = document.getElementById("menuButtons");
   const form = document.getElementById("formAgregarEvento");
@@ -224,6 +226,7 @@ function buscarPorFecha() {
 }
 
 // ===================== INICIALIZACIÓN =====================
+//
 async function initAgenda() {
   console.log("[Agenda] Inicializando módulo...");
 

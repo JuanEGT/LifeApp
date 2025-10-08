@@ -1,3 +1,4 @@
+/* ===================== CONTENEDOR PRINCIPAL ===================== */
 .agenda-container {
   display: flex;
   flex-direction: column;
@@ -70,3 +71,36 @@
   background-color: #444;
 }
 
+/* ===================== CALENDARIO ===================== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+th, td {
+  width: 14.28%; /* 100 / 7 */
+  padding: 0.5rem 0;
+  border: 1px solid #333;
+  border-radius: 4px;
+}
+
+thead th {
+  background-color: #2d2d2d;
+}
+
+td[data-evento="true"] {
+  background-color: #b03a2e; /* rojo para días con evento */
+  color: #fff;
+}
+
+td[data-evento="false"] {
+  background-color: #2e7d32; /* verde para días sin evento */
+  color: #fff;
+}
+
+td:hover {
+  background-color: #555; /* resaltado al pasar el cursor */
+  cursor: pointer;
+}
