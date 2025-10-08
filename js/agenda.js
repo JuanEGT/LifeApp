@@ -37,9 +37,6 @@ async function mostrarAgenda() {
   // Cargar eventos desde Google Sheets
   const eventos = await cargarEventos();
 
-    // Mostrar próximos 7 días (solo lógica)
-  mostrarProximosEventos(eventos);
-
   // Mostrar calendario con los eventos
   mostrarCalendario(eventos);
 
@@ -116,57 +113,6 @@ function mostrarCalendario(eventosCache) {
 
   msg.innerText = "";
 }
-
-// ===================== MOSTRAR PRÓXIMOS 7 DÍAS =====================
-async function mostrarProximosEventos(eventosCache) {
-  const cont = document.getElementById("agendaContent");
-  if (!cont) return;
-
-  // Crear o seleccionar el contenedor de próximos eventos
-  let proximosDiv = document.getElementById("proximosEventos");
-  if (!proximosDiv) {
-    proximosDiv = document.createElement("div");
-    proximosDiv.id = "proximosEventos";
-    cont.prepend(proximosDiv);
-  }
-  proximosDiv.innerHTML = "<h3>Próximos 7 días:</h3>";
-
-  if (!eventosCache || eventosCache.length < 2) {
-    proximosDiv.innerHTML += "<p>No hay eventos próximos.</p>";
-    return;
-  }
-
-  const headers = eventosCache[0];
-  const eventos = eventosCache.slice(1).map(r => {
-    const obj = {};
-    headers.forEach((h, i) => obj[h] = r[i] || "");
-    return obj;
-  });
-
-  const hoy = new Date();
-  const sieteDias = new Date();
-  sieteDias.setDate(hoy.getDate() + 7);
-
-  const proximos = eventos.filter(ev => {
-    const fechaEv = new Date(ev.Fecha);
-    return fechaEv >= hoy && fechaEv <= sieteDias;
-  });
-
-  if (proximos.length === 0) {
-    proximosDiv.innerHTML += "<p>No hay eventos próximos.</p>";
-    return;
-  }
-
-  const ul = document.createElement("ul");
-  proximos.forEach(ev => {
-    const li = document.createElement("li");
-    li.innerText = `${ev.Fecha} ${ev.Hora} - ${ev.Evento} (${ev.Notas})`;
-    ul.appendChild(li);
-  });
-
-  proximosDiv.appendChild(ul);
-}
-
 
 // ===================== FUNCION UNICA PARA AGREGAR EVENTO =====================
 // 
