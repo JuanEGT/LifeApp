@@ -18,17 +18,15 @@ async function cargarEventos() {
     if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
 
     const data = await resp.json();
-    eventosCache = Array.isArray(data.values) ? data.values : [];
-    console.log(`[Agenda] ${eventosCache.length} eventos cargados.`);
-    return eventosCache;
+    return Array.isArray(data.values) ? data.values : [];
   } catch (err) {
     console.error("Error al cargar eventos:", err);
     const msg = document.getElementById("msg");
     if (msg) msg.innerText = "Error al cargar eventos";
-    eventosCache = [];
     return [];
   }
 }
+
 
 // ===================== UI =====================
 async function mostrarAgenda() {
@@ -49,7 +47,7 @@ async function mostrarAgenda() {
 }
 
 //====================CALENDARIO======================
-async function mostrarCalendario() {
+async function mostrarCalendario(eventosCache) {
   const cont = document.getElementById("agendaContent");
   const msg = document.getElementById("msg");
   if (!cont || !msg) return;
@@ -57,8 +55,6 @@ async function mostrarCalendario() {
   msg.innerText = "Generando calendario...";
   cont.innerHTML = "";
 
-  // Cargar eventos desde Google Sheets
-  const eventosCache = await cargarEventos();
   if (eventosCache.length < 2) {
     cont.innerHTML = "<p>No hay eventos para este mes.</p>";
     msg.innerText = "";
