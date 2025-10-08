@@ -3,9 +3,6 @@
 // Nombre de la hoja de Google Sheets
 const SHEET_NAME = "Agenda";
 
-// Variable interna para almacenar los eventos cargados
-let eventosCache = [];
-
 // ===================== DATOS =====================
 // Cargar eventos desde Google Sheets usando token global
 async function cargarEventos() {
@@ -27,8 +24,8 @@ async function cargarEventos() {
   }
 }
 
-
 // ===================== UI =====================
+// Mostrar agenda: carga eventos y genera calendario
 async function mostrarAgenda() {
   const cont = document.getElementById("agendaContent");
   const msg = document.getElementById("msg");
@@ -40,14 +37,15 @@ async function mostrarAgenda() {
   // Cargar eventos desde Google Sheets
   const eventos = await cargarEventos();
 
-  // Llamar a la función de calendario para mostrarlo
+  // Mostrar calendario con los eventos
   mostrarCalendario(eventos);
 
   msg.innerText = "";
 }
 
-//====================CALENDARIO======================
-async function mostrarCalendario(eventosCache) {
+// ===================== CALENDARIO =====================
+// Genera un calendario del mes actual, días con evento en rojo y sin evento en verde
+function mostrarCalendario(eventosCache) {
   const cont = document.getElementById("agendaContent");
   const msg = document.getElementById("msg");
   if (!cont || !msg) return;
@@ -55,13 +53,13 @@ async function mostrarCalendario(eventosCache) {
   msg.innerText = "Generando calendario...";
   cont.innerHTML = "";
 
-  if (eventosCache.length < 2) {
+  if (!eventosCache || eventosCache.length < 2) {
     cont.innerHTML = "<p>No hay eventos para este mes.</p>";
     msg.innerText = "";
     return;
   }
 
-  const eventos = eventosCache.slice(1); // ignorar encabezados
+  const eventos = eventosCache.slice(1); // Ignorar encabezados
   const today = new Date();
   const mes = today.getMonth();
   const anio = today.getFullYear();
@@ -83,11 +81,12 @@ async function mostrarCalendario(eventosCache) {
   const tbody = document.createElement("tbody");
   let fila = document.createElement("tr");
 
-  // Espacios hasta primer día
+  // Espacios hasta primer día del mes
   for (let i = 0; i < primerDia; i++) {
     fila.appendChild(document.createElement("td"));
   }
 
+  // Crear los días del mes
   for (let dia = 1; dia <= diasMes; dia++) {
     if (fila.children.length === 7) {
       tbody.appendChild(fila);
@@ -100,21 +99,20 @@ async function mostrarCalendario(eventosCache) {
     // Revisar si hay evento
     const fechaStr = `${anio}-${String(mes + 1).padStart(2, "0")}-${String(dia).padStart(2, "0")}`;
     const tieneEvento = eventos.some(r => r[1] === fechaStr);
-    td.dataset.evento = tieneEvento ? "true" : "false"; // para CSS/JS posterior
+    td.dataset.evento = tieneEvento ? "true" : "false";
 
     fila.appendChild(td);
   }
 
   // Rellenar últimos espacios de la fila
   while (fila.children.length < 7) fila.appendChild(document.createElement("td"));
-
   tbody.appendChild(fila);
+
   tabla.appendChild(tbody);
   cont.appendChild(tabla);
 
   msg.innerText = "";
 }
-
 
 // ===================== FUNCION UNICA PARA AGREGAR EVENTO =====================
 function agregarEvento() {
@@ -135,7 +133,7 @@ function agregarEvento() {
 
   // Agregar listener de submit solo una vez
   if (!form.dataset.listenerAgregado) {
-    form.onsubmit = async (e) => {
+    form.onsubmit = async e => {
       e.preventDefault();
 
       const fecha = document.getElementById("inputFecha").value;
@@ -163,9 +161,8 @@ function agregarEvento() {
         form.reset();
         form.style.display = "none";
 
-        // Actualizar eventos en memoria y UI
-        await cargarEventos();
-        mostrarAgenda();
+        // Actualizar UI
+        await mostrarAgenda();
       } catch (err) {
         console.error("Error al agregar evento:", err);
         const msg = document.getElementById("msg");
@@ -179,30 +176,19 @@ function agregarEvento() {
 
 // ===================== FUNCION UNICA PARA BUSCAR POR FECHA =====================
 function buscarPorFecha() {
-  console.log("[Agenda] Se ejecutó buscarPorFecha"); // <- log al iniciar función
-
   const menu = document.getElementById("menuButtons");
   const form = document.getElementById("formAgregarEvento");
   const fechaSelector = document.getElementById("fechaSelector");
   const agendaDiv = document.getElementById("agendaContent");
   const msg = document.getElementById("msg");
 
-    console.log("menuButtons:", menu);
-    console.log("formAgregarEvento:", form);
-    console.log("fechaSelector:", fechaSelector);
-    console.log("agendaContent:", agendaDiv);
-    console.log("msg:", msg);
-
-
   // Ocultar elementos principales
-  console.log("[Agenda] Ocultando menú y formulario");
   menu.style.display = "none";
   form.style.display = "none";
   agendaDiv.innerHTML = "";
   msg.innerText = "";
 
   // Mostrar selector de fecha
-  console.log("[Agenda] Mostrando selector de fecha");
   fechaSelector.style.display = "flex";
 
   const btnBuscar = document.getElementById("btnBuscarPorFecha");
@@ -210,33 +196,26 @@ function buscarPorFecha() {
 
   // Volver a agenda
   btnVolver.onclick = async () => {
-    console.log("[Agenda] Volver a agenda presionado");
     fechaSelector.style.display = "none";
     menu.style.display = "flex";
-    await mostrarAgenda(); // recargar vista de agenda
+    await mostrarAgenda();
   };
 
   // Buscar eventos por fecha
   btnBuscar.onclick = async () => {
     const fecha = document.getElementById("fechaInput").value;
-    console.log("[Agenda] Botón buscar presionado. Fecha:", fecha);
     if (!fecha) return;
 
     const allValues = await cargarEventos();
-    if (!allValues || allValues.length < 2) {
-      console.log("[Agenda] No hay eventos en la agenda");
-      return;
-    }
+    if (!allValues || allValues.length < 2) return;
 
     const headers = allValues[0];
     const rows = allValues.slice(1).filter(r => r[1] === fecha);
 
-    console.log("[Agenda] Eventos encontrados:", rows.length);
     agendaDiv.innerHTML = "";
-
     rows.forEach(r => {
       const obj = {};
-      headers.forEach((h, i) => obj[h] = r[i] || "");
+      headers.forEach((h, i) => (obj[h] = r[i] || ""));
       const p = document.createElement("p");
       p.innerText = `${obj.Fecha} ${obj.Hora} - ${obj.Evento} (${obj.Notas})`;
       agendaDiv.appendChild(p);
@@ -244,53 +223,25 @@ function buscarPorFecha() {
   };
 }
 
-
 // ===================== INICIALIZACIÓN =====================
 async function initAgenda() {
   console.log("[Agenda] Inicializando módulo...");
 
-  // Cargar eventos y mostrar calendario
+  // Mostrar calendario al iniciar
   await mostrarAgenda();
-  console.log("[Agenda] Agenda mostrada en UI");
 
   // Botón volver al Home
   const backBtn = document.getElementById("backToHomeBtn");
-  if (backBtn) {
-    backBtn.addEventListener("click", () => {
-      console.log("[Agenda] Botón Volver al Home presionado");
-      window.volverHome();
-    });
-    console.log("[Agenda] Botón Volver al Home conectado");
-  } else {
-    console.log("[Agenda] ERROR: Botón Volver al Home no encontrado");
-  }
+  if (backBtn) backBtn.addEventListener("click", () => window.volverHome());
 
-  // Botón agregar evento → nuestra función única
+  // Botón agregar evento
   const agregarBtn = document.getElementById("btnAgregarEvento");
-  if (agregarBtn) {
-    agregarBtn.onclick = () => {
-      console.log("[Agenda] Botón Agregar Evento presionado");
-      agregarEvento();
-    };
-    console.log("[Agenda] Botón Agregar Evento conectado");
-  } else {
-    console.log("[Agenda] ERROR: Botón Agregar Evento no encontrado");
-  }
+  if (agregarBtn) agregarBtn.onclick = () => agregarEvento();
 
   // Botón buscar por fecha
   const btnBuscarFecha = document.getElementById("btnBuscarFecha");
-  if (btnBuscarFecha) {
-    btnBuscarFecha.onclick = () => {
-      console.log("[Agenda] Botón Buscar por Fecha presionado");
-      buscarPorFecha();
-    };
-    console.log("[Agenda] Botón Buscar por Fecha conectado");
-  } else {
-    console.log("[Agenda] ERROR: Botón Buscar por Fecha no encontrado");
-  }
+  if (btnBuscarFecha) btnBuscarFecha.onclick = () => buscarPorFecha();
 }
-
-
 
 // ===================== EXPOSICIÓN GLOBAL =====================
 window.initAgenda = initAgenda;
