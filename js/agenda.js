@@ -31,7 +31,6 @@ async function cargarEventos() {
 }
 
 // ===================== UI =====================
-// Mostrar agenda con eventos
 async function mostrarAgenda() {
   const cont = document.getElementById("agendaContent");
   const msg = document.getElementById("msg");
@@ -40,21 +39,86 @@ async function mostrarAgenda() {
   msg.innerText = "Cargando agenda...";
   cont.innerHTML = "";
 
-  if (eventosCache.length < 2) {
-    cont.innerHTML = "<p>No hay eventos.</p>";
-  } else {
-    const headers = eventosCache[0];
-    eventosCache.slice(1).forEach(r => {
-      const obj = {};
-      headers.forEach((h, i) => obj[h] = r[i] || "");
-      const p = document.createElement("p");
-      p.innerText = `${obj.Fecha} ${obj.Hora} - ${obj.Evento} (${obj.Notas})`;
-      cont.appendChild(p);
-    });
-  }
+  // Cargar eventos desde Google Sheets
+  const eventos = await cargarEventos();
+
+  // Llamar a la función de calendario para mostrarlo
+  mostrarCalendario(eventos);
 
   msg.innerText = "";
 }
+
+//====================CALENDARIO======================
+async function mostrarCalendario() {
+  const cont = document.getElementById("agendaContent");
+  const msg = document.getElementById("msg");
+  if (!cont || !msg) return;
+
+  msg.innerText = "Generando calendario...";
+  cont.innerHTML = "";
+
+  // Cargar eventos desde Google Sheets
+  const eventosCache = await cargarEventos();
+  if (eventosCache.length < 2) {
+    cont.innerHTML = "<p>No hay eventos para este mes.</p>";
+    msg.innerText = "";
+    return;
+  }
+
+  const eventos = eventosCache.slice(1); // ignorar encabezados
+  const today = new Date();
+  const mes = today.getMonth();
+  const anio = today.getFullYear();
+  const primerDia = new Date(anio, mes, 1).getDay();
+  const diasMes = new Date(anio, mes + 1, 0).getDate();
+
+  // Crear tabla
+  const tabla = document.createElement("table");
+  const thead = document.createElement("thead");
+  const filaHead = document.createElement("tr");
+  ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"].forEach(d => {
+    const th = document.createElement("th");
+    th.innerText = d;
+    filaHead.appendChild(th);
+  });
+  thead.appendChild(filaHead);
+  tabla.appendChild(thead);
+
+  const tbody = document.createElement("tbody");
+  let fila = document.createElement("tr");
+
+  // Espacios hasta primer día
+  for (let i = 0; i < primerDia; i++) {
+    fila.appendChild(document.createElement("td"));
+  }
+
+  for (let dia = 1; dia <= diasMes; dia++) {
+    if (fila.children.length === 7) {
+      tbody.appendChild(fila);
+      fila = document.createElement("tr");
+    }
+
+    const td = document.createElement("td");
+    td.innerText = dia;
+
+    // Revisar si hay evento
+    const fechaStr = `${anio}-${String(mes + 1).padStart(2, "0")}-${String(dia).padStart(2, "0")}`;
+    const tieneEvento = eventos.some(r => r[1] === fechaStr);
+    td.dataset.evento = tieneEvento ? "true" : "false"; // para CSS/JS posterior
+
+    fila.appendChild(td);
+  }
+
+  // Rellenar últimos espacios de la fila
+  while (fila.children.length < 7) fila.appendChild(document.createElement("td"));
+
+  tbody.appendChild(fila);
+  tabla.appendChild(tbody);
+  cont.appendChild(tabla);
+
+  msg.innerText = "";
+}
+
 
 // ===================== FUNCION UNICA PARA AGREGAR EVENTO =====================
 function agregarEvento() {
@@ -189,10 +253,7 @@ function buscarPorFecha() {
 async function initAgenda() {
   console.log("[Agenda] Inicializando módulo...");
 
-  // Cargar eventos
-  await cargarEventos();
-  console.log("[Agenda] Eventos cargados:", eventosCache.length);
-
+  // Cargar eventos y mostrar calendario
   await mostrarAgenda();
   console.log("[Agenda] Agenda mostrada en UI");
 
@@ -232,6 +293,7 @@ async function initAgenda() {
     console.log("[Agenda] ERROR: Botón Buscar por Fecha no encontrado");
   }
 }
+
 
 
 // ===================== EXPOSICIÓN GLOBAL =====================
