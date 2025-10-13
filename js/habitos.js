@@ -70,26 +70,50 @@ async function initHabitos() {
   const content = document.querySelector(".habitosContent");
   if (!content) return;
 
-  content.innerText = "Cargando hábitos...";
+  // Agregamos formulario para nuevo hábito
+  content.innerHTML = `
+    <div class="nuevoHabitoForm">
+      <input type="text" id="habitoNombre" placeholder="Nombre del hábito" />
+      <input type="text" id="habitoFrecuencia" placeholder="Frecuencia" />
+      <button id="agregarHabitoBtn" class="btn">➕ Agregar Hábito</button>
+    </div>
+    <div class="tablaHabitosContainer">Cargando hábitos...</div>
+  `;
+
+  // Botón para agregar hábito
+  const agregarBtn = document.getElementById("agregarHabitoBtn");
+  if (agregarBtn) {
+    agregarBtn.addEventListener("click", async () => {
+      const nombre = document.getElementById("habitoNombre").value;
+      const frecuencia = document.getElementById("habitoFrecuencia").value;
+      const success = await agregarHabito(nombre, frecuencia);
+      if (success) {
+        alert("✅ Hábito agregado!");
+        initHabitos(); // recargar tabla y formulario
+      } else {
+        alert("⚠️ Error al agregar hábito");
+      }
+    });
+  }
 
   // Cargar y mostrar datos
   const datos = await cargarHabitos();
+  const tablaContainer = content.querySelector(".tablaHabitosContainer");
 
   if (datos.length > 0) {
     const [headers, ...rows] = datos;
-
     let html = `<table class="tabla-habitos">
                   <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
                   <tbody>
                     ${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}
                   </tbody>
                 </table>`;
-
-    content.innerHTML = html;
+    tablaContainer.innerHTML = html;
   } else {
-    content.innerText = "No hay hábitos registrados.";
+    tablaContainer.innerText = "No hay hábitos registrados.";
   }
 }
+
 
 // Exponer al scope global
 window.initHabitos = initHabitos;
