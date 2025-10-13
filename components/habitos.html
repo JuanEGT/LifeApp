@@ -2,11 +2,19 @@
     <h2>📋 Hábitos & Tareas</h2>
 
     <!-- Formulario para agregar hábito -->
-    <div class="habito-form">
-        <input type="text" id="habitoNombre" placeholder="Nombre del hábito" />
-        <input type="text" id="habitoFrecuencia" placeholder="Frecuencia" />
-        <button id="agregarHabitoBtn" class="btn">➕ Agregar Hábito</button>
-    </div>
+<div class="habito-form">
+    <input type="text" id="habitoNombre" placeholder="Nombre del hábito" />
+
+    <!-- Select para frecuencia -->
+    <select id="habitoFrecuencia">
+        <option value="Diaria">Diaria</option>
+        <option value="Semanal">Semanal</option>
+        <option value="Mensual">Mensual</option>
+    </select>
+
+    <button id="agregarHabitoBtn" class="btn">➕ Agregar Hábito</button>
+</div>
+
 
     <!-- Botón para volver al menú principal -->
     <button id="backToHomeBtn" class="btn">← Volver al menú principal</button>

@@ -93,7 +93,6 @@ async function initHabitos() {
 
   if (datos.length > 0) {
     const [headers, ...rows] = datos;
-    // Solo mostrar las primeras 3 columnas: Nombre, Frecuencia, Estado
     const visibleHeaders = headers.slice(0, 3);
     const visibleRows = rows.map(r => r.slice(0, 3));
 
