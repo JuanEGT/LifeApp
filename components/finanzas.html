@@ -1,11 +1,30 @@
 <div class="finanzas-container">
-  <h2>💰 Finanzas</h2>
+  <h2>💰 Finanzas personales</h2>
 
-  <!-- Botón para volver al menú principal -->
   <button id="backToHomeBtn" class="btn">← Volver al menú principal</button>
 
-  <!-- Contenedor de contenido del módulo -->
-  <div class="moduloContent">
-    <p>Contenido de este módulo se mostrará aquí.</p>
+  <div id="msg" class="msg"></div>
+
+  <div class="resumen">
+    <p><strong>Total ingresos:</strong> <span id="totalIngresos">-</span></p>
+    <p><strong>Total gastos:</strong> <span id="totalGastos">-</span></p>
+    <p><strong>Balance:</strong> <span id="balance">-</span></p>
   </div>
+
+  <table class="tabla-finanzas">
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Tipo</th>
+        <th>Categoría</th>
+        <th>Nombre</th>
+        <th>Cantidad</th>
+        <th>Método</th>
+        <th>Notas</th>
+      </tr>
+    </thead>
+    <tbody id="tablaFinanzasBody">
+      <tr><td colspan="7" style="text-align:center;">Cargando datos...</td></tr>
+    </tbody>
+  </table>
 </div>

@@ -1,11 +1,36 @@
 .finanzas-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  max-width: 800px;
+  margin: 0 auto;
   padding: 1rem;
-  background-color: #1a1a1a; /* fondo de módulo */
-  border-radius: 8px;
 }
+
+.tabla-finanzas {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.tabla-finanzas th, .tabla-finanzas td {
+  border: 1px solid #ddd;
+  padding: 0.5rem;
+}
+
+.tabla-finanzas th {
+  background: #f0f0f0;
+}
+
+.resumen {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+  font-size: 1.1em;
+}
+
+.msg {
+  margin-top: 10px;
+  color: #666;
+}
+
 
 .moduloContent {
   padding: 1rem;

@@ -26,23 +26,54 @@ async function cargarFinanzas() {
 // --------------------- Función para mostrar movimientos financieros ---------------------
 async function mostrarFinanzas() {
   const msg = document.getElementById("msg");
-  if (msg) msg.innerText = "Cargando movimientos financieros...";
+  const tbody = document.getElementById("tablaFinanzasBody");
+  const totalIngresosEl = document.getElementById("totalIngresos");
+  const totalGastosEl = document.getElementById("totalGastos");
+  const balanceEl = document.getElementById("balance");
 
+  msg.innerText = "Cargando movimientos financieros...";
   const movimientos = await cargarFinanzas();
-  console.log("Movimientos financieros cargados:", movimientos);
+  msg.innerText = "";
 
-  if (msg) msg.innerText = "";
+  if (movimientos.length <= 1) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No hay registros</td></tr>`;
+    return;
+  }
+
+  // Quitar encabezados
+  const filas = movimientos.slice(1);
+
+  // Calcular totales
+  let totalIngresos = 0;
+  let totalGastos = 0;
+
+  tbody.innerHTML = filas.map(fila => {
+    const [id, tipo, fecha, categoria, nombre, cantidad, metodo, notas] = fila;
+    const valor = parseFloat(cantidad) || 0;
+
+    if (tipo === "Ingreso") totalIngresos += valor;
+    else if (tipo === "Gasto") totalGastos += valor;
+
+    return `
+      <tr>
+        <td>${fecha}</td>
+        <td>${tipo}</td>
+        <td>${categoria}</td>
+        <td>${nombre}</td>
+        <td>${valor.toLocaleString("es-MX", { style: "currency", currency: "MXN" })}</td>
+        <td>${metodo}</td>
+        <td>${notas || ""}</td>
+      </tr>
+    `;
+  }).join("");
+
+  const balance = totalIngresos - totalGastos;
+  totalIngresosEl.innerText = totalIngresos.toLocaleString("es-MX", { style: "currency", currency: "MXN" });
+  totalGastosEl.innerText = totalGastos.toLocaleString("es-MX", { style: "currency", currency: "MXN" });
+  balanceEl.innerText = balance.toLocaleString("es-MX", { style: "currency", currency: "MXN" });
+  balanceEl.style.color = balance >= 0 ? "green" : "red";
 }
 
-// --------------------- Inicialización del módulo ---------------------
-async function initFinanzas() {
-  console.log("[Finanzas] Inicializando módulo");
-
-  await mostrarFinanzas();
-
-  const backBtn = document.getElementById("backToHomeBtn");
-  if (backBtn) backBtn.addEventListener("click", () => window.volverHome());
-}
 
 // --------------------- Exponer función al scope global ---------------------
 window.initFinanzas = initFinanzas;
