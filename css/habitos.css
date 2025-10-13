@@ -3,7 +3,7 @@
   flex-direction: column;
   gap: 1rem;
   padding: 1rem;
-  background-color: #1a1a1a;
+  background-color: #1a1a1a; /* fondo de módulo */
   border-radius: 8px;
 }
 
@@ -12,54 +12,4 @@
   background-color: #1f1f1f;
   border-radius: 6px;
   min-height: 150px;
-}
-
-.agregar-habito {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.agregar-habito input, .agregar-habito select {
-  padding: 0.5rem;
-  border-radius: 6px;
-  border: none;
-  background-color: #2a2a2a;
-  color: #fff;
-}
-
-.agregar-habito button {
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  border: none;
-  background-color: #4caf50;
-  color: #fff;
-  cursor: pointer;
-}
-
-.agregar-habito button:hover {
-  background-color: #45a049;
-}
-
-.habito-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.5rem;
-  background-color: #2b2b2b;
-  border-radius: 6px;
-  margin-bottom: 0.3rem;
-}
-
-.habito-item button {
-  padding: 0.3rem 0.6rem;
-  border: none;
-  border-radius: 4px;
-  background-color: #008cff;
-  color: #fff;
-  cursor: pointer;
-}
-
-.habito-item button:disabled {
-  background-color: #555;
-  cursor: not-allowed;
 }
