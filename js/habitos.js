@@ -131,6 +131,33 @@ async function marcarCompletado(rowIndex, frecuencia, fechaUltima, lpActual) {
   }
 }
 
+// --------------------- Función para obtener número de semana ---------------------
+function getWeekNumber(d) {
+  d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+  return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+}
+
+// --------------------- Función para verificar si se puede completar ---------------------
+function puedeCompletar(fechaUltima, frecuencia) {
+  const hoy = new Date();
+  if (!fechaUltima) return true;
+  const ultima = new Date(fechaUltima);
+
+  switch(frecuencia) {
+    case "Diaria":
+      return ultima.toDateString() !== hoy.toDateString();
+    case "Semanal":
+      return getWeekNumber(ultima) !== getWeekNumber(hoy) || ultima.getFullYear() !== hoy.getFullYear();
+    case "Mensual":
+      return ultima.getMonth() !== hoy.getMonth() || ultima.getFullYear() !== hoy.getFullYear();
+    default:
+      return true;
+  }
+}
+
 // --------------------- Inicialización del módulo ---------------------
 async function initHabitos() {
   console.log("[Habitos] Inicializando módulo");
@@ -142,24 +169,27 @@ async function initHabitos() {
   // Botón para agregar hábito
   const agregarBtn = document.getElementById("agregarHabitoBtn");
   if (agregarBtn) {
-    agregarBtn.addEventListener("click", async () => {
-      const nombre = document.getElementById("habitoNombre").value;
+    agregarBtn.onclick = async () => {
+      const nombre = document.getElementById("habitoNombre").value.trim();
       const frecuencia = document.getElementById("habitoFrecuencia").value;
+      if (!nombre) {
+        alert("⚠️ Ingresa un nombre para el hábito");
+        return;
+      }
       const success = await agregarHabito(nombre, frecuencia);
       if (success) {
         alert("✅ Hábito agregado!");
-        initHabitos();
         document.getElementById("habitoNombre").value = "";
+        initHabitos(); // recargar tabla
       } else {
         alert("⚠️ Error al agregar hábito");
       }
-    });
+    };
   }
 
   // Contenedor de la tabla
   const tablaContainer = document.querySelector(".tablaHabitosContainer");
   if (!tablaContainer) return;
-
   tablaContainer.innerText = "Cargando hábitos...";
 
   // Cargar y mostrar datos
@@ -167,7 +197,7 @@ async function initHabitos() {
 
   if (datos.length > 0) {
     const [headers, ...rows] = datos;
-    const visibleHeaders = headers.slice(0, 3).concat("Acciones"); // Nombre, Frecuencia, Estado + columna de botones
+    const visibleHeaders = headers.slice(0, 3).concat("Acciones"); // Nombre, Frecuencia, Estado + columna de acciones
 
     let html = `<table class="tabla-habitos">
                   <thead><tr>${visibleHeaders.map(h => `<th>${h}</th>`).join('')}</tr></thead>
@@ -175,13 +205,14 @@ async function initHabitos() {
                     ${rows.map((r, i) => {
                       // Resetear estado si toca
                       const estado = resetearPendientes(r[1], r[3], r[2]);
+                      const accionHTML = puedeCompletar(r[3], r[1])
+                        ? `<button onclick="marcarCompletado(${i+2}, '${r[1]}', '${r[3]}', '${r[4]}')">✔️</button>`
+                        : `<span class="completado-text">Completado</span>`;
                       return `<tr>
                                 <td>${r[0]}</td>
                                 <td>${r[1]}</td>
                                 <td>${estado}</td>
-                                <td>
-                                  <button onclick="marcarCompletado(${i+2}, '${r[1]}', '${r[3]}', '${r[4]}')">✔️</button>
-                                </td>
+                                <td>${accionHTML}</td>
                               </tr>`;
                     }).join('')}
                   </tbody>
