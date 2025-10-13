@@ -2,21 +2,35 @@
   max-width: 800px;
   margin: 0 auto;
   padding: 1rem;
+  color: #e0e0e0; /* texto claro, pero no blanco puro */
 }
 
 .tabla-finanzas {
   width: 100%;
   border-collapse: collapse;
   margin-top: 1rem;
+  background-color: #2a2a2a; /* gris oscuro suave */
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .tabla-finanzas th, .tabla-finanzas td {
-  border: 1px solid #ddd;
-  padding: 0.5rem;
+  border: 1px solid #3a3a3a;
+  padding: 0.6rem;
 }
 
 .tabla-finanzas th {
-  background: #f0f0f0;
+  background-color: #333; /* gris medio */
+  color: #f0f0f0; /* texto claro pero no brillante */
+  font-weight: 600;
+}
+
+.tabla-finanzas tr:nth-child(even) {
+  background-color: #252525; /* alternancia suave */
+}
+
+.tabla-finanzas tr:hover {
+  background-color: #383838; /* resalta al pasar el mouse */
 }
 
 .resumen {
@@ -24,17 +38,22 @@
   justify-content: space-between;
   margin-top: 1rem;
   font-size: 1.1em;
+  background-color: #2a2a2a;
+  padding: 0.8rem;
+  border-radius: 6px;
+  color: #d0d0d0;
 }
 
 .msg {
   margin-top: 10px;
-  color: #666;
+  color: #bbb;
 }
-
 
 .moduloContent {
   padding: 1rem;
   background-color: #1f1f1f;
   border-radius: 6px;
   min-height: 150px;
+  color: #e0e0e0;
 }
+
