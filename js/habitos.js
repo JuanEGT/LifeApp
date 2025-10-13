@@ -3,11 +3,10 @@ const SHEET_NAME_2 = "Habitos";
 
 // --------------------- Función para cargar hábitos ---------------------
 async function cargarHabitos() {
-
   try {
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME_2}?majorDimension=ROWS`;
     const resp = await fetch(url, {
-      headers: { Authorization: "Bearer " + token } // usa el token global
+      headers: { Authorization: "Bearer " + token }
     });
 
     if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
@@ -24,6 +23,39 @@ async function cargarHabitos() {
   }
 }
 
+// --------------------- Función para agregar un hábito ---------------------
+async function agregarHabito(nombre, frecuencia, estado = "Pendiente") {
+  if (!nombre || !frecuencia) {
+    console.warn("[Habitos] Nombre y frecuencia son obligatorios");
+    return false;
+  }
+
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME_2}:append?valueInputOption=USER_ENTERED`;
+
+  const body = {
+    values: [[nombre, frecuencia, estado]]
+  };
+
+  try {
+    const resp = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + token,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
+    const data = await resp.json();
+    console.log("[Habitos] Hábito agregado:", data);
+    return true;
+  } catch (err) {
+    console.error("[Habitos] Error al agregar hábito:", err);
+    return false;
+  }
+}
+
 // --------------------- Inicialización del módulo ---------------------
 async function initHabitos() {
   console.log("[Habitos] Inicializando módulo");
@@ -31,18 +63,19 @@ async function initHabitos() {
   // Botón para volver al Home
   const backBtn = document.getElementById("backToHomeBtn");
   if (backBtn) {
-    console.log("[Habitos] Botón de volver al Home encontrado");
     backBtn.addEventListener("click", volverHome);
-  } else {
-    console.warn("[Habitos] Botón de volver al Home NO encontrado");
   }
+
+  // Contenedor principal
+  const content = document.querySelector(".habitosContent");
+  if (!content) return;
+
+  content.innerText = "Cargando hábitos...";
 
   // Cargar y mostrar datos
   const datos = await cargarHabitos();
-  console.log("[Habitos] Datos obtenidos:", datos);
 
-  const content = document.querySelector(".habitosContent");
-  if (content && datos.length > 0) {
+  if (datos.length > 0) {
     const [headers, ...rows] = datos;
 
     let html = `<table class="tabla-habitos">
@@ -51,12 +84,13 @@ async function initHabitos() {
                     ${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}
                   </tbody>
                 </table>`;
+
     content.innerHTML = html;
-  } else if (content) {
-    content.innerText = "No hay datos en la hoja de hábitos.";
+  } else {
+    content.innerText = "No hay hábitos registrados.";
   }
 }
 
-// Exponer al scope global (solo lo necesario)
-window.initHabitos = initHabitos; // ✅ Esto sí existe
-
+// Exponer al scope global
+window.initHabitos = initHabitos;
+window.agregarHabito = agregarHabito;
