@@ -37,13 +37,16 @@ function calcularRango(lpTotales) {
   ];
 
   let rangoActual = rangos[0];
+  let indexActual = 0;
   for (let i = 0; i < rangos.length; i++) {
-    if (lpTotales >= rangos[i].lp) rangoActual = rangos[i];
-    else break;
+    if (lpTotales >= rangos[i].lp) {
+      rangoActual = rangos[i];
+      indexActual = i;
+    } else break;
   }
 
   let division = rangoActual.divisiones > 1
-    ? Math.max(1, rangoActual.divisiones - Math.floor((lpTotales - rangoActual.lp) / Math.ceil(((rangos[i - 1]?.lp ?? 0) + 1))))
+    ? Math.max(1, rangoActual.divisiones - Math.floor((lpTotales - rangoActual.lp) / Math.ceil(((rangos[indexActual - 1]?.lp ?? 0) + 1))))
     : 1;
 
   return { nombre: rangoActual.nombre, division, lpTotales };
@@ -61,6 +64,8 @@ async function cargarHabitos() {
     return Array.isArray(data.values) ? data.values : [];
   } catch (err) {
     console.error("[Habitos] Error al cargar hábitos:", err);
+    const content = document.querySelector(".habitosContent");
+    if (content) content.innerText = "⚠️ Error al cargar hábitos.";
     return [];
   }
 }
@@ -70,8 +75,8 @@ async function completarHabito(habito, fila) {
   const hoy = new Date().toISOString().split('T')[0];
   const { ganados } = obtenerLP(habito[1]);
 
+  const url = `${SCRIPT_URL}?action=marcarCompletado&fila=${fila}&fecha=${hoy}&lp=${ganados}`;
   try {
-    const url = `${SCRIPT_URL}?action=marcarCompletado&fila=${fila}&fecha=${hoy}&lp=${ganados}`;
     const resp = await fetch(url);
     if (!resp.ok) throw new Error(`Error al actualizar hábito: ${resp.status}`);
     alert(`+${ganados} LP 🎉`);
