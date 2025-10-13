@@ -2,23 +2,21 @@ const SHEET_NAME_2 = "Habitos";
 
 // --------------------- LP por frecuencia ---------------------
 const LP_POR_FRECUENCIA = {
-  diaria: { ganados: 5, perdidos: 2 },
-  semanal: { ganados: 10, perdidos: 5 },
-  mensual: { ganados: 30, perdidos: 15 }
+  diaria: { ganados: 5 },
+  semanal: { ganados: 10 },
+  mensual: { ganados: 30 }
 };
 
 // --------------------- Funciones auxiliares ---------------------
 function obtenerLP(frecuencia) {
-  return LP_POR_FRECUENCIA[frecuencia.toLowerCase()] || { ganados: 0, perdidos: 0 };
+  return LP_POR_FRECUENCIA[frecuencia.toLowerCase()] || { ganados: 0 };
 }
 
 function habitoDisponible(habito) {
-  const frecuencia = habito[1]; // Frecuencia
-  const estado = habito[2];     // Estado
+  const estado = habito[2]; // Estado
   const ultimaFecha = habito[3]; // Última actualización
   const hoy = new Date().toDateString();
   const last = ultimaFecha ? new Date(ultimaFecha).toDateString() : null;
-
   return estado === "Pendiente" && last !== hoy;
 }
 
@@ -46,7 +44,7 @@ function calcularRango(lpTotales) {
   }
 
   let division = rangoActual.divisiones > 1
-    ? Math.max(1, rangoActual.divisiones - Math.floor((lpTotales - rangoActual.lp) / Math.ceil(((rangos[indexActual - 1]?.lp ?? 0) + 1))))
+    ? Math.max(1, rangoActual.divisiones - Math.floor((lpTotales - rangoActual.lp) / 100))
     : 1;
 
   return { nombre: rangoActual.nombre, division, lpTotales };
@@ -55,13 +53,10 @@ function calcularRango(lpTotales) {
 // --------------------- Cargar hábitos ---------------------
 async function cargarHabitos() {
   try {
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME_2}?majorDimension=ROWS`;
-    const resp = await fetch(url, {
-      headers: { Authorization: "Bearer " + token }
-    });
-    if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
+    const url = `${SCRIPT_URL}?sheet=${SHEET_NAME_2}`;
+    const resp = await fetch(url);
     const data = await resp.json();
-    return Array.isArray(data.values) ? data.values : [];
+    return data; // Array de objetos
   } catch (err) {
     console.error("[Habitos] Error al cargar hábitos:", err);
     const content = document.querySelector(".habitosContent");
@@ -72,15 +67,15 @@ async function cargarHabitos() {
 
 // --------------------- Completar hábito ---------------------
 async function completarHabito(habito, fila) {
-  const hoy = new Date().toISOString().split('T')[0];
+  const hoy = new Date().toISOString().split("T")[0];
   const { ganados } = obtenerLP(habito[1]);
 
   const url = `${SCRIPT_URL}?action=marcarCompletado&fila=${fila}&fecha=${hoy}&lp=${ganados}`;
   try {
     const resp = await fetch(url);
-    if (!resp.ok) throw new Error(`Error al actualizar hábito: ${resp.status}`);
+    const data = await resp.json();
     alert(`+${ganados} LP 🎉`);
-    initHabitos(); // recargar
+    initHabitos(); // recargar hábitos
   } catch (err) {
     console.error("[Habitos] Error al marcar completado:", err);
   }
@@ -92,32 +87,28 @@ async function mostrarHabitos() {
   const content = document.querySelector(".habitosContent");
   if (!content) return;
 
-  if (datos.length < 2) {
+  if (!datos || datos.length === 0) {
     content.innerText = "No hay hábitos en la hoja.";
     return;
   }
 
-  const [headers, ...rows] = datos;
   content.innerHTML = "";
-
   let lpTotales = 0;
 
-  rows.forEach((habito, i) => {
+  datos.forEach((habito, i) => {
     const div = document.createElement("div");
     div.classList.add("habito-item");
-    div.innerText = `${habito[0]} (${habito[1]})`;
+    div.innerText = `${habito.Nombre} (${habito.Frecuencia})`;
 
     const btn = document.createElement("button");
     btn.innerText = "✓";
-    btn.disabled = !habitoDisponible(habito);
-    btn.addEventListener("click", () => completarHabito(habito, i + 2));
+    btn.disabled = !habitoDisponible([habito.Nombre, habito.Frecuencia, habito.Estado, habito["Última actualización"]]);
+    btn.addEventListener("click", () => completarHabito([habito.Nombre, habito.Frecuencia, habito.Estado, habito["Última actualización"]], i + 2));
 
     div.appendChild(btn);
     content.appendChild(div);
 
-    const { ganados } = obtenerLP(habito[1]);
-    if (!btn.disabled) lpTotales += 0;
-    else lpTotales += ganados;
+    lpTotales += parseInt(habito["LP totales"] || 0);
   });
 
   const rango = calcularRango(lpTotales);
@@ -130,14 +121,10 @@ async function agregarHabito() {
   const frecuencia = document.getElementById("nuevoHabitoFrecuencia").value;
   if (!nombre) return alert("Escribe un nombre para el hábito");
 
-  const estado = "Pendiente";
-  const ultimaActualizacion = "";
-  const lpTotales = 0;
-
-  const url = `${SCRIPT_URL}?action=agregarHabito&nombre=${encodeURIComponent(nombre)}&frecuencia=${frecuencia}&estado=${estado}&fecha=${ultimaActualizacion}&lp=${lpTotales}`;
+  const url = `${SCRIPT_URL}?action=agregarHabito&nombre=${encodeURIComponent(nombre)}&frecuencia=${frecuencia}&estado=Pendiente&fecha=&lp=0`;
   try {
     const resp = await fetch(url);
-    if (!resp.ok) throw new Error(`Error al agregar hábito: ${resp.status}`);
+    const data = await resp.json();
     alert(`Hábito "${nombre}" agregado ✅`);
     initHabitos();
     document.getElementById("nuevoHabitoNombre").value = "";
