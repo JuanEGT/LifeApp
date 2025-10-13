@@ -3,7 +3,6 @@ const SHEET_NAME_2 = "Habitos";
 
 // --------------------- Función para cargar hábitos ---------------------
 async function cargarHabitos() {
-  const SHEET_NAME = "Habitos"; // nombre exacto de la hoja en Google Sheets
 
   try {
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME_2}?majorDimension=ROWS`;
@@ -59,5 +58,5 @@ async function initHabitos() {
 }
 
 // Exponer al scope global (solo lo necesario)
-window.initFinanzas = initFinanzas;
+window.initHabitos = initHabitos; // ✅ Esto sí existe
 
