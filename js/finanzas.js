@@ -75,5 +75,15 @@ async function mostrarFinanzas() {
 }
 
 
+// --------------------- Inicialización del módulo ---------------------
+async function initFinanzas() {
+  console.log("[Finanzas] Inicializando módulo");
+
+  await mostrarFinanzas();
+
+  const backBtn = document.getElementById("backToHomeBtn");
+  if (backBtn) backBtn.addEventListener("click", () => window.volverHome());
+}
+
 // --------------------- Exponer función al scope global ---------------------
 window.initFinanzas = initFinanzas;
