@@ -17,8 +17,8 @@ async function cargarHabitos() {
     return Array.isArray(data.values) ? data.values : [];
   } catch (err) {
     console.error("[Habitos] Error al cargar hábitos:", err);
-    const content = document.querySelector(".habitosContent");
-    if (content) content.innerText = "⚠️ Error al cargar hábitos.";
+    const tablaContainer = document.querySelector(".tablaHabitosContainer");
+    if (tablaContainer) tablaContainer.innerText = "⚠️ Error al cargar hábitos.";
     return [];
   }
 }
@@ -62,25 +62,9 @@ async function initHabitos() {
 
   // Botón para volver al Home
   const backBtn = document.getElementById("backToHomeBtn");
-  if (backBtn) {
-    backBtn.addEventListener("click", volverHome);
-  }
+  if (backBtn) backBtn.addEventListener("click", volverHome);
 
-  // Contenedor principal
-  const content = document.querySelector(".habitosContent");
-  if (!content) return;
-
-  // Agregamos formulario para nuevo hábito
-  content.innerHTML = `
-    <div class="nuevoHabitoForm">
-      <input type="text" id="habitoNombre" placeholder="Nombre del hábito" />
-      <input type="text" id="habitoFrecuencia" placeholder="Frecuencia" />
-      <button id="agregarHabitoBtn" class="btn">➕ Agregar Hábito</button>
-    </div>
-    <div class="tablaHabitosContainer">Cargando hábitos...</div>
-  `;
-
-  // Botón para agregar hábito
+  // Botón para agregar hábito (ya definido en HTML)
   const agregarBtn = document.getElementById("agregarHabitoBtn");
   if (agregarBtn) {
     agregarBtn.addEventListener("click", async () => {
@@ -89,23 +73,34 @@ async function initHabitos() {
       const success = await agregarHabito(nombre, frecuencia);
       if (success) {
         alert("✅ Hábito agregado!");
-        initHabitos(); // recargar tabla y formulario
+        initHabitos(); // recargar tabla
+        document.getElementById("habitoNombre").value = "";
+        document.getElementById("habitoFrecuencia").value = "";
       } else {
         alert("⚠️ Error al agregar hábito");
       }
     });
   }
 
+  // Contenedor de la tabla
+  const tablaContainer = document.querySelector(".tablaHabitosContainer");
+  if (!tablaContainer) return;
+
+  tablaContainer.innerText = "Cargando hábitos...";
+
   // Cargar y mostrar datos
   const datos = await cargarHabitos();
-  const tablaContainer = content.querySelector(".tablaHabitosContainer");
 
   if (datos.length > 0) {
     const [headers, ...rows] = datos;
+    // Solo mostrar las primeras 3 columnas: Nombre, Frecuencia, Estado
+    const visibleHeaders = headers.slice(0, 3);
+    const visibleRows = rows.map(r => r.slice(0, 3));
+
     let html = `<table class="tabla-habitos">
-                  <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+                  <thead><tr>${visibleHeaders.map(h => `<th>${h}</th>`).join('')}</tr></thead>
                   <tbody>
-                    ${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}
+                    ${visibleRows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}
                   </tbody>
                 </table>`;
     tablaContainer.innerHTML = html;
@@ -113,7 +108,6 @@ async function initHabitos() {
     tablaContainer.innerText = "No hay hábitos registrados.";
   }
 }
-
 
 // Exponer al scope global
 window.initHabitos = initHabitos;
