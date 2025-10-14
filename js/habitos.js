@@ -205,6 +205,7 @@ function puedeCompletar(fechaUltima, frecuencia) {
 async function initHabitos() {
   console.log("[Habitos] Inicializando módulo");
 
+  mostrarSumaYRank();
   // Botón para volver al Home
   const backBtn = document.getElementById("backToHomeBtn");
   if (backBtn) backBtn.addEventListener("click", volverHome);
