@@ -205,7 +205,7 @@ function puedeCompletar(fechaUltima, frecuencia) {
 async function initHabitos() {
   console.log("[Habitos] Inicializando módulo");
 
-  mostrarSumaYRank();
+
   // Botón para volver al Home
   const backBtn = document.getElementById("backToHomeBtn");
   if (backBtn) backBtn.addEventListener("click", volverHome);
@@ -238,7 +238,7 @@ async function initHabitos() {
 
   // Cargar y mostrar datos
   const datos = await cargarHabitos();
-
+  mostrarSumaYRank();
   if (datos.length > 0) {
     const [headers, ...rows] = datos;
     const visibleHeaders = headers.slice(0, 3).concat("Acciones"); // Nombre, Frecuencia, Estado + columna de acciones
