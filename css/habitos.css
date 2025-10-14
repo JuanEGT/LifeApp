@@ -100,3 +100,27 @@
 .tabla-habitos button:hover {
   background: #555;
 }
+.lp-summary {
+  background-color: #242424;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  color: #fff;
+  margin-bottom: 1rem;
+}
+
+.lp-summary h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.lp-summary p {
+  margin: 0.5rem 0 0;
+  font-size: 1rem;
+}
+
+.lp-rank-img {
+  width: 80px;
+  margin-top: 0.5rem;
+  filter: drop-shadow(0 0 4px rgba(255,255,255,0.2));
+}

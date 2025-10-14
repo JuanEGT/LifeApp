@@ -54,6 +54,49 @@ async function agregarHabito(nombre, frecuencia, estado = "Pendiente") {
   }
 }
 
+// --------------------- Mostrar Suma LP y Rango ---------------------
+async function mostrarSumaYRank() {
+  try {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/Habitos!F2?majorDimension=ROWS`;
+    const resp = await fetch(url, {
+      headers: { Authorization: "Bearer " + token }
+    });
+
+    if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
+
+    const data = await resp.json();
+    const totalLP = parseInt(data.values?.[0]?.[0] || 0);
+
+    // Determinar rango según LP
+    let rango = "Sin rango", imagen = "";
+    if (totalLP >= 3900) { rango = "Challenger 👑"; imagen = "rango-challenger.png"; }
+    else if (totalLP >= 3600) { rango = "Gran Maestro 🟥"; imagen = "rango-gm.png"; }
+    else if (totalLP >= 3300) { rango = "Maestro 🔶"; imagen = "rango-master.png"; }
+    else if (totalLP >= 3000) { rango = "Diamante 🔷"; imagen = "rango-diamond.png"; }
+    else if (totalLP >= 2500) { rango = "Esmeralda 🟢"; imagen = "rango-emerald.png"; }
+    else if (totalLP >= 2000) { rango = "Platino 💎"; imagen = "rango-platino.png"; }
+    else if (totalLP >= 1500) { rango = "Oro 🟡"; imagen = "rango-oro.png"; }
+    else if (totalLP >= 1000) { rango = "Plata ⚪"; imagen = "rango-plata.png"; }
+    else if (totalLP >= 500) { rango = "Bronce 🟤"; imagen = "rango-bronce.png"; }
+    else { rango = "Hierro ⚙️"; imagen = "rango-hierro.png"; }
+
+    // Mostrar datos en el contenedor
+    const cont = document.querySelector(".lp-summary");
+    if (cont) {
+      cont.innerHTML = `
+        <div class="lp-info">
+          <h3>🏆 LP totales: <span>${totalLP}</span></h3>
+          <p>Rango actual: <strong>${rango}</strong></p>
+          ${imagen ? `<img src="img/${imagen}" alt="${rango}" class="lp-rank-img">` : ""}
+        </div>
+      `;
+    }
+  } catch (err) {
+    console.error("[Habitos] Error al mostrar LP total:", err);
+  }
+}
+
+
 // --------------------- Función para verificar si se puede completar ---------------------
 function puedeCompletar(fechaUltima, frecuencia) {
   const hoy = new Date();
