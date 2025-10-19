@@ -141,23 +141,27 @@ function resetearPendientes(frecuencia, fechaUltima, estado) {
 
 // --------------------- Función para marcar hábito como completado ---------------------
 async function marcarCompletado(rowIndex, frecuencia, fechaUltima, lpActual, btn) {
+  // 1️⃣ Desactivar botón visualmente
   if (btn) {
     btn.disabled = true;
-    btn.innerText = "⏳";
+    btn.style.opacity = "0.5";
+    btn.textContent = "⏳";
   }
 
+  // 2️⃣ Validar frecuencia
   if (!puedeCompletar(fechaUltima, frecuencia)) {
-    alert(`⚠️ Ya completaste este hábito según su frecuencia (${frecuencia})`);
+    alert(`⚠️ Ya completaste este hábito (${frecuencia})`);
     if (btn) {
       btn.disabled = true;
-      btn.innerText = "✔️";
+      btn.textContent = "✔️";
+      btn.style.opacity = "0.5";
     }
     return;
   }
 
+  // 3️⃣ Actualizar hoja
   const hoyStr = new Date().toISOString().split("T")[0];
   const nuevaLP = parseInt(lpActual || 0) + 1;
-
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME_2}!C${rowIndex}:E${rowIndex}?valueInputOption=USER_ENTERED`;
   const body = { values: [["Completado", hoyStr, nuevaLP]] };
 
@@ -172,22 +176,29 @@ async function marcarCompletado(rowIndex, frecuencia, fechaUltima, lpActual, btn
     });
 
     if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
-    console.log(`[Habitos] Hábito en fila ${rowIndex} marcado como completado`);
+    console.log(`[Habitos] Hábito fila ${rowIndex} marcado como completado`);
 
+    // 4️⃣ Actualizar visual sin recargar
     if (btn) {
       btn.outerHTML = `<span class="completado-text">Completado</span>`;
     }
 
-    await initHabitos();
+    // 5️⃣ Esperar 2 segundos antes de recargar tabla (por delay de la API)
+    setTimeout(() => {
+      initHabitos();
+    }, 2000);
+
   } catch (err) {
     console.error("[Habitos] Error al marcar completado:", err);
     alert("⚠️ No se pudo actualizar el hábito");
     if (btn) {
       btn.disabled = false;
-      btn.innerText = "✔️";
+      btn.textContent = "✔️";
+      btn.style.opacity = "1";
     }
   }
 }
+
 
 // --------------------- Función para obtener número de semana ---------------------
 function getWeekNumber(d) {
@@ -219,7 +230,6 @@ function puedeCompletar(fechaUltima, frecuencia) {
 // --------------------- Inicialización del módulo ---------------------
 async function initHabitos() {
   console.log("[Habitos] Inicializando módulo");
-
 
   // Botón para volver al Home
   const backBtn = document.getElementById("backToHomeBtn");
@@ -254,33 +264,48 @@ async function initHabitos() {
   // Cargar y mostrar datos
   const datos = await cargarHabitos();
   mostrarSumaYRank();
-  if (datos.length > 0) {
+
+  if (datos.length > 1) {
     const [headers, ...rows] = datos;
     const visibleHeaders = headers.slice(0, 3).concat("Acciones"); // Nombre, Frecuencia, Estado + columna de acciones
 
-    let html = `<table class="tabla-habitos">
-                  <thead><tr>${visibleHeaders.map(h => `<th>${h}</th>`).join('')}</tr></thead>
-                  <tbody>
-                    ${rows.map((r, i) => {
-                      if (!r[0]) return ''; // evitar filas vacías
+    let html = `
+      <table class="tabla-habitos">
+        <thead>
+          <tr>${visibleHeaders.map(h => `<th>${h}</th>`).join('')}</tr>
+        </thead>
+        <tbody>
+          ${rows.map((r, i) => {
+            // Evitar filas vacías o incompletas
+            if (!r || !r[0] || r.length < 3) return "";
 
-                      const filaReal = i + 2; // +2 porque hay encabezados (fila 1)
-                      const estado = resetearPendientes(r[1], r[3], r[2]);
-                      const puede = puedeCompletar(r[3], r[1]);
+            const filaReal = i + 2; // +2 por encabezado
+            const frecuencia = r[1] || "";
+            const estadoOriginal = r[2] || "Pendiente";
+            const fechaUltima = r[3] || "";
+            const lpActual = r[4] || 0;
 
-                      const accionHTML = puede
-                        ? `<button id="btn-${filaReal}" onclick="marcarCompletado(${filaReal}, '${r[1]}', '${r[3]}', '${r[4]}', this)">✔️</button>`
-                        : `<span class="completado-text">Completado</span>`;
+            // Resetear estado según frecuencia y fecha
+            const estado = resetearPendientes(frecuencia, fechaUltima, estadoOriginal);
+            const puede = puedeCompletar(fechaUltima, frecuencia);
 
-                      return `<tr>
-                                <td>${r[0]}</td>
-                                <td>${r[1]}</td>
-                                <td>${estado}</td>
-                                <td>${accionHTML}</td>
-                              </tr>`;
-                    }).join('')}
-                  </tbody>
-                </table>`;
+            // Generar botón o texto según el estado
+            const accionHTML = puede
+              ? `<button class="btn-completar" id="btn-${filaReal}"
+                         onclick="marcarCompletado(${filaReal}, '${frecuencia}', '${fechaUltima}', '${lpActual}', this)">✔️</button>`
+              : `<span class="completado-text">Completado</span>`;
+
+            return `
+              <tr>
+                <td>${r[0]}</td>
+                <td>${frecuencia}</td>
+                <td>${estado}</td>
+                <td>${accionHTML}</td>
+              </tr>`;
+          }).join('')}
+        </tbody>
+      </table>`;
+
     tablaContainer.innerHTML = html;
   } else {
     tablaContainer.innerText = "No hay hábitos registrados.";
