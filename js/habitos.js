@@ -140,20 +140,26 @@ function resetearPendientes(frecuencia, fechaUltima, estado) {
 }
 
 // --------------------- Función para marcar hábito como completado ---------------------
-async function marcarCompletado(rowIndex, frecuencia, fechaUltima, lpActual) {
+async function marcarCompletado(rowIndex, frecuencia, fechaUltima, lpActual, btn) {
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = "⏳";
+  }
+
   if (!puedeCompletar(fechaUltima, frecuencia)) {
     alert(`⚠️ Ya completaste este hábito según su frecuencia (${frecuencia})`);
+    if (btn) {
+      btn.disabled = true;
+      btn.innerText = "✔️";
+    }
     return;
   }
 
   const hoyStr = new Date().toISOString().split("T")[0];
   const nuevaLP = parseInt(lpActual || 0) + 1;
 
-  // Construir objeto para actualizar la fila (Estado y Última actualización)
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME_2}!C${rowIndex}:E${rowIndex}?valueInputOption=USER_ENTERED`;
-  const body = {
-    values: [["Completado", hoyStr, nuevaLP]]
-  };
+  const body = { values: [["Completado", hoyStr, nuevaLP]] };
 
   try {
     const resp = await fetch(url, {
@@ -167,10 +173,19 @@ async function marcarCompletado(rowIndex, frecuencia, fechaUltima, lpActual) {
 
     if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
     console.log(`[Habitos] Hábito en fila ${rowIndex} marcado como completado`);
-    initHabitos(); // recargar tabla
+
+    if (btn) {
+      btn.outerHTML = `<span class="completado-text">Completado</span>`;
+    }
+
+    await initHabitos();
   } catch (err) {
     console.error("[Habitos] Error al marcar completado:", err);
     alert("⚠️ No se pudo actualizar el hábito");
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = "✔️";
+    }
   }
 }
 
@@ -247,11 +262,16 @@ async function initHabitos() {
                   <thead><tr>${visibleHeaders.map(h => `<th>${h}</th>`).join('')}</tr></thead>
                   <tbody>
                     ${rows.map((r, i) => {
-                      // Resetear estado si toca
+                      if (!r[0]) return ''; // evitar filas vacías
+
+                      const filaReal = i + 2; // +2 porque hay encabezados (fila 1)
                       const estado = resetearPendientes(r[1], r[3], r[2]);
-                      const accionHTML = puedeCompletar(r[3], r[1])
-                        ? `<button onclick="marcarCompletado(${i+2}, '${r[1]}', '${r[3]}', '${r[4]}')">✔️</button>`
+                      const puede = puedeCompletar(r[3], r[1]);
+
+                      const accionHTML = puede
+                        ? `<button id="btn-${filaReal}" onclick="marcarCompletado(${filaReal}, '${r[1]}', '${r[3]}', '${r[4]}', this)">✔️</button>`
                         : `<span class="completado-text">Completado</span>`;
+
                       return `<tr>
                                 <td>${r[0]}</td>
                                 <td>${r[1]}</td>
