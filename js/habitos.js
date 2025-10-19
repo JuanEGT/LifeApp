@@ -207,63 +207,83 @@ function getWeekNumber(d) {
 async function initHabitos() {
   console.log("[Habitos] Inicializando módulo");
 
+  // Botón para volver al Home
   const backBtn = document.getElementById("backToHomeBtn");
   if (backBtn) backBtn.addEventListener("click", volverHome);
 
+  // Botón para agregar hábito
   const agregarBtn = document.getElementById("agregarHabitoBtn");
   if (agregarBtn) {
     agregarBtn.onclick = async () => {
       const nombre = document.getElementById("habitoNombre").value.trim();
       const frecuencia = document.getElementById("habitoFrecuencia").value;
-      if (!nombre) return alert("⚠️ Ingresa un nombre para el hábito");
+      if (!nombre) {
+        alert("⚠️ Ingresa un nombre para el hábito");
+        return;
+      }
       const success = await agregarHabito(nombre, frecuencia);
       if (success) {
         alert("✅ Hábito agregado!");
         document.getElementById("habitoNombre").value = "";
-        initHabitos();
-      } else alert("⚠️ Error al agregar hábito");
+        initHabitos(); // recargar tabla
+      } else {
+        alert("⚠️ Error al agregar hábito");
+      }
     };
   }
 
+  // Contenedor de la tabla
   const tablaContainer = document.querySelector(".tablaHabitosContainer");
   if (!tablaContainer) return;
   tablaContainer.innerText = "Cargando hábitos...";
 
+  // Cargar y mostrar datos
   const datos = await cargarHabitos();
   mostrarSumaYRank();
 
   if (datos.length > 1) {
-    const [headers, ...rows] = datos;
-    const visibleHeaders = headers.slice(0, 3).concat("Acciones");
+    const [, ...rows] = datos; // ignorar encabezado de la hoja
+
     const html = `
       <table class="tabla-habitos">
-        <thead><tr>${visibleHeaders.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Frecuencia</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
         <tbody>
           ${rows.map((r, i) => {
             if (!r || !r[0]) return "";
             const filaReal = i + 2;
             const [nombre, frecuencia, estadoOriginal, fechaUltima, lpActual] = r;
+
             const estado = resetearPendientes(frecuencia, fechaUltima, estadoOriginal);
             const puede = puedeCompletar(fechaUltima, frecuencia);
 
-            const accionHTML = (estado === "Completado" || !puede)
-              ? `<span class="completado-text">Completado</span>`
-              : `<button class="btn-completar" onclick="marcarCompletado(${filaReal}, '${frecuencia}', '${fechaUltima}', '${lpActual}', this)">✔️</button>`;
+            const accionHTML =
+              (estado === "Completado" || !puede)
+                ? `<span class="completado-text">Completado</span>`
+                : `<button class="btn-completar"
+                    onclick="marcarCompletado(${filaReal}, '${frecuencia}', '${fechaUltima}', '${lpActual}', this)">✔️</button>`;
 
             return `
-  <tr>
-    <td>${nombre}</td>
-    <td>${frecuencia}</td>
-    <td>${accionHTML}</td>
-  </tr>`;
-      }).join('')}
+              <tr>
+                <td>${nombre}</td>
+                <td>${frecuencia}</td>
+                <td>${accionHTML}</td>
+              </tr>`;
+          }).join('')}
         </tbody>
       </table>`;
+
     tablaContainer.innerHTML = html;
   } else {
     tablaContainer.innerText = "No hay hábitos registrados.";
   }
 }
+
 
 window.initHabitos = initHabitos;
 window.agregarHabito = agregarHabito;
