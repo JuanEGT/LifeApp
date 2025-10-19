@@ -119,25 +119,64 @@ function puedeCompletar(fechaUltima, frecuencia) {
 
 // --------------------- Función para resetear pendientes ---------------------
 function resetearPendientes(frecuencia, fechaUltima, estado) {
-  const hoy = new Date();
   if (!fechaUltima) return estado;
 
-  const ultima = new Date(fechaUltima);
+  const hoy = new Date();
+  const ultima = parseFechaSeguro(fechaUltima);
 
-  switch(frecuencia) {
+  // Si no se pudo parsear, mantener estado
+  if (!ultima || isNaN(ultima)) return estado;
+
+  switch (frecuencia) {
     case "Diaria":
+      // Si no es el mismo día → pendiente
       if (ultima.toDateString() !== hoy.toDateString()) return "Pendiente";
       break;
-    case "Semanal":
+
+    case "Semanal": {
       const diffDias = Math.floor((hoy - ultima) / (1000 * 60 * 60 * 24));
       if (diffDias >= 7) return "Pendiente";
       break;
+    }
+
     case "Mensual":
-      if (hoy.getMonth() !== ultima.getMonth() || hoy.getFullYear() !== ultima.getFullYear()) return "Pendiente";
+      if (hoy.getMonth() !== ultima.getMonth() || hoy.getFullYear() !== ultima.getFullYear()) {
+        return "Pendiente";
+      }
       break;
   }
+
+  // Si ya está completado hoy, mantenerlo
   return estado;
 }
+
+// --------------------- Helper para parsear fechas seguras ---------------------
+function parseFechaSeguro(fechaStr) {
+  if (!fechaStr) return null;
+
+  // Ya viene en ISO (YYYY-MM-DD)
+  if (/^\d{4}-\d{2}-\d{2}$/.test(fechaStr)) {
+    const [y, m, d] = fechaStr.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  }
+
+  // Formato DD/MM/YYYY
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(fechaStr)) {
+    const [d, m, y] = fechaStr.split("/").map(Number);
+    return new Date(y, m - 1, d);
+  }
+
+  // Formato MM/DD/YYYY
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(fechaStr)) {
+    const [m, d, y] = fechaStr.split("/").map(Number);
+    return new Date(y, m - 1, d);
+  }
+
+  // Intento genérico
+  const parsed = new Date(fechaStr);
+  return isNaN(parsed) ? null : parsed;
+}
+
 
 // --------------------- Función para marcar hábito como completado ---------------------
 async function marcarCompletado(rowIndex, frecuencia, fechaUltima, lpActual, btn) {
