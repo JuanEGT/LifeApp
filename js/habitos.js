@@ -267,7 +267,7 @@ async function initHabitos() {
 
   if (datos.length > 1) {
     const [headers, ...rows] = datos;
-    const visibleHeaders = headers.slice(0, 3).concat("Acciones"); // Nombre, Frecuencia, Estado + columna de acciones
+    const visibleHeaders = headers.slice(0, 3).concat("Acciones");
 
     let html = `
       <table class="tabla-habitos">
@@ -276,28 +276,34 @@ async function initHabitos() {
         </thead>
         <tbody>
           ${rows.map((r, i) => {
-            // Evitar filas vacías o incompletas
             if (!r || !r[0] || r.length < 3) return "";
 
             const filaReal = i + 2; // +2 por encabezado
-            const frecuencia = r[1] || "";
+            const nombre = r[0];
+            const frecuencia = r[1];
             const estadoOriginal = r[2] || "Pendiente";
             const fechaUltima = r[3] || "";
             const lpActual = r[4] || 0;
 
-            // Resetear estado según frecuencia y fecha
-            const estado = resetearPendientes(frecuencia, fechaUltima, estadoOriginal);
-            const puede = puedeCompletar(fechaUltima, frecuencia);
+            // Normalizar fecha (por si Sheets la devuelve en formato distinto)
+            let fechaFormateada = fechaUltima;
+            if (fechaUltima && fechaUltima.includes("/")) {
+              const partes = fechaUltima.split("/");
+              if (partes[2]) fechaFormateada = `${partes[2]}-${partes[1]}-${partes[0]}`;
+            }
 
-            // Generar botón o texto según el estado
-            const accionHTML = puede
-              ? `<button class="btn-completar" id="btn-${filaReal}"
-                         onclick="marcarCompletado(${filaReal}, '${frecuencia}', '${fechaUltima}', '${lpActual}', this)">✔️</button>`
-              : `<span class="completado-text">Completado</span>`;
+            // Calcular estado real
+            const estado = resetearPendientes(frecuencia, fechaFormateada, estadoOriginal);
+            const puede = puedeCompletar(fechaFormateada, frecuencia);
+
+            const accionHTML = (estado === "Completado" || !puede)
+              ? `<span class="completado-text">Completado</span>`
+              : `<button class="btn-completar"
+                         onclick="marcarCompletado(${filaReal}, '${frecuencia}', '${fechaFormateada}', '${lpActual}', this)">✔️</button>`;
 
             return `
               <tr>
-                <td>${r[0]}</td>
+                <td>${nombre}</td>
                 <td>${frecuencia}</td>
                 <td>${estado}</td>
                 <td>${accionHTML}</td>
