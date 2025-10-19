@@ -250,8 +250,13 @@ async function initHabitos() {
               ? `<span class="completado-text">Completado</span>`
               : `<button class="btn-completar" onclick="marcarCompletado(${filaReal}, '${frecuencia}', '${fechaUltima}', '${lpActual}', this)">✔️</button>`;
 
-            return `<tr><td>${nombre}</td><td>${frecuencia}</td><td>${estado}</td><td>${accionHTML}</td></tr>`;
-          }).join('')}
+            return `
+  <tr>
+    <td>${nombre}</td>
+    <td>${frecuencia}</td>
+    <td>${accionHTML}</td>
+  </tr>`;
+      }).join('')}
         </tbody>
       </table>`;
     tablaContainer.innerHTML = html;
