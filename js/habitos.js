@@ -120,6 +120,14 @@ async function resetearPendienteSiCambioDia(rowIndex, frecuencia, fechaUltima, e
 function puedeCompletar(estado) {
   return estado === "Pendiente";
 }
+// --------------------- Helper para obtener fecha de hoy en formato YYYY-MM-DD (hora local) ---------------------
+function hoyLocalStr() {
+  const hoy = new Date();
+  const yyyy = hoy.getFullYear();
+  const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+  const dd = String(hoy.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
 
 // --------------------- Función para marcar hábito como completado ---------------------
 async function marcarCompletado(rowIndex, frecuencia, fechaUltima, lpActual, btn) {
@@ -136,15 +144,7 @@ async function marcarCompletado(rowIndex, frecuencia, fechaUltima, lpActual, btn
     return;
   }
 
-      function hoyLocalStr() {
-      const hoy = new Date();
-      const yyyy = hoy.getFullYear();
-      const mm = String(hoy.getMonth() + 1).padStart(2, '0');
-      const dd = String(hoy.getDate()).padStart(2, '0');
-      return `${yyyy}-${mm}-${dd}`;
-    }
-
-    const hoyStr = hoyLocalStr();
+  const hoyStr = hoyLocalStr();
 
   const nuevaLP = parseInt(lpActual || 0) + 1;
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME_2}!C${rowIndex}:E${rowIndex}?valueInputOption=USER_ENTERED`;
