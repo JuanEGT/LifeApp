@@ -31,7 +31,7 @@ async function cargarHabitos() {
 async function agregarHabito(nombre, frecuencia, estado = "Pendiente") {
   if (!nombre || !frecuencia) return false;
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME_2}:append?valueInputOption=USER_ENTERED`;
-  const body = { values: [[nombre, frecuencia, estado, "", 0]] };
+  const body = { values: [[nombre, frecuencia, estado, hoyLocalStr(), 0]] };
   try {
     const resp = await fetch(url, {
       method: "POST",
@@ -74,7 +74,7 @@ async function mostrarSumaYRank() {
         <div class="lp-info">
           <h3>🏆 LP totales: <span>${totalLP}</span></h3>
           <p>Rango actual: <strong>${rango}</strong></p>
-          ${imagen ? `<img src="img/${imagen}" alt="${rango}" class="lp-rank-img">` : ""}
+          ${imagen ? `<img src="img/${imagen}" alt="${rango}" class="lp-rank-img">` : "" }
         </div>`;
     }
   } catch (err) {
@@ -97,17 +97,16 @@ function parseFechaSeguro(fechaStr) {
   return isNaN(parsed) ? null : parsed;
 }
 
-// --------------------- Función para resetear pendientes ---------------------
-async function resetearPendienteSiCambioDia(rowIndex, frecuencia, fechaUltima, estado) {
-  const hoyStr = new Date().toISOString().split("T")[0];
+// --------------------- Resetear estado a Pendiente si la fecha cambió ---------------------
+async function resetearPendienteSiCambioDia(rowIndex, fechaUltima, estado) {
+  const hoyStr = hoyLocalStr();
   const ultima = parseFechaSeguro(fechaUltima);
-  if (!ultima || estado === "Pendiente") return estado; // ya está pendiente
-
+  if (!ultima) return estado; // sin fecha registrada
   const hoy = new Date();
-  const mismaFecha = ultima.toDateString() === hoy.toDateString();
-  if (mismaFecha) return estado; // no cambia nada
+  if (estado === "Pendiente") return estado; // ya pendiente
+  if (ultima.toDateString() === hoy.toDateString()) return estado; // mismo día, no cambia
 
-  // Cambiar a pendiente y actualizar fecha en Sheets
+  // Actualiza a Pendiente y fecha de última modificación
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME_2}!C${rowIndex}:D${rowIndex}?valueInputOption=USER_ENTERED`;
   const body = { values: [["Pendiente", hoyStr]] };
   try {
@@ -117,7 +116,7 @@ async function resetearPendienteSiCambioDia(rowIndex, frecuencia, fechaUltima, e
       body: JSON.stringify(body)
     });
     if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
-    console.log(`[Habitos] Hábito fila ${rowIndex} reseteado a Pendiente`);
+    console.log(`[Habitos] Fila ${rowIndex} reseteada a Pendiente`);
     return "Pendiente";
   } catch (err) {
     console.error("[Habitos] Error al resetear pendiente:", err);
@@ -125,12 +124,12 @@ async function resetearPendienteSiCambioDia(rowIndex, frecuencia, fechaUltima, e
   }
 }
 
-// --------------------- Función para verificar si se puede completar ---------------------
+// --------------------- Verificar si se puede completar ---------------------
 function puedeCompletar(estado) {
   return estado === "Pendiente";
 }
 
-// --------------------- Función para marcar hábito como completado ---------------------
+// --------------------- Marcar hábito como completado ---------------------
 async function marcarCompletado(rowIndex, frecuencia, fechaUltima, lpActual, btn) {
   if (btn) {
     btn.disabled = true;
@@ -138,7 +137,7 @@ async function marcarCompletado(rowIndex, frecuencia, fechaUltima, lpActual, btn
     btn.textContent = "⏳";
   }
 
-  const estado = await resetearPendienteSiCambioDia(rowIndex, frecuencia, fechaUltima, "Pendiente");
+  let estado = await resetearPendienteSiCambioDia(rowIndex, fechaUltima, "Completado");
 
   if (!puedeCompletar(estado)) {
     if (btn) btn.outerHTML = `<span class="completado-text">Completado</span>`;
@@ -146,7 +145,6 @@ async function marcarCompletado(rowIndex, frecuencia, fechaUltima, lpActual, btn
   }
 
   const hoyStr = hoyLocalStr();
-
   const nuevaLP = parseInt(lpActual || 0) + 1;
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME_2}!C${rowIndex}:E${rowIndex}?valueInputOption=USER_ENTERED`;
   const body = { values: [["Completado", hoyStr, nuevaLP]] };
@@ -158,7 +156,6 @@ async function marcarCompletado(rowIndex, frecuencia, fechaUltima, lpActual, btn
     });
     if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
     if (btn) btn.outerHTML = `<span class="completado-text">Completado</span>`;
-    setTimeout(initHabitos, 2000);
   } catch (err) {
     console.error("[Habitos] Error al marcar completado:", err);
     if (btn) {
@@ -200,32 +197,24 @@ async function initHabitos() {
   if (!tablaContainer) return;
   tablaContainer.innerText = "Cargando hábitos...";
 
-  // Cargar datos
   const datos = await cargarHabitos();
   mostrarSumaYRank();
 
   if (datos.length > 1) {
-    const [, ...rows] = datos;
+    const [, ...rows] = datos; // ignorar encabezado
     const html = `
       <table class="tabla-habitos">
-        <thead>
-          <tr><th>Nombre</th><th>Frecuencia</th><th>Acciones</th></tr>
-        </thead>
+        <thead><tr><th>Nombre</th><th>Frecuencia</th><th>Acciones</th></tr></thead>
         <tbody>
           ${rows.map((r, i) => {
             if (!r || !r[0]) return "";
             const filaReal = i + 2;
             const [nombre, frecuencia, estadoOriginal, fechaUltima, lpActual] = r;
-
-            const accionHTML = `<button class="btn-completar"
+            const estado = estadoOriginal === "Pendiente" ? "Pendiente" : estadoOriginal;
+            const botonHTML = `<button class="btn-completar"
               onclick="marcarCompletado(${filaReal}, '${frecuencia}', '${fechaUltima}', '${lpActual}', this)">✔️</button>`;
-
-            return `
-              <tr>
-                <td>${nombre}</td>
-                <td>${frecuencia}</td>
-                <td>${accionHTML}</td>
-              </tr>`;
+            const accionHTML = estado === "Completado" ? `<span class="completado-text">Completado</span>` : botonHTML;
+            return `<tr><td>${nombre}</td><td>${frecuencia}</td><td>${accionHTML}</td></tr>`;
           }).join('')}
         </tbody>
       </table>`;
