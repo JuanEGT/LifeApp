@@ -5,17 +5,71 @@ const SHEET_NAME_2 = "Habitos";
 async function cargarHabitos() {
   try {
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME_2}?majorDimension=ROWS`;
-    const resp = await fetch(url, {
-      headers: { Authorization: "Bearer " + token }
-    });
+    const resp = await fetch(url, { headers: { Authorization: "Bearer " + token } });
     if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
     const data = await resp.json();
+    console.log("[Habitos] Datos cargados desde la hoja:", data);
     return Array.isArray(data.values) ? data.values : [];
   } catch (err) {
     console.error("[Habitos] Error al cargar hábitos:", err);
     const tablaContainer = document.querySelector(".tablaHabitosContainer");
     if (tablaContainer) tablaContainer.innerText = "⚠️ Error al cargar hábitos.";
     return [];
+  }
+}
+
+// --------------------- Función para agregar un hábito ---------------------
+async function agregarHabito(nombre, frecuencia, estado = "Pendiente") {
+  if (!nombre || !frecuencia) return false;
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME_2}:append?valueInputOption=USER_ENTERED`;
+  const body = { values: [[nombre, frecuencia, estado, "", 0]] };
+  try {
+    const resp = await fetch(url, {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
+    console.log("[Habitos] Hábito agregado");
+    return true;
+  } catch (err) {
+    console.error("[Habitos] Error al agregar hábito:", err);
+    return false;
+  }
+}
+
+// --------------------- Mostrar Suma LP y Rango ---------------------
+async function mostrarSumaYRank() {
+  try {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/Habitos!F2?majorDimension=ROWS`;
+    const resp = await fetch(url, { headers: { Authorization: "Bearer " + token } });
+    if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
+    const data = await resp.json();
+    const totalLP = parseInt(data.values?.[0]?.[0] || 0);
+
+    let rango = "Sin rango", imagen = "";
+    if (totalLP >= 3900) { rango = "Challenger 👑"; imagen = "rango-challenger.png"; }
+    else if (totalLP >= 3600) { rango = "Gran Maestro 🟥"; imagen = "rango-gm.png"; }
+    else if (totalLP >= 3300) { rango = "Maestro 🔶"; imagen = "rango-master.png"; }
+    else if (totalLP >= 3000) { rango = "Diamante 🔷"; imagen = "rango-diamond.png"; }
+    else if (totalLP >= 2500) { rango = "Esmeralda 🟢"; imagen = "rango-emerald.png"; }
+    else if (totalLP >= 2000) { rango = "Platino 💎"; imagen = "rango-platino.png"; }
+    else if (totalLP >= 1500) { rango = "Oro 🟡"; imagen = "rango-oro.png"; }
+    else if (totalLP >= 1000) { rango = "Plata ⚪"; imagen = "rango-plata.png"; }
+    else if (totalLP >= 500) { rango = "Bronce 🟤"; imagen = "rango-bronce.png"; }
+    else { rango = "Hierro ⚙️"; imagen = "rango-hierro.png"; }
+
+    const cont = document.querySelector(".lp-summary");
+    if (cont) {
+      cont.innerHTML = `
+        <div class="lp-info">
+          <h3>🏆 LP totales: <span>${totalLP}</span></h3>
+          <p>Rango actual: <strong>${rango}</strong></p>
+          ${imagen ? `<img src="img/${imagen}" alt="${rango}" class="lp-rank-img">` : ""}
+        </div>`;
+    }
+  } catch (err) {
+    console.error("[Habitos] Error al mostrar LP total:", err);
   }
 }
 
@@ -34,39 +88,19 @@ function parseFechaSeguro(fechaStr) {
   return isNaN(parsed) ? null : parsed;
 }
 
-// --------------------- Función para obtener número de semana ---------------------
-function getWeekNumber(d) {
-  d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-  const dayNum = d.getUTCDay() || 7;
-  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-  return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
-}
-
-// --------------------- Función para determinar si el hábito debe estar pendiente ---------------------
-function estadoSegunFecha(frecuencia, fechaUltima) {
-  const hoy = new Date();
+// --------------------- Función para resetear pendientes ---------------------
+async function resetearPendienteSiCambioDia(rowIndex, frecuencia, fechaUltima, estado) {
+  const hoyStr = new Date().toISOString().split("T")[0];
   const ultima = parseFechaSeguro(fechaUltima);
-  if (!ultima) return "Pendiente";
+  if (!ultima || estado === "Pendiente") return estado; // ya está pendiente
 
-  switch(frecuencia) {
-    case "Diaria":
-      return (ultima.toDateString() !== hoy.toDateString()) ? "Pendiente" : "Completado";
-    case "Semanal":
-      return (getWeekNumber(ultima) !== getWeekNumber(hoy) || ultima.getFullYear() !== hoy.getFullYear())
-        ? "Pendiente" : "Completado";
-    case "Mensual":
-      return (ultima.getMonth() !== hoy.getMonth() || ultima.getFullYear() !== hoy.getFullYear())
-        ? "Pendiente" : "Completado";
-    default:
-      return "Pendiente";
-  }
-}
+  const hoy = new Date();
+  const mismaFecha = ultima.toDateString() === hoy.toDateString();
+  if (mismaFecha) return estado; // no cambia nada
 
-// --------------------- Función para actualizar hábito en la hoja ---------------------
-async function actualizarHabito(rowIndex, estado, fecha, lp) {
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME_2}!C${rowIndex}:E${rowIndex}?valueInputOption=USER_ENTERED`;
-  const body = { values: [[estado, fecha, lp]] };
+  // Cambiar a pendiente y actualizar fecha en Sheets
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME_2}!C${rowIndex}:D${rowIndex}?valueInputOption=USER_ENTERED`;
+  const body = { values: [["Pendiente", hoyStr]] };
   try {
     const resp = await fetch(url, {
       method: "PUT",
@@ -74,32 +108,66 @@ async function actualizarHabito(rowIndex, estado, fecha, lp) {
       body: JSON.stringify(body)
     });
     if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
+    console.log(`[Habitos] Hábito fila ${rowIndex} reseteado a Pendiente`);
+    return "Pendiente";
   } catch (err) {
-    console.error("[Habitos] Error al actualizar hábito:", err);
+    console.error("[Habitos] Error al resetear pendiente:", err);
+    return estado;
   }
 }
 
-// --------------------- Función para marcar completado ---------------------
-async function marcarCompletado(rowIndex, frecuencia, fechaUltima, lpActual, btn) {
-  const hoyStr = new Date().toISOString().split("T")[0];
-  const nuevaLP = parseInt(lpActual || 0) + 1;
+// --------------------- Función para verificar si se puede completar ---------------------
+function puedeCompletar(estado) {
+  return estado === "Pendiente";
+}
 
+// --------------------- Función para marcar hábito como completado ---------------------
+async function marcarCompletado(rowIndex, frecuencia, fechaUltima, lpActual, btn) {
   if (btn) {
     btn.disabled = true;
     btn.style.opacity = "0.5";
     btn.textContent = "⏳";
   }
 
-  await actualizarHabito(rowIndex, "Completado", hoyStr, nuevaLP);
+  const estado = await resetearPendienteSiCambioDia(rowIndex, frecuencia, fechaUltima, "Pendiente");
 
-  if (btn) btn.outerHTML = `<span class="completado-text">Completado</span>`;
+  if (!puedeCompletar(estado)) {
+    if (btn) btn.outerHTML = `<span class="completado-text">Completado</span>`;
+    return;
+  }
+
+  const hoyStr = new Date().toISOString().split("T")[0];
+  const nuevaLP = parseInt(lpActual || 0) + 1;
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME_2}!C${rowIndex}:E${rowIndex}?valueInputOption=USER_ENTERED`;
+  const body = { values: [["Completado", hoyStr, nuevaLP]] };
+  try {
+    const resp = await fetch(url, {
+      method: "PUT",
+      headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
+    if (btn) btn.outerHTML = `<span class="completado-text">Completado</span>`;
+    setTimeout(initHabitos, 2000);
+  } catch (err) {
+    console.error("[Habitos] Error al marcar completado:", err);
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "✔️";
+      btn.style.opacity = "1";
+    }
+  }
 }
 
-// --------------------- Función para inicializar tabla ---------------------
+// --------------------- Inicialización del módulo ---------------------
 async function initHabitos() {
-  const backBtn = document.getElementById("backToHomeBtn");
-  if (backBtn) backBtn.onclick = volverHome;
+  console.log("[Habitos] Inicializando módulo");
 
+  // Botón volver al Home
+  const backBtn = document.getElementById("backToHomeBtn");
+  if (backBtn) backBtn.addEventListener("click", volverHome);
+
+  // Botón agregar hábito
   const agregarBtn = document.getElementById("agregarHabitoBtn");
   if (agregarBtn) {
     agregarBtn.onclick = async () => {
@@ -117,58 +185,46 @@ async function initHabitos() {
     };
   }
 
+  // Contenedor de tabla
   const tablaContainer = document.querySelector(".tablaHabitosContainer");
   if (!tablaContainer) return;
   tablaContainer.innerText = "Cargando hábitos...";
 
+  // Cargar datos
   const datos = await cargarHabitos();
   mostrarSumaYRank();
 
   if (datos.length > 1) {
-    const [, ...rows] = datos; // ignorar encabezados
+    const [, ...rows] = datos;
+    const html = `
+      <table class="tabla-habitos">
+        <thead>
+          <tr><th>Nombre</th><th>Frecuencia</th><th>Acciones</th></tr>
+        </thead>
+        <tbody>
+          ${rows.map((r, i) => {
+            if (!r || !r[0]) return "";
+            const filaReal = i + 2;
+            const [nombre, frecuencia, estadoOriginal, fechaUltima, lpActual] = r;
 
-    let html = `<table class="tabla-habitos">
-      <thead>
-        <tr><th>Nombre</th><th>Frecuencia</th><th>Acciones</th></tr>
-      </thead>
-      <tbody>`;
+            const accionHTML = `<button class="btn-completar"
+              onclick="marcarCompletado(${filaReal}, '${frecuencia}', '${fechaUltima}', '${lpActual}', this)">✔️</button>`;
 
-    for (let i = 0; i < rows.length; i++) {
-      const r = rows[i];
-      if (!r || !r[0]) continue;
-      const filaReal = i + 2;
-      const [nombre, frecuencia, estadoOriginal, fechaUltima, lpActual] = r;
-
-      // Determinar estado real según fecha
-      let estado = estadoSegunFecha(frecuencia, fechaUltima);
-      const hoyStr = new Date().toISOString().split("T")[0];
-
-      // Si estaba completado pero fecha anterior, resetear a Pendiente
-      if (estado === "Pendiente" && estadoOriginal === "Completado") {
-        await actualizarHabito(filaReal, "Pendiente", hoyStr, lpActual || 0);
-      }
-
-      // Mostrar botón solo si está pendiente
-      const mostrarComoPendiente = estado === "Pendiente";
-      const accionHTML = mostrarComoPendiente
-        ? `<button class="btn-completar" onclick="marcarCompletado(${filaReal}, '${frecuencia}', '${hoyStr}', '${lpActual}', this)">✔️</button>`
-        : `<span class="completado-text">Completado</span>`;
-
-      html += `<tr>
-        <td>${nombre}</td>
-        <td>${frecuencia}</td>
-        <td>${accionHTML}</td>
-      </tr>`;
-    }
-
-    html += `</tbody></table>`;
+            return `
+              <tr>
+                <td>${nombre}</td>
+                <td>${frecuencia}</td>
+                <td>${accionHTML}</td>
+              </tr>`;
+          }).join('')}
+        </tbody>
+      </table>`;
     tablaContainer.innerHTML = html;
   } else {
     tablaContainer.innerText = "No hay hábitos registrados.";
   }
 }
 
-// --------------------- Exportar funciones ---------------------
 window.initHabitos = initHabitos;
 window.agregarHabito = agregarHabito;
 window.marcarCompletado = marcarCompletado;
