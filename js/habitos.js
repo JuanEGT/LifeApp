@@ -1,6 +1,15 @@
 // ===================== Habitos.js =====================
 const SHEET_NAME_2 = "Habitos";
 
+// --------------------- Helper para obtener fecha de hoy en formato YYYY-MM-DD (hora local) ---------------------
+function hoyLocalStr() {
+  const hoy = new Date();
+  const yyyy = hoy.getFullYear();
+  const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+  const dd = String(hoy.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 // --------------------- Función para cargar hábitos ---------------------
 async function cargarHabitos() {
   try {
@@ -119,14 +128,6 @@ async function resetearPendienteSiCambioDia(rowIndex, frecuencia, fechaUltima, e
 // --------------------- Función para verificar si se puede completar ---------------------
 function puedeCompletar(estado) {
   return estado === "Pendiente";
-}
-// --------------------- Helper para obtener fecha de hoy en formato YYYY-MM-DD (hora local) ---------------------
-function hoyLocalStr() {
-  const hoy = new Date();
-  const yyyy = hoy.getFullYear();
-  const mm = String(hoy.getMonth() + 1).padStart(2, '0');
-  const dd = String(hoy.getDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
 }
 
 // --------------------- Función para marcar hábito como completado ---------------------
