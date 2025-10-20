@@ -1,7 +1,7 @@
 // ===================== Habitos.js =====================
 const SHEET_NAME_2 = "Habitos";
 
-// --------------------- Helper para obtener fecha de hoy en formato YYYY-MM-DD (hora local) ---------------------
+// --------------------- Helper para obtener fecha de hoy en formato YYYY-MM-DD ---------------------
 function hoyLocalStr() {
   const hoy = new Date();
   const yyyy = hoy.getFullYear();
@@ -98,14 +98,13 @@ async function mostrarSumaYRank() {
   }
 }
 
-// --------------------- Resetear a Pendiente si la fecha cambió ---------------------
+// --------------------- Resetear a Pendiente si la fecha es anterior ---------------------
 async function resetearPendienteSiCambioDia(rowIndex, fechaUltima, estado) {
   const hoyStr = hoyLocalStr();
   const ultima = parseFechaSeguro(fechaUltima);
   if (!ultima) return estado;
-  const hoy = new Date();
-  if (estado === "Pendiente") return estado;
-  if (ultima.toDateString() === hoy.toDateString()) return estado;
+  if (estado === "Pendiente") return estado; 
+  if (ultima.toDateString() === new Date().toDateString()) return estado; // ya es hoy, no tocar
 
   console.log(`[Habitos] Reseteando fila ${rowIndex} de "${estado}" a Pendiente`);
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME_2}!C${rowIndex}:D${rowIndex}?valueInputOption=USER_ENTERED`;
@@ -137,7 +136,6 @@ async function marcarCompletado(rowIndex, frecuencia, fechaUltima, lpActual, btn
     btn.textContent = "⏳";
   }
 
-  // Resetear pendiente si corresponde antes de completar
   const estado = await resetearPendienteSiCambioDia(rowIndex, fechaUltima, "Completado");
 
   if (!puedeCompletar(estado)) {
@@ -148,6 +146,7 @@ async function marcarCompletado(rowIndex, frecuencia, fechaUltima, lpActual, btn
 
   const hoyStr = hoyLocalStr();
   const nuevaLP = parseInt(lpActual || 0) + 1;
+
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME_2}!C${rowIndex}:E${rowIndex}?valueInputOption=USER_ENTERED`;
   const body = { values: [["Completado", hoyStr, nuevaLP]] };
   try {
@@ -158,7 +157,12 @@ async function marcarCompletado(rowIndex, frecuencia, fechaUltima, lpActual, btn
     });
     if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
     console.log(`[Habitos] Fila ${rowIndex} marcada como Completado`);
-    await initHabitos(); // refrescar tabla
+
+    // Actualiza solo el botón en la tabla
+    if (btn) btn.outerHTML = `<span class="completado-text">Completado</span>`;
+
+    // Actualiza LP y rango
+    mostrarSumaYRank();
   } catch (err) {
     console.error("[Habitos] Error al marcar completado:", err);
     if (btn) {
@@ -214,10 +218,8 @@ async function initHabitos() {
     const filaReal = i + 2;
     const [nombre, frecuencia, estadoOriginal, fechaUltima, lpActual] = r;
 
-    // Resetear Pendiente si la fecha es de ayer o antes
+    // Resetear Pendiente solo si la fecha es anterior
     const estado = await resetearPendienteSiCambioDia(filaReal, fechaUltima, estadoOriginal);
-
-    console.log(`[Habitos] Fila ${filaReal}: ${nombre} - Estado: ${estado}, FechaUltima: ${fechaUltima}`);
 
     const accionHTML = estado === "Completado"
       ? `<span class="completado-text">Completado</span>`
